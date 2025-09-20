@@ -1,9 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
-    <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
-    </PropertyGroup>
-
+  <ItemGroup>
+    <ProjectReference Include="..\Devisions.Contracts\Devisions.Contracts.csproj" />
+    <ProjectReference Include="..\Devisions.Domain\Devisions.Domain.csproj" />
+  </ItemGroup>
 </Project>
