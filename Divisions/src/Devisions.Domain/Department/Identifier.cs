@@ -1,6 +1,6 @@
 ﻿using CSharpFunctionalExtensions;
 
-namespace Devisions.Domain;
+namespace Devisions.Domain.Department;
 
 public record Identifier
 {

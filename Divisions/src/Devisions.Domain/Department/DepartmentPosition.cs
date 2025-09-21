@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Devisions.Domain;
+namespace Devisions.Domain.Department;
 
 public class DepartmentPosition
 {

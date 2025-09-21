@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using CSharpFunctionalExtensions;
 
-namespace Devisions.Domain;
+namespace Devisions.Domain.Department;
 
 public class Department
 {

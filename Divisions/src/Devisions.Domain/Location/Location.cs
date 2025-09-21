@@ -1,7 +1,7 @@
 ﻿using System;
 using CSharpFunctionalExtensions;
 
-namespace Devisions.Domain;
+namespace Devisions.Domain.Location;
 
 public class Location
 {
