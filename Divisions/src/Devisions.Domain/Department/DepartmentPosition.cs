@@ -1,0 +1,19 @@
+﻿using System;
+
+namespace Devisions.Domain;
+
+public class DepartmentPosition
+{
+    public Guid Id { get; private set; }
+
+    public Department Department { get; private set; }
+
+    public Guid PositionId { get; private set; }
+
+    public DepartmentPosition(Guid id, Department department, Guid positionId)
+    {
+        Id = id;
+        Department = department;
+        PositionId = positionId;
+    }
+}
