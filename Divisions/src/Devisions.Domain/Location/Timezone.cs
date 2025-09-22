@@ -5,11 +5,11 @@ namespace Devisions.Domain.Location;
 
 public record Timezone
 {
-    private readonly string _ianaTimeZone;
+    public string IanaTimeZone { get; }
 
     private Timezone(string ianaTimeZone)
     {
-        _ianaTimeZone = ianaTimeZone;
+        IanaTimeZone = ianaTimeZone;
     }
 
     public static Result<Timezone> Create(string ianaTimeZone)

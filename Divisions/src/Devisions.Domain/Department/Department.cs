@@ -57,8 +57,7 @@ public class Department
 
 
     private Department(Guid id, string name, Identifier identifier, string path, short depth, bool isActive,
-        IEnumerable<Guid> departmentLocations,
-        IEnumerable<Guid> departmentPositions)
+        IEnumerable<Guid> departmentLocations)
     {
         Id = id;
         Name = name;
@@ -71,12 +70,9 @@ public class Department
         _departmentLocations = departmentLocations
             .Select(departmentLocation => new DepartmentLocation(Guid.NewGuid(), this, departmentLocation))
             .ToList();
-        _departmentPositions = departmentPositions
-            .Select(departmentPosition => new DepartmentPosition(Guid.NewGuid(), this, departmentPosition))
-            .ToList();
     }
 
-    public static Result<Department, string> Create(string name, string identifier, Department parent,
+    public static Result<Department, string> Create(string name, Identifier identifier, Department parent,
         string path, bool isActive, IEnumerable<Guid> departmentLocations, IEnumerable<Guid> departmentPositions)
     {
         if (string.IsNullOrWhiteSpace(name))
@@ -84,11 +80,6 @@ public class Department
 
         if (name.Length is > 150 or < 3)
             return $"Name must be between 3 and 150 characters.";
-
-        var identify = Identifier.Create(identifier);
-
-        if (identify.IsFailure)
-            return identify.Error;
 
         if (string.IsNullOrEmpty(path))
             return $"Path cannot be null or empty.";
@@ -100,13 +91,13 @@ public class Department
 
         var depth = (short)(DEFAULT_DEPTH + parent?.Depth)!;
 
-        var department = new Department(Guid.NewGuid(), name, identify.Value, currentPath, depth, isActive,
-            departmentLocations,
-            departmentPositions);
+        var department = new Department(Guid.NewGuid(), name, identifier, currentPath, depth, isActive,
+            departmentLocations);
 
         return Result.Success<Department, string>(department);
     }
 
     private static string GetPath(Department parent, string path) =>
         (parent?.Path != null ? parent.Path + "/" : string.Empty) + path;
+
 }
