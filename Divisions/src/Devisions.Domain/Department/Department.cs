@@ -25,7 +25,7 @@ public class Department
 
     public DateTime CreatedAt { get; private set; }
 
-    public DateTime UpdatedAt { get; private set; }
+    public DateTime? UpdatedAt { get; private set; }
 
     private readonly List<Department> _children = [];
 
@@ -55,6 +55,8 @@ public class Department
         UpdatedAt = DateTime.Now;
     }
 
+    // EF Core
+    private Department() { }
 
     private Department(Guid id, string name, Identifier identifier, string path, short depth, bool isActive,
         IEnumerable<Guid> departmentLocations)
@@ -78,7 +80,7 @@ public class Department
         if (string.IsNullOrWhiteSpace(name))
             return $"Name cannot be null or whitespace.";
 
-        if (name.Length is > 150 or < 3)
+        if (name.Length is > LengthConstants.LENGTH150 or < LengthConstants.LENGTH3)
             return $"Name must be between 3 and 150 characters.";
 
         if (string.IsNullOrEmpty(path))
@@ -99,5 +101,4 @@ public class Department
 
     private static string GetPath(Department parent, string path) =>
         (parent?.Path != null ? parent.Path + "/" : string.Empty) + path;
-
 }

@@ -7,6 +7,9 @@ public record Timezone
 {
     public string IanaTimeZone { get; }
 
+    // EF Core
+    private Timezone() { }
+
     private Timezone(string ianaTimeZone)
     {
         IanaTimeZone = ianaTimeZone;

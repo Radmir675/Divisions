@@ -3,6 +3,11 @@
 ##
 ## Get latest from `dotnet new gitignore`
 
+# Entity Framework Migrations
+**/Migrations/*.Designer.cs
+**/Migrations/*.cs
+!**/Migrations/*Snapshot.cs
+
 # dotenv files
 .env
 

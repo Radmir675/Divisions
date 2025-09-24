@@ -15,7 +15,10 @@ public class Position
 
     public DateTime CreatedAt { get; private set; }
 
-    public DateTime UpdatedAt { get; private set; }
+    public DateTime? UpdatedAt { get; private set; }
+
+    // EF Core
+    private Position() { }
 
     private Position(Guid id, string name, string? description, bool isActive)
     {
@@ -29,10 +32,10 @@ public class Position
 
     public static Result<Position, string> Create(string name, string? description)
     {
-        if (name.Length is < 3 or > 100)
+        if (name.Length is < LengthConstants.LENGTH3 or > LengthConstants.LENGTH100)
             return $"Name must be between 3 and 100 characters.";
 
-        if ((description?.Length ?? 0) > 1000)
+        if ((description?.Length ?? 0) > LengthConstants.LENGTH1000)
             return $"Description must be less than  1000 characters.";
 
         var model = new Position(Guid.NewGuid(), name, description, true);

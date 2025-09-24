@@ -18,8 +18,4 @@ public class WeatherForecastController : ControllerBase
     {
         return Ok("Hello World");
     }
-
-    public void Test()
-    {
-    }
 }

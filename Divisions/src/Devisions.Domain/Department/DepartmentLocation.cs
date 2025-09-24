@@ -10,6 +10,9 @@ public class DepartmentLocation
 
     public Guid LocationId { get; private set; }
 
+    // EF Core
+    private DepartmentLocation() { }
+
     public DepartmentLocation(Guid id, Department department, Guid locationId)
     {
         Id = id;

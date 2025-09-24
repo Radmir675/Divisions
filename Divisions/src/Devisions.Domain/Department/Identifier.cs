@@ -6,6 +6,9 @@ public record Identifier
 {
     public string Identify { get; }
 
+    // EF Core
+    private Identifier() { }
+
     private Identifier(string identifier)
     {
         Identify = identifier;

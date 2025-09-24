@@ -10,6 +10,9 @@ public class DepartmentPosition
 
     public Guid PositionId { get; private set; }
 
+    // EF Core
+    private DepartmentPosition() { }
+
     public DepartmentPosition(Guid id, Department department, Guid positionId)
     {
         Id = id;

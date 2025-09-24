@@ -1,6 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
-    <ProjectReference Include="..\Devisions.Contracts\Devisions.Contracts.csproj" />
-    <ProjectReference Include="..\Devisions.Domain\Devisions.Domain.csproj" />
+    <ProjectReference Include="..\Devisions.Contracts\Devisions.Contracts.csproj"/>
+    <ProjectReference Include="..\Devisions.Domain\Devisions.Domain.csproj"/>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0"/>
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.0"/>
   </ItemGroup>
 </Project>

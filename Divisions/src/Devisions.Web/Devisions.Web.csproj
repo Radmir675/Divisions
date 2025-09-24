@@ -1,12 +1,21 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
-    <ItemGroup>
-        <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2"/>
-    </ItemGroup>
-    <ItemGroup>
-      <ProjectReference Include="..\Devisions.Application\Devisions.Application.csproj" />
-      <ProjectReference Include="..\Devisions.Contracts\Devisions.Contracts.csproj" />
-      <ProjectReference Include="..\Devisions.Domain\Devisions.Domain.csproj" />
-      <ProjectReference Include="..\Devisions.Infrastructure\Devisions.Infrastructure.csproj" />
-    </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2"/>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Devisions.Application\Devisions.Application.csproj"/>
+    <ProjectReference Include="..\Devisions.Contracts\Devisions.Contracts.csproj"/>
+    <ProjectReference Include="..\Devisions.Domain\Devisions.Domain.csproj"/>
+    <ProjectReference Include="..\Devisions.Infrastructure\Devisions.Infrastructure.csproj"/>
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="Properties\launchSettings.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 
 </Project>

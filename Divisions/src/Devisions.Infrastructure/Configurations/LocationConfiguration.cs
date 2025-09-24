@@ -1,6 +1,48 @@
-﻿namespace Devisions.Infrastructure.Configurations;
+﻿using Devisions.Domain;
+using Devisions.Domain.Location;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-public class LocationConfiguration
+namespace Devisions.Infrastructure.Configurations;
+
+public class LocationConfiguration : IEntityTypeConfiguration<Location>
 {
-    
+    public void Configure(EntityTypeBuilder<Location> builder)
+    {
+        builder.ToTable("locations");
+
+        builder.HasKey(x => x.Id);
+
+        builder.Property(x => x.Id)
+            .HasColumnName("id");
+
+        builder.Property(x => x.Name)
+            .HasColumnName("name");
+
+        builder.Property(x => x.Address)
+            .HasColumnName("address")
+            .IsRequired()
+            .HasMaxLength(LengthConstants.LENGTH1000);
+
+        builder.OwnsOne(n => n.Timezone, tz =>
+        {
+            tz.Property(x => x.IanaTimeZone)
+                .HasColumnName("timezone")
+                .IsRequired();
+        });
+        builder.Navigation(x => x.Timezone)
+            .IsRequired(false);
+
+        builder.Property(i => i.IsActive)
+            .HasColumnName("is_active")
+            .IsRequired();
+
+        builder.Property(c => c.CreatedAt)
+            .HasColumnName("created_at")
+            .IsRequired();
+
+        builder.Property(c => c.UpdatedAt)
+            .HasColumnName("updated_at")
+            .IsRequired(false);
+    }
 }
