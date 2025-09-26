@@ -33,14 +33,18 @@ public record Timezone
         }
         catch (TimeZoneNotFoundException exception)
         {
-            Result.Failure<Timezone>("Timezone not found.");
+            return Result.Failure<Timezone>("Timezone not found.");
+        }
+        catch (InvalidTimeZoneException exception)
+        {
+            return Result.Failure<Timezone>("Timezone is invalid.");
         }
 
         var validTimeZone = new Timezone(zoneStandardName);
         return Result.Success(validTimeZone);
     }
 
-    private static bool IsTimeZoneValid(string ianaTimeZone)
+    public static bool IsTimeZoneValid(string ianaTimeZone)
     {
         return ianaTimeZone.Contains('/') &&
                !ianaTimeZone.StartsWith("GMT");

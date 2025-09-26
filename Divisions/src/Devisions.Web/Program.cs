@@ -1,13 +1,11 @@
-using Devisions.Infrastructure;
+using Devisions.Infrastructure.Postgres;
+using Devisions.Web;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<AppDbContext>(_ =>
     new AppDbContext(builder.Configuration.GetConnectionString("DefaultConnection")!));
+builder.Services.AddProgramDependencies();
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
