@@ -3,7 +3,7 @@ using Devisions.Domain.Position;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Devisions.Infrastructure.Configurations;
+namespace Devisions.Infrastructure.Postgres.Configurations;
 
 public class DepartmentPositionConfiguration : IEntityTypeConfiguration<DepartmentPosition>
 {

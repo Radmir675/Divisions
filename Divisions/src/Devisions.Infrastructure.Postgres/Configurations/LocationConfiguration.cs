@@ -3,7 +3,7 @@ using Devisions.Domain.Location;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Devisions.Infrastructure.Configurations;
+namespace Devisions.Infrastructure.Postgres.Configurations;
 
 public class LocationConfiguration : IEntityTypeConfiguration<Location>
 {
@@ -23,6 +23,31 @@ public class LocationConfiguration : IEntityTypeConfiguration<Location>
             .HasColumnName("address")
             .IsRequired()
             .HasMaxLength(LengthConstants.LENGTH1000);
+
+        builder.OwnsOne(ad => ad.Address, adr =>
+        {
+            adr.Property(x => x.Country)
+                .HasColumnName("country")
+                .HasMaxLength(LengthConstants.LENGTH30);
+
+            adr.Property(x => x.City)
+                .HasColumnName("city")
+                .HasMaxLength(LengthConstants.LENGTH30);
+
+            adr.Property(x => x.Street)
+                .HasColumnName("street")
+                .HasMaxLength(LengthConstants.LENGTH30);
+
+            adr.Property(x => x.HouseNumber)
+                .HasColumnName("houseNumber")
+                .HasMaxLength(LengthConstants.LENGTH5);
+
+            adr.Property(x => x.RoomNumber)
+                .HasColumnName("roomNumber")
+                .HasMaxLength(LengthConstants.LENGTH5);
+        });
+        builder.Navigation(x => x.Address)
+            .IsRequired(true);
 
         builder.OwnsOne(n => n.Timezone, tz =>
         {

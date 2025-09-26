@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Devisions.Infrastructure.Configurations;
+namespace Devisions.Infrastructure.Postgres.Configurations;
 
 public class PositionConfiguration : IEntityTypeConfiguration<Position>
 {

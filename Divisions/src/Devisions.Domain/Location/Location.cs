@@ -9,7 +9,7 @@ public class Location
 
     public string Name { get; private set; }
 
-    public string Address { get; private set; }
+    public Adress Address { get; private set; }
 
     public Timezone? Timezone { get; private set; }
 
@@ -22,7 +22,7 @@ public class Location
     // EF Core
     private Location() { }
 
-    private Location(Guid id, string name, string adress, bool isActive, Timezone timezone)
+    private Location(Guid id, string name, Adress adress, bool isActive, Timezone timezone)
     {
         Id = id;
         Name = name;
@@ -33,15 +33,12 @@ public class Location
         UpdatedAt = CreatedAt;
     }
 
-    public static Result<Location, string> Create(string name, string? adress, bool isActive, Timezone timezone)
+    public static Result<Location, string> Create(string name, Adress adress, bool isActive, Timezone timezone)
     {
         if (name.Length is < LengthConstants.LENGTH3 or > LengthConstants.LENGTH120)
             return $"Name must be between 3 and 120 characters.";
 
-        if ((adress?.Length ?? 0) < LengthConstants.LENGTH1000)
-            return $"Description must be less than  1000 characters.";
-
-        var model = new Location(Guid.NewGuid(), name, adress!, isActive, timezone);
+        var model = new Location(Guid.NewGuid(), name, adress, isActive, timezone);
         return Result.Success<Location, string>(model);
     }
 }

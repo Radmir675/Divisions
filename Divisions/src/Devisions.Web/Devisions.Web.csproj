@@ -10,7 +10,7 @@
     <ProjectReference Include="..\Devisions.Application\Devisions.Application.csproj"/>
     <ProjectReference Include="..\Devisions.Contracts\Devisions.Contracts.csproj"/>
     <ProjectReference Include="..\Devisions.Domain\Devisions.Domain.csproj"/>
-    <ProjectReference Include="..\Devisions.Infrastructure\Devisions.Infrastructure.csproj"/>
+    <ProjectReference Include="..\Devisions.Infrastructure.Postgres\Devisions.Infrastructure.Postgres.csproj"/>
   </ItemGroup>
   <ItemGroup>
     <None Update="Properties\launchSettings.json">

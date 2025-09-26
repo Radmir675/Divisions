@@ -6,7 +6,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{4956E856-BFD
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Devisions.Application", "src\Devisions.Application\Devisions.Application.csproj", "{3065DA57-E9F6-4A18-99EC-02F2FDF0F457}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Devisions.Infrastructure", "src\Devisions.Infrastructure\Devisions.Infrastructure.csproj", "{68731F3E-C0FE-4C30-A581-5C256850A989}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Devisions.Infrastructure.Postgres", "src\Devisions.Infrastructure.Postgres\Devisions.Infrastructure.Postgres.csproj", "{68731F3E-C0FE-4C30-A581-5C256850A989}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Devisions.Web", "src\Devisions.Web\Devisions.Web.csproj", "{05AA67EA-2534-46D6-8378-6D674364D458}"
 EndProject
