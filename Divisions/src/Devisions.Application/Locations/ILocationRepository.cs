@@ -1,8 +1,9 @@
-﻿using Devisions.Domain.Location;
+﻿using CSharpFunctionalExtensions;
+using Devisions.Domain.Location;
 
-namespace Devisions.Application.Interfaces;
+namespace Devisions.Application.Locations;
 
 public interface ILocationRepository
 {
-    Task<Guid> AddAsync(Location location, CancellationToken cancellationToken);
+    Task<Result<Guid>> AddAsync(Location location, CancellationToken cancellationToken);
 }

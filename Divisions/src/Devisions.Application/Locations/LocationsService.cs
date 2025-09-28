@@ -1,13 +1,10 @@
-﻿using Devisions.Application.Interfaces;
-using Devisions.Application.Locations;
-using Devisions.Contracts;
+﻿using Devisions.Contracts;
 using Devisions.Domain.Location;
 using FluentValidation;
 using Microsoft.Extensions.Logging;
 using Adress = Devisions.Domain.Location.Adress;
 
-
-namespace Devisions.Application.Services;
+namespace Devisions.Application.Locations;
 
 public class LocationsService : ILocationsService
 {
@@ -41,7 +38,7 @@ public class LocationsService : ILocationsService
         if (adress.IsFailure)
         {
             _logger.LogError(adress.Error);
-            return Guid.Empty;
+            throw new Exception(adress.Error);
         }
 
         var timeZone = Timezone.Create(dto.TimeZone);
@@ -49,18 +46,25 @@ public class LocationsService : ILocationsService
         if (timeZone.IsFailure)
         {
             _logger.LogWarning(timeZone.Error);
-            return Guid.Empty;
+            throw new Exception(timeZone.Error);
         }
 
         var location = Location.Create(dto.Name, adress.Value!, true, timeZone.Value);
         if (location.IsFailure)
         {
             _logger.LogWarning(location.Error);
-            return Guid.Empty;
+            throw new Exception(location.Error);
         }
 
         var resultId = await _repository.AddAsync(location.Value, cancellationToken);
+
+        if (resultId.IsFailure)
+        {
+            _logger.LogWarning(resultId.Error);
+            throw new Exception(resultId.Error);
+        }
+
         _logger.LogInformation("Created location with id {resultId}", resultId);
-        return resultId;
+        return resultId.Value;
     }
 }

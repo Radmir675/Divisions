@@ -1,5 +1,4 @@
 ﻿using Devisions.Application.Locations;
-using Devisions.Application.Services;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 

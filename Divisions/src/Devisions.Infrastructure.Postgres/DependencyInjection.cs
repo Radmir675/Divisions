@@ -1,4 +1,4 @@
-﻿using Devisions.Application.Interfaces;
+﻿using Devisions.Application.Locations;
 using Devisions.Infrastructure.Postgres.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 
