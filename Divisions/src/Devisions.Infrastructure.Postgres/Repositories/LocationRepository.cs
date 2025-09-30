@@ -2,6 +2,7 @@
 using Devisions.Application.Locations;
 using Devisions.Domain.Location;
 using Microsoft.Extensions.Logging;
+using Shared.Failures;
 
 namespace Devisions.Infrastructure.Postgres.Repositories;
 
@@ -16,18 +17,19 @@ public class LocationRepository : ILocationRepository
         _logger = logger;
     }
 
-    public async Task<Result<Guid>> AddAsync(Location location, CancellationToken cancellationToken)
+    public async Task<Result<Guid, Error>> AddAsync(Location location, CancellationToken cancellationToken)
     {
         try
         {
             _dbContext.Locations.Add(location);
             await _dbContext.SaveChangesAsync(cancellationToken);
-            return Result.Success(location.Id);
         }
         catch (Exception e)
         {
             _logger.LogError(e.Message);
-            return Result.Failure<Guid>("Location could not be added in repository");
+            return Error.Failure("locationRepository.AddAsync", "Location could not be added in repository");
         }
+
+        return location.Id;
     }
 }

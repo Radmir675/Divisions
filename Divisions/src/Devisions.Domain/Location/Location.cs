@@ -1,5 +1,6 @@
 ﻿using System;
 using CSharpFunctionalExtensions;
+using Shared.Failures;
 
 namespace Devisions.Domain.Location;
 
@@ -9,7 +10,7 @@ public class Location
 
     public string Name { get; private set; }
 
-    public Adress Address { get; private set; }
+    public Address Address { get; private set; }
 
     public Timezone? Timezone { get; private set; }
 
@@ -22,23 +23,23 @@ public class Location
     // EF Core
     private Location() { }
 
-    private Location(Guid id, string name, Adress adress, bool isActive, Timezone timezone)
+    private Location(Guid id, string name, Address address, bool isActive, Timezone timezone)
     {
         Id = id;
         Name = name;
-        Address = adress;
+        Address = address;
         IsActive = isActive;
         Timezone = timezone;
         CreatedAt = DateTime.UtcNow;
         UpdatedAt = CreatedAt;
     }
 
-    public static Result<Location, string> Create(string name, Adress adress, bool isActive, Timezone timezone)
+    public static Result<Location, Error> Create(string name, Address address, bool isActive, Timezone timezone)
     {
         if (name.Length is < LengthConstants.LENGTH3 or > LengthConstants.LENGTH120)
-            return $"Name must be between 3 and 120 characters.";
+            return Error.Validation("location.length", "Name must be between 3 and 120 characters.");
 
-        var model = new Location(Guid.NewGuid(), name, adress, isActive, timezone);
-        return Result.Success<Location, string>(model);
+        var model = new Location(Guid.NewGuid(), name, address, isActive, timezone);
+        return model;
     }
 }

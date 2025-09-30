@@ -2,6 +2,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Devisions.Contracts\Devisions.Contracts.csproj"/>
     <ProjectReference Include="..\Devisions.Domain\Devisions.Domain.csproj"/>
+    <ProjectReference Include="..\Shared\Shared.csproj"/>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.10.0"/>

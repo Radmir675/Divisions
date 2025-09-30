@@ -1,8 +1,10 @@
-﻿using Devisions.Contracts;
+﻿using CSharpFunctionalExtensions;
+using Devisions.Application.Extensions;
+using Devisions.Contracts;
 using Devisions.Domain.Location;
 using FluentValidation;
 using Microsoft.Extensions.Logging;
-using Adress = Devisions.Domain.Location.Adress;
+using Shared.Failures;
 
 namespace Devisions.Application.Locations;
 
@@ -20,48 +22,45 @@ public class LocationsService : ILocationsService
         _validator = validator;
     }
 
-    public async Task<Guid> CreateAsync(CreateLocationDto dto, CancellationToken cancellationToken)
+    public async Task<Result<Guid, Failure>> CreateAsync(CreateLocationDto dto, CancellationToken cancellationToken)
     {
         var validationResult = await _validator.ValidateAsync(dto, cancellationToken);
-        if (validationResult.IsValid)
+        if (!validationResult.IsValid)
         {
-            throw new ValidationException(validationResult.Errors);
+            return validationResult.ToErrors();
         }
 
-        var adress = Adress.Create(
+        var adressResult = Address.Create(
             dto.Address.Country,
             dto.Address.City,
             dto.Address.Street,
             dto.Address.HouseNumber,
             dto.Address.RoomNumber);
 
-        if (adress.IsFailure)
+        if (adressResult.IsFailure)
         {
-            _logger.LogError(adress.Error);
-            throw new Exception(adress.Error);
+            return adressResult.Error.ToFailure();
         }
 
-        var timeZone = Timezone.Create(dto.TimeZone);
+        var timeZoneResult = Timezone.Create(dto.TimeZone);
 
-        if (timeZone.IsFailure)
+        if (timeZoneResult.IsFailure)
         {
-            _logger.LogWarning(timeZone.Error);
-            throw new Exception(timeZone.Error);
+            return timeZoneResult.Error.ToFailure();
         }
 
-        var location = Location.Create(dto.Name, adress.Value!, true, timeZone.Value);
-        if (location.IsFailure)
+        var locationResult = Location.Create(dto.Name, adressResult.Value!, true, timeZoneResult.Value);
+        if (locationResult.IsFailure)
         {
-            _logger.LogWarning(location.Error);
-            throw new Exception(location.Error);
+            return locationResult.Error.ToFailure();
         }
 
-        var resultId = await _repository.AddAsync(location.Value, cancellationToken);
+        var resultId = await _repository.AddAsync(locationResult.Value, cancellationToken);
 
         if (resultId.IsFailure)
         {
-            _logger.LogWarning(resultId.Error);
-            throw new Exception(resultId.Error);
+            _logger.LogWarning(resultId.Error.ToString());
+            return resultId.Error.ToFailure();
         }
 
         _logger.LogInformation("Created location with id {resultId}", resultId);
