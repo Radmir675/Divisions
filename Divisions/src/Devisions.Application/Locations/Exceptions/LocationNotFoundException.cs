@@ -1,7 +1,7 @@
 ﻿using Devisions.Application.Exceptions;
-using Shared.Failures;
+using Shared.Errors;
 
-namespace Devisions.Application.Locations;
+namespace Devisions.Application.Locations.Exceptions;
 
 public class LocationNotFoundException : BadRequestException
 {

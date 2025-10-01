@@ -1,4 +1,4 @@
-﻿namespace Shared.Failures;
+﻿namespace Shared.Errors;
 
 public enum ErrorType
 {

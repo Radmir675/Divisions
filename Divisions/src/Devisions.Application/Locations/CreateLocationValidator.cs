@@ -1,4 +1,4 @@
-﻿using Devisions.Contracts;
+﻿using Devisions.Contracts.Locations;
 using Devisions.Domain;
 using Devisions.Domain.Location;
 using FluentValidation;

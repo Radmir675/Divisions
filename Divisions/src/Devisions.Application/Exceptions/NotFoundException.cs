@@ -1,5 +1,5 @@
 ﻿using System.Text.Json;
-using Shared.Failures;
+using Shared.Errors;
 
 namespace Devisions.Application.Exceptions;
 

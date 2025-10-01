@@ -1,10 +1,10 @@
 ﻿using CSharpFunctionalExtensions;
-using Devisions.Contracts;
-using Shared.Failures;
+using Devisions.Contracts.Locations;
+using Shared.Errors;
 
 namespace Devisions.Application.Locations;
 
 public interface ILocationsService
 {
-    Task<Result<Guid, Failure>> CreateAsync(CreateLocationDto dto, CancellationToken cancellationToken);
+    Task<Result<Guid, Errors>> CreateAsync(CreateLocationDto dto, CancellationToken cancellationToken);
 }

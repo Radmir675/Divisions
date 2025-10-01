@@ -2,7 +2,7 @@
 using Devisions.Application.Locations;
 using Devisions.Domain.Location;
 using Microsoft.Extensions.Logging;
-using Shared.Failures;
+using Shared.Errors;
 
 namespace Devisions.Infrastructure.Postgres.Repositories;
 
