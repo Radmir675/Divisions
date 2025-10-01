@@ -1,6 +1,6 @@
 using Devisions.Application.Locations;
-using Devisions.Contracts;
-using Devisions.Web.ResponseExtensions;
+using Devisions.Contracts.Locations;
+using Devisions.Web.EndPointResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Devisions.Web.Controllers;
@@ -19,13 +19,12 @@ public class LocationController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<Guid>> Create(CreateLocationDto dto, CancellationToken cancellationToken)
+    public async Task<EndPointResult<Guid>> Create(CreateLocationDto dto, CancellationToken cancellationToken)
     {
         var result = await _locationsService.CreateAsync(dto, cancellationToken);
-        if (result.IsFailure)
-            return result.Error.ToResponse();
 
-        _logger.LogInformation("Location created: {locationId}", result.Value);
-        return Ok(result.Value);
+        if (result.IsSuccess)
+            _logger.LogInformation("Location created: {locationId}", result.Value);
+        return result;
     }
 }

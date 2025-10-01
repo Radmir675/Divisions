@@ -1,4 +1,4 @@
-﻿using Devisions.Contracts;
+﻿using Devisions.Contracts.Locations;
 using Devisions.Domain;
 using FluentValidation;
 
@@ -18,6 +18,6 @@ public class AdressValidator : AbstractValidator<Adress>
 
         RuleFor(x => x.Street).NotEmpty().WithMessage("Street is required");
 
-        RuleFor(x => x.HouseNumber).NotEmpty().WithMessage("Street is required");
+        RuleFor(x => x.HouseNumber).NotEmpty().WithMessage("House number is required");
     }
 }

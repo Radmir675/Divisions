@@ -1,5 +1,5 @@
 ﻿using Devisions.Application.Exceptions;
-using Shared.Failures;
+using Shared.Errors;
 
 namespace Devisions.Application.Locations.Exceptions;
 

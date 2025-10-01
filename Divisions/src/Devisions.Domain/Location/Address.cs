@@ -1,5 +1,5 @@
 ﻿using CSharpFunctionalExtensions;
-using Shared.Failures;
+using Shared.Errors;
 
 namespace Devisions.Domain.Location;
 

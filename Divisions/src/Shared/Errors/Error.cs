@@ -1,4 +1,4 @@
-﻿namespace Shared.Failures;
+﻿namespace Shared.Errors;
 
 public record Error
 {
@@ -29,5 +29,5 @@ public record Error
     public static Error Failure(string? code, string message) =>
         new Error(code ?? "failure", message, ErrorType.FAILURE);
 
-    public Failure ToFailure() => this;
+    public Errors ToErrors() => this;
 }
