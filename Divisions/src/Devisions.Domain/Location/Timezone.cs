@@ -1,5 +1,6 @@
 ﻿using System;
 using CSharpFunctionalExtensions;
+using Shared.Errors;
 
 namespace Devisions.Domain.Location;
 
@@ -15,14 +16,14 @@ public record Timezone
         IanaTimeZone = ianaTimeZone;
     }
 
-    public static Result<Timezone> Create(string ianaTimeZone)
+    public static Result<Timezone, Error> Create(string ianaTimeZone)
     {
         if (string.IsNullOrWhiteSpace(ianaTimeZone))
-            return Result.Failure<Timezone>("Timezone cannot be empty.");
+            return Error.Validation("IanaTimeZone", "Timezone cannot be empty.");
 
         if (IsTimeZoneValid(ianaTimeZone))
         {
-            return Result.Failure<Timezone>("Timezone is invalid.");
+            return Error.Validation("timezone.validation", "Timezone is invalid.");
         }
 
         string zoneStandardName = string.Empty;
@@ -33,15 +34,15 @@ public record Timezone
         }
         catch (TimeZoneNotFoundException exception)
         {
-            return Result.Failure<Timezone>("Timezone not found.");
+            return Error.NotFound("timezone.not.found", "Timezone not found.", null);
         }
         catch (InvalidTimeZoneException exception)
         {
-            return Result.Failure<Timezone>("Timezone is invalid.");
+            return Error.Validation("timezone.not.valid.parse", "Timezone is invalid.");
         }
 
         var validTimeZone = new Timezone(zoneStandardName);
-        return Result.Success(validTimeZone);
+        return validTimeZone;
     }
 
     public static bool IsTimeZoneValid(string ianaTimeZone)
