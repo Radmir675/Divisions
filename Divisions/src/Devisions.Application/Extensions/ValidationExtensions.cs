@@ -1,4 +1,5 @@
-﻿using FluentValidation.Results;
+﻿using System.Linq;
+using FluentValidation.Results;
 using Shared.Errors;
 
 namespace Devisions.Application.Extensions;

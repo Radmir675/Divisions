@@ -3,7 +3,7 @@ using Devisions.Domain;
 using Devisions.Domain.Location;
 using FluentValidation;
 
-namespace Devisions.Application.Locations;
+namespace Devisions.Application.Locations.CreateLocation;
 
 public class CreateLocationValidator : AbstractValidator<CreateLocationDto>
 {
