@@ -2,7 +2,7 @@
 using Devisions.Domain;
 using FluentValidation;
 
-namespace Devisions.Application.Locations;
+namespace Devisions.Application.Locations.CreateLocation;
 
 public class AdressValidator : AbstractValidator<Adress>
 {

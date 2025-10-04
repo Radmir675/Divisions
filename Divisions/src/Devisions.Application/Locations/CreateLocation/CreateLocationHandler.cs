@@ -1,4 +1,8 @@
-﻿using CSharpFunctionalExtensions;
+﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
+using CSharpFunctionalExtensions;
+using Devisions.Application.Abstractions;
 using Devisions.Application.Extensions;
 using Devisions.Contracts.Locations;
 using Devisions.Domain.Location;
@@ -6,25 +10,27 @@ using FluentValidation;
 using Microsoft.Extensions.Logging;
 using Shared.Errors;
 
-namespace Devisions.Application.Locations;
+namespace Devisions.Application.Locations.CreateLocation;
 
-public class LocationsService : ILocationsService
+public class CreateLocationHandler : ICommandHandler<Guid, CreateLocationCommand>
 {
     private readonly ILocationRepository _repository;
-    private readonly ILogger<LocationsService> _logger;
+    private readonly ILogger<CreateLocationHandler> _logger;
     private readonly IValidator<CreateLocationDto> _validator;
 
-    public LocationsService(ILocationRepository repository, ILogger<LocationsService> logger,
-        IValidator<CreateLocationDto> validator)
+    public CreateLocationHandler(
+        ILocationRepository repository,
+        IValidator<CreateLocationDto> validator,
+        ILogger<CreateLocationHandler> logger)
     {
         _repository = repository;
-        _logger = logger;
         _validator = validator;
+        _logger = logger;
     }
 
-    public async Task<Result<Guid, Errors>> CreateAsync(CreateLocationDto dto, CancellationToken cancellationToken)
+    public async Task<Result<Guid, Errors>> Handle(CreateLocationCommand command, CancellationToken cancellationToken)
     {
-        var validationResult = await _validator.ValidateAsync(dto, cancellationToken);
+        var validationResult = await _validator.ValidateAsync(command.request, cancellationToken);
         if (!validationResult.IsValid)
         {
             _logger.LogError(validationResult.ToErrors().ToString());
@@ -32,11 +38,11 @@ public class LocationsService : ILocationsService
         }
 
         var adressResult = Address.Create(
-            dto.Address.Country,
-            dto.Address.City,
-            dto.Address.Street,
-            dto.Address.HouseNumber,
-            dto.Address.RoomNumber);
+            command.request.Address.Country,
+            command.request.Address.City,
+            command.request.Address.Street,
+            command.request.Address.HouseNumber,
+            command.request.Address.RoomNumber);
 
         if (adressResult.IsFailure)
         {
@@ -44,7 +50,7 @@ public class LocationsService : ILocationsService
             return adressResult.Error.ToErrors();
         }
 
-        var timeZoneResult = Timezone.Create(dto.TimeZone);
+        var timeZoneResult = Timezone.Create(command.request.TimeZone);
 
         if (timeZoneResult.IsFailure)
         {
@@ -52,7 +58,7 @@ public class LocationsService : ILocationsService
             return timeZoneResult.Error.ToErrors();
         }
 
-        var locationResult = Location.Create(dto.Name, adressResult.Value!, true, timeZoneResult.Value);
+        var locationResult = Location.Create(command.request.Name, adressResult.Value!, true, timeZoneResult.Value);
         if (locationResult.IsFailure)
         {
             _logger.LogError(locationResult.Error.ToString());

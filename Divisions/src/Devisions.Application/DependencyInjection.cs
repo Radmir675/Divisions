@@ -1,4 +1,4 @@
-﻿using Devisions.Application.Locations;
+﻿using Devisions.Application.Abstractions;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -10,7 +10,13 @@ public static class DependencyInjection
     {
         services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly);
 
-        services.AddScoped<ILocationsService, LocationsService>();
+        var assembly = typeof(DependencyInjection).Assembly;
+
+        services.Scan(scan => scan.FromAssemblies([assembly])
+            .AddClasses(class1 => class1
+                .AssignableToAny(typeof(ICommandHandler<,>), typeof(ICommandHandler<>)))
+            .AsSelfWithInterfaces()
+            .WithTransientLifetime());
 
         return services;
     }
