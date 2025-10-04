@@ -32,7 +32,6 @@ public class EndPointResult<TValue> : IResult, IEndpointMetadataProvider
 
     public static implicit operator EndPointResult<TValue>(Result<TValue, Errors> result) => new(result);
 
-
     public static void PopulateMetadata(MethodInfo method, EndpointBuilder builder)
     {
         ArgumentNullException.ThrowIfNull(method);

@@ -21,6 +21,7 @@ public class LocationController(ILogger<LocationController> logger) : Controller
 
         if (result.IsSuccess)
             logger.LogInformation("Location created: {locationId}", result.Value);
+
         return result;
     }
 }

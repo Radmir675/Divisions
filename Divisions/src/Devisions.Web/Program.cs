@@ -20,7 +20,6 @@ var app = builder.Build();
 app.UseExceptionMiddleware();
 app.UseSerilogRequestLogging();
 
-
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
