@@ -7,7 +7,6 @@ public class ErrorsResult : IResult
 {
     private readonly Errors _errors;
 
-
     public ErrorsResult(Error error)
     {
         _errors = error;
@@ -27,7 +26,6 @@ public class ErrorsResult : IResult
             httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
             return httpContext.Response.WriteAsJsonAsync(Envelope.Error(_errors));
         }
-
 
         var distinctErrors = _errors
             .Select(x => x.ErrorType)
