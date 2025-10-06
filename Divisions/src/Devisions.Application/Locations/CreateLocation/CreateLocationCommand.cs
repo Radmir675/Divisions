@@ -3,4 +3,4 @@ using Devisions.Contracts.Locations;
 
 namespace Devisions.Application.Locations.CreateLocation;
 
-public record CreateLocationCommand(CreateLocationDto request) : ICommand;
+public record CreateLocationCommand(CreateLocationRequest Request) : ICommand;

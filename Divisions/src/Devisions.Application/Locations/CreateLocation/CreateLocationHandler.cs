@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using Devisions.Application.Abstractions;
 using Devisions.Application.Extensions;
-using Devisions.Contracts.Locations;
 using Devisions.Domain.Location;
 using FluentValidation;
 using Microsoft.Extensions.Logging;
@@ -16,11 +15,11 @@ public class CreateLocationHandler : ICommandHandler<Guid, CreateLocationCommand
 {
     private readonly ILocationRepository _repository;
     private readonly ILogger<CreateLocationHandler> _logger;
-    private readonly IValidator<CreateLocationDto> _validator;
+    private readonly IValidator<CreateLocationCommand> _validator;
 
     public CreateLocationHandler(
         ILocationRepository repository,
-        IValidator<CreateLocationDto> validator,
+        IValidator<CreateLocationCommand> validator,
         ILogger<CreateLocationHandler> logger)
     {
         _repository = repository;
@@ -30,42 +29,26 @@ public class CreateLocationHandler : ICommandHandler<Guid, CreateLocationCommand
 
     public async Task<Result<Guid, Errors>> Handle(CreateLocationCommand command, CancellationToken cancellationToken)
     {
-        var validationResult = await _validator.ValidateAsync(command.request, cancellationToken);
+        var validationResult = await _validator.ValidateAsync(command, cancellationToken);
         if (!validationResult.IsValid)
         {
             _logger.LogError(validationResult.ToErrors().ToString());
             return validationResult.ToErrors();
         }
 
-        var adressResult = Address.Create(
-            command.request.Address.Country,
-            command.request.Address.City,
-            command.request.Address.Street,
-            command.request.Address.HouseNumber,
-            command.request.Address.RoomNumber);
+        var address = Address.Create(
+            command.Request.Address.Country,
+            command.Request.Address.City,
+            command.Request.Address.Street,
+            command.Request.Address.HouseNumber,
+            command.Request.Address.RoomNumber).Value;
 
-        if (adressResult.IsFailure)
-        {
-            _logger.LogError(adressResult.Error.ToString());
-            return adressResult.Error.ToErrors();
-        }
+        var timezone = Timezone.Create(command.Request.TimeZone).Value;
 
-        var timeZoneResult = Timezone.Create(command.request.TimeZone);
+        var location = Location.Create(command.Request.Name, address, true, timezone).Value;
 
-        if (timeZoneResult.IsFailure)
-        {
-            _logger.LogError(timeZoneResult.ToString());
-            return timeZoneResult.Error.ToErrors();
-        }
 
-        var locationResult = Location.Create(command.request.Name, adressResult.Value!, true, timeZoneResult.Value);
-        if (locationResult.IsFailure)
-        {
-            _logger.LogError(locationResult.Error.ToString());
-            return locationResult.Error.ToErrors();
-        }
-
-        var resultId = await _repository.AddAsync(locationResult.Value, cancellationToken);
+        var resultId = await _repository.AddAsync(location, cancellationToken);
 
         if (resultId.IsFailure)
         {

@@ -21,7 +21,7 @@ public record Timezone
         if (string.IsNullOrWhiteSpace(ianaTimeZone))
             return Error.Validation("IanaTimeZone", "Timezone cannot be empty.");
 
-        if (IsTimeZoneValid(ianaTimeZone))
+        if (!IsTimeZoneValid(ianaTimeZone))
         {
             return Error.Validation("timezone.validation", "Timezone is invalid.");
         }

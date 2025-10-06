@@ -4,7 +4,7 @@ using FluentValidation;
 
 namespace Devisions.Application.Locations.CreateLocation;
 
-public class AdressValidator : AbstractValidator<Adress>
+public class AdressValidator : AbstractValidator<AddressRequest>
 {
     public AdressValidator()
     {

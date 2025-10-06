@@ -13,7 +13,7 @@ public class LocationController(ILogger<LocationController> logger) : Controller
     [HttpPost]
     public async Task<EndPointResult<Guid>> Create(
         [FromServices] ICommandHandler<Guid, CreateLocationCommand> handler,
-        CreateLocationDto request,
+        CreateLocationRequest request,
         CancellationToken cancellationToken)
     {
         throw new Exception("Create location exception");
