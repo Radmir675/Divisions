@@ -16,11 +16,14 @@ public class LocationController(ILogger<LocationController> logger) : Controller
         CreateLocationDto request,
         CancellationToken cancellationToken)
     {
+        throw new Exception("Create location exception");
         var command = new CreateLocationCommand(request);
         var result = await handler.Handle(command, cancellationToken);
 
         if (result.IsSuccess)
             logger.LogInformation("Location created: {locationId}", result.Value);
+
+        logger.LogError("Location is not created!");
         return result;
     }
 }
