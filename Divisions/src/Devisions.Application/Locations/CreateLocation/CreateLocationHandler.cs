@@ -44,9 +44,7 @@ public class CreateLocationHandler : ICommandHandler<Guid, CreateLocationCommand
             command.Request.Address.RoomNumber).Value;
 
         var timezone = Timezone.Create(command.Request.TimeZone).Value;
-
         var location = Location.Create(command.Request.Name, address, true, timezone).Value;
-
 
         var resultId = await _repository.AddAsync(location, cancellationToken);
 
