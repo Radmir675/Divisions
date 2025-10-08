@@ -36,6 +36,11 @@ public class Location
 
     public static Result<Location, Error> Create(string name, Address address, bool isActive, Timezone timezone)
     {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return GeneralErrors.ValueIsRequired("Name");
+        }
+
         if (name.Length is < LengthConstants.LENGTH3 or > LengthConstants.LENGTH120)
             return Error.Validation("location.length", "Name must be between 3 and 120 characters.");
 

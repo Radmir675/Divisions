@@ -1,4 +1,6 @@
-﻿using Devisions.Web.Response;
+﻿using System.Text.Json;
+using System.Text.Json.Serialization;
+using Devisions.Web.Response;
 using Shared.Errors;
 
 namespace Devisions.Web.EndPointResults;
@@ -40,7 +42,11 @@ public class ErrorsResult : IResult
 
         httpContext.Response.StatusCode = statusCode;
 
-        return httpContext.Response.WriteAsJsonAsync(envelope);
+        var options = new JsonSerializerOptions
+        {
+            Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) },
+        };
+        return httpContext.Response.WriteAsJsonAsync(envelope, options);
     }
 
     private static int GetStatusCodeFromErrorType(ErrorType errorType) => errorType switch

@@ -27,7 +27,8 @@ public class LocationRepository : ILocationRepository
         catch (Exception e)
         {
             _logger.LogError(e.Message);
-            return Error.Failure("locationRepository.AddAsync", "Location could not be added in repository");
+            return Error.Failure("locationRepository.AddAsync",
+                "Location could not be added in repository");
         }
 
         return location.Id;

@@ -19,10 +19,11 @@ public class LocationConfiguration : IEntityTypeConfiguration<Location>
         builder.Property(x => x.Name)
             .HasColumnName("name");
 
-        builder.Property(x => x.Address)
-            .HasColumnName("address")
-            .IsRequired()
-            .HasMaxLength(LengthConstants.LENGTH1000);
+        builder.HasIndex(i => i.Name)
+            .IsUnique();
+
+        builder.HasIndex(i => i.Address)
+            .IsUnique();
 
         builder.OwnsOne(ad => ad.Address, adr =>
         {
@@ -47,7 +48,7 @@ public class LocationConfiguration : IEntityTypeConfiguration<Location>
                 .HasMaxLength(LengthConstants.LENGTH5);
         });
         builder.Navigation(x => x.Address)
-            .IsRequired(true);
+            .IsRequired();
 
         builder.OwnsOne(n => n.Timezone, tz =>
         {

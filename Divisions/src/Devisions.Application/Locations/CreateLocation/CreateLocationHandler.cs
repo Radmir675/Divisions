@@ -31,10 +31,7 @@ public class CreateLocationHandler : ICommandHandler<Guid, CreateLocationCommand
     {
         var validationResult = await _validator.ValidateAsync(command, cancellationToken);
         if (!validationResult.IsValid)
-        {
-            _logger.LogError(validationResult.ToErrors().ToString());
             return validationResult.ToErrors();
-        }
 
         var address = Address.Create(
             command.Request.Address.Country,

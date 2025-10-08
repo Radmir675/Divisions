@@ -16,16 +16,14 @@ public class CreateLocationCommandValidator : AbstractValidator<CreateLocationCo
 
         RuleFor(x => x.Request.Name)
             .NotEmpty()
-            .WithMessage("Name is required");
+            .WithError(GeneralErrors.ValueIsRequired("Name is required"));
 
         RuleFor(x => x.Request.Name)
             .MaximumLength(LengthConstants.LENGTH120)
-            .WithMessage("Name is more than 120 characters");
+            .WithError(Error.Validation("request.name", "Name is more than 120 characters", "name"));
 
         RuleFor(x => x.Request.TimeZone)
             .MustBeValueObject(Timezone.Create);
-
-        RuleFor(x => x.Request.Address).SetValidator(new AdressValidator());
 
         RuleFor(x => x.Request.Address)
             .MustBeValueObject(c => Address
