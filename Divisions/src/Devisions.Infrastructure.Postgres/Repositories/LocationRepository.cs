@@ -26,11 +26,11 @@ public class LocationRepository : ILocationRepository
         }
         catch (Exception e)
         {
-            _logger.LogError(e.Message);
+            _logger.LogError(e?.InnerException.Message);
             return Error.Failure("locationRepository.AddAsync",
                 "Location could not be added in repository");
         }
 
-        return location.Id;
+        return location.Id.Value;
     }
 }

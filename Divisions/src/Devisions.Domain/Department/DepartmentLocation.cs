@@ -1,4 +1,5 @@
 ﻿using System;
+using Devisions.Domain.Location;
 
 namespace Devisions.Domain.Department;
 
@@ -8,12 +9,12 @@ public class DepartmentLocation
 
     public Department Department { get; private set; }
 
-    public Guid LocationId { get; private set; }
+    public LocationId LocationId { get; private set; }
 
     // EF Core
     private DepartmentLocation() { }
 
-    public DepartmentLocation(Guid id, Department department, Guid locationId)
+    public DepartmentLocation(Guid id, Department department, LocationId locationId)
     {
         Id = id;
 

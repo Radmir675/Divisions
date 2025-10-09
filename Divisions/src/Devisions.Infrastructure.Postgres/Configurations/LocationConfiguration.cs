@@ -11,18 +11,16 @@ public class LocationConfiguration : IEntityTypeConfiguration<Location>
     {
         builder.ToTable("locations");
 
-        builder.HasKey(x => x.Id);
+        builder.HasKey(x => x.Id)
+            .HasName("id");
 
         builder.Property(x => x.Id)
-            .HasColumnName("id");
+            .HasConversion(x => x.Value, x => new LocationId(x));
 
         builder.Property(x => x.Name)
             .HasColumnName("name");
 
         builder.HasIndex(i => i.Name)
-            .IsUnique();
-
-        builder.HasIndex(i => i.Address)
             .IsUnique();
 
         builder.OwnsOne(ad => ad.Address, adr =>
@@ -46,9 +44,21 @@ public class LocationConfiguration : IEntityTypeConfiguration<Location>
             adr.Property(x => x.RoomNumber)
                 .HasColumnName("roomNumber")
                 .HasMaxLength(LengthConstants.LENGTH5);
+
+            adr.HasIndex(ind => new
+                {
+                    ind.Country,
+                    ind.City,
+                    ind.Street,
+                    ind.HouseNumber,
+                    ind.RoomNumber,
+                })
+                .IsUnique()
+                .HasDatabaseName("address_unique");
         });
         builder.Navigation(x => x.Address)
             .IsRequired();
+
 
         builder.OwnsOne(n => n.Timezone, tz =>
         {
@@ -57,7 +67,7 @@ public class LocationConfiguration : IEntityTypeConfiguration<Location>
                 .IsRequired();
         });
         builder.Navigation(x => x.Timezone)
-            .IsRequired(false);
+            .IsRequired();
 
         builder.Property(i => i.IsActive)
             .HasColumnName("is_active")

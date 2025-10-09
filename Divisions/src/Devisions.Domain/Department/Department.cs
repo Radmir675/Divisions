@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using CSharpFunctionalExtensions;
+using Devisions.Domain.Location;
 
 namespace Devisions.Domain.Department;
 
@@ -59,7 +60,7 @@ public class Department
     private Department() { }
 
     private Department(Guid id, string name, Identifier identifier, string path, short depth, bool isActive,
-        IEnumerable<Guid> departmentLocations)
+        IEnumerable<LocationId> departmentLocations)
     {
         Id = id;
         Name = name;
@@ -75,7 +76,7 @@ public class Department
     }
 
     public static Result<Department, string> Create(string name, Identifier identifier, Department parent,
-        string path, bool isActive, IEnumerable<Guid> departmentLocations, IEnumerable<Guid> departmentPositions)
+        string path, bool isActive, IEnumerable<LocationId> departmentLocations, IEnumerable<Guid> departmentPositions)
     {
         if (string.IsNullOrWhiteSpace(name))
             return $"Name cannot be null or whitespace.";
