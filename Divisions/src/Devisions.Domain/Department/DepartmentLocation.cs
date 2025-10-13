@@ -7,7 +7,7 @@ public class DepartmentLocation
 {
     public Guid Id { get; private set; }
 
-    public Department Department { get; private set; }
+    public Department Department { get; private set; } //TODO: сюда может ID?
 
     public LocationId LocationId { get; private set; }
 

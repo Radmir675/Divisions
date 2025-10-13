@@ -15,7 +15,9 @@ public class LocationConfiguration : IEntityTypeConfiguration<Location>
             .HasName("id");
 
         builder.Property(x => x.Id)
-            .HasConversion(x => x.Value, x => new LocationId(x));
+            .HasConversion(
+                x => x.Value,
+                x => new LocationId(x));
 
         builder.Property(x => x.Name)
             .HasColumnName("name");
@@ -58,7 +60,6 @@ public class LocationConfiguration : IEntityTypeConfiguration<Location>
         });
         builder.Navigation(x => x.Address)
             .IsRequired();
-
 
         builder.OwnsOne(n => n.Timezone, tz =>
         {

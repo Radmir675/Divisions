@@ -14,10 +14,18 @@ public class DepartmentConfiguration : IEntityTypeConfiguration<Department>
         builder.HasKey(x => x.Id);
 
         builder.Property(x => x.Id)
-            .HasColumnName("id");
+            .HasColumnName("id")
+            .HasConversion(
+                x => x.Value,
+                x => new DepartmentId(x));
 
-        builder.Property(x => x.Name)
-            .HasColumnName("name")
+        builder.OwnsOne(x => x.Name, n =>
+        {
+            n.Property(x => x.Name)
+                .HasColumnName("name")
+                .IsRequired();
+        });
+        builder.Navigation(x => x.Name)
             .IsRequired();
 
         builder.OwnsOne(i => i.Identifier, idn =>
@@ -49,7 +57,7 @@ public class DepartmentConfiguration : IEntityTypeConfiguration<Department>
             .HasColumnName("updated_at");
 
         builder.HasOne(i => i.Parent)
-            .WithMany(x => x.Children)
+            .WithMany()
             .HasForeignKey("parent_id")
             .IsRequired(false)
             .OnDelete(DeleteBehavior.SetNull);

@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using Devisions.Domain.Department;
 using Devisions.Domain.Location;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,6 +10,7 @@ public sealed class AppDbContext : DbContext
     private readonly string _connectionString;
 
     public DbSet<Location> Locations { get; set; }
+    public DbSet<Department> Departments { get; set; }
 
     public AppDbContext(string connectionString)
     {

@@ -1,6 +1,7 @@
 ﻿using CSharpFunctionalExtensions;
 using Devisions.Application.Locations;
 using Devisions.Domain.Location;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Shared.Errors;
 
@@ -32,5 +33,34 @@ public class LocationRepository : ILocationRepository
         }
 
         return location.Id.Value;
+    }
+
+    public async Task<Result<bool, Error>> ExistsByIdsAsync(
+        IEnumerable<Guid> locationsId,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            foreach (var locationId in locationsId)
+            {
+                var isIdExist = await _dbContext
+                    .Locations
+                    .AnyAsync(x => x.Id.Value == locationId, cancellationToken);
+                if (!isIdExist)
+                {
+                    return Error.NotFound("locationRepository.ExistsByIdAsync",
+                        "location not found",
+                        locationId);
+                }
+            }
+
+            return true;
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e?.InnerException.Message);
+            return Error.Failure("locationRepository.ExistsByIdAsync",
+                "Location could not be found");
+        }
     }
 }

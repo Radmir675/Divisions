@@ -3,20 +3,23 @@ using System.Collections.Generic;
 using System.Linq;
 using CSharpFunctionalExtensions;
 using Devisions.Domain.Location;
+using Shared.Errors;
 
 namespace Devisions.Domain.Department;
 
+public record DepartmentId(Guid Value);
+
 public class Department
 {
-    private const short DEFAULT_DEPTH = 1;
+    private const short DEFAULT_DEPTH = 0;
 
-    public Guid Id { get; private set; }
+    public DepartmentId Id { get; private set; }
 
-    public string Name { get; private set; }
+    public DepartmentName Name { get; private set; }
 
     public Identifier Identifier { get; private set; }
 
-    public Department? Parent { get; private set; }
+    public DepartmentId? Parent { get; private set; }
 
     public string Path { get; private set; }
 
@@ -40,66 +43,78 @@ public class Department
 
     private List<DepartmentPosition> _departmentPositions;
 
-    public void Add(Department childDepartment)
+    public UnitResult<Error> Rename(string name)
     {
-        childDepartment.Parent = this;
-        childDepartment.Depth++;
-        _children.Add(childDepartment);
-        childDepartment.Path = GetPath(this, childDepartment.Path);
-        UpdatedAt = DateTime.Now;
-        childDepartment.UpdatedAt = UpdatedAt;
-    }
+        var nameResult = DepartmentName.Create(name);
+        if (nameResult.IsFailure)
+            return nameResult.Error;
 
-    public void Rename(string name)
-    {
-        Name = name;
+        Name = nameResult.Value;
         UpdatedAt = DateTime.Now;
+        return Result.Success<Error>();
     }
 
     // EF Core
     private Department() { }
 
-    private Department(Guid id, string name, Identifier identifier, string path, short depth, bool isActive,
-        IEnumerable<LocationId> departmentLocations)
+    private Department(
+        DepartmentId id,
+        DepartmentName name,
+        Identifier identifier,
+        string path,
+        short depth,
+        bool isActive,
+        IEnumerable<LocationId> departmentLocations,
+        Department? parent = null)
     {
         Id = id;
         Name = name;
         Identifier = identifier;
         CreatedAt = DateTime.UtcNow;
-        UpdatedAt = CreatedAt;
+        UpdatedAt = DateTime.UtcNow;
         Path = path;
         Depth = depth;
         IsActive = isActive;
         _departmentLocations = departmentLocations
-            .Select(departmentLocation => new DepartmentLocation(Guid.NewGuid(), this, departmentLocation))
+            .Select(departmentLocation => new DepartmentLocation(
+                Guid.NewGuid(),
+                this, departmentLocation))
             .ToList();
+        Parent = parent?.Id;
+        parent?._children.Add(this);
     }
 
-    public static Result<Department, string> Create(string name, Identifier identifier, Department parent,
-        string path, bool isActive, IEnumerable<LocationId> departmentLocations, IEnumerable<Guid> departmentPositions)
+    public static Result<Department, Error> CreateParent(
+        DepartmentName name,
+        Identifier identifier,
+        IEnumerable<LocationId> departmentLocations)
     {
-        if (string.IsNullOrWhiteSpace(name))
-            return $"Name cannot be null or whitespace.";
+        var currentPath = GetPath(identifier.Identify);
 
-        if (name.Length is > LengthConstants.LENGTH150 or < LengthConstants.LENGTH3)
-            return $"Name must be between 3 and 150 characters.";
+        var depth = DEFAULT_DEPTH;
 
-        if (string.IsNullOrEmpty(path))
-            return $"Path cannot be null or empty.";
+        var departmentId = new DepartmentId(Guid.NewGuid());
 
-        if (path.ToCharArray().Any(c => !char.IsLetterOrDigit(c)))
-            return $"Path must contain only letters, digits and underscores.";
-
-        var currentPath = GetPath(parent, path);
-
-        var depth = (short)(DEFAULT_DEPTH + parent?.Depth)!;
-
-        var department = new Department(Guid.NewGuid(), name, identifier, currentPath, depth, isActive,
+        var department = new Department(departmentId, name, identifier, currentPath, depth, true,
             departmentLocations);
 
-        return Result.Success<Department, string>(department);
+        return department;
     }
 
-    private static string GetPath(Department parent, string path) =>
-        (parent?.Path != null ? parent.Path + "/" : string.Empty) + path;
+    public static Result<Department, Error> CreateChild(
+        DepartmentName name,
+        Identifier identifier,
+        Department parent,
+        IEnumerable<LocationId> departmentLocations)
+    {
+        var departmentId = new DepartmentId(Guid.NewGuid());
+        var path = GetPath(identifier.Identify, parent.Path);
+        var depth = parent.Depth++;
+
+        var department = new Department(departmentId, name, identifier, path, depth, true, departmentLocations);
+        return department;
+    }
+
+    private static string GetPath(string identifier, string? parentPath = null) =>
+        (parentPath != null ? parentPath + "/" : string.Empty) + identifier;
 }

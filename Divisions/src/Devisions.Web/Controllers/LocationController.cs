@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Devisions.Web.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("[controller]")]
 public class LocationController(ILogger<LocationController> logger) : ControllerBase
 {
     [HttpPost]

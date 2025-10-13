@@ -20,7 +20,10 @@ public class CreateLocationCommandValidator : AbstractValidator<CreateLocationCo
 
         RuleFor(x => x.Request.Name)
             .MaximumLength(LengthConstants.LENGTH120)
-            .WithError(Error.Validation("request.name", "Name is more than 120 characters", "name"));
+            .WithError(Error.Validation(
+                "request.name",
+                "Name is more than 120 characters",
+                "name"));
 
         RuleFor(x => x.Request.TimeZone)
             .MustBeValueObject(Timezone.Create);
