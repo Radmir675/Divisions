@@ -10,7 +10,7 @@ public record LocationId(Guid Value);
 
 public class Location
 {
-    public LocationId Id { get; }
+    public LocationId Id { get; } = null!;
 
     public string Name { get; private set; } = null!;
 

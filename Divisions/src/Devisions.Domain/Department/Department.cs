@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using CSharpFunctionalExtensions;
 using Devisions.Domain.Location;
-using Devisions.Domain.Position;
 using Shared.Errors;
 
 namespace Devisions.Domain.Department;
@@ -14,13 +13,13 @@ public class Department
 {
     private const short DEFAULT_DEPTH = 0;
 
-    public DepartmentId Id { get; }
+    public DepartmentId Id { get; } = null!;
 
     public DepartmentName Name { get; private set; } = null!;
 
     public Identifier Identifier { get; private set; } = null!;
 
-    public DepartmentId? Parent { get; private set; }
+    public DepartmentId? ParentId { get; private set; }
 
     public string Path { get; private set; } = null!;
 
@@ -32,9 +31,11 @@ public class Department
 
     public DateTime? UpdatedAt { get; private set; }
 
-    private readonly List<Department> _children = [];
+    public Department? Parent { get; private set; }
 
-    public IReadOnlyList<Department> Children => _children;
+    private readonly List<Department> _childrens = [];
+
+    public IReadOnlyList<Department> Childrens => _childrens;
 
     public IReadOnlyList<DepartmentLocation> DepartmentLocations => _departmentLocations;
 
@@ -51,7 +52,7 @@ public class Department
             return nameResult.Error;
 
         Name = nameResult.Value;
-        UpdatedAt = DateTime.Now;
+        UpdatedAt = DateTime.UtcNow;
         return Result.Success<Error>();
     }
 
@@ -66,8 +67,7 @@ public class Department
         short depth,
         bool isActive,
         IEnumerable<LocationId> departmentLocations,
-        // IEnumerable<PositionId>? departmentPositions = null,
-        Department? parent = null)
+        DepartmentId? parentId = null)
     {
         Id = id;
         Name = name;
@@ -81,13 +81,7 @@ public class Department
             .Select(departmentLocation => new DepartmentLocation(
                 Guid.NewGuid(), id, departmentLocation))
             .ToList();
-
-        // _departmentPositions = departmentPositions?
-        //     .Select(departmentPosition => new DepartmentPosition(
-        //         Guid.NewGuid(), id, departmentPosition))
-        //     .ToList()!;
-        Parent = parent?.Id;
-        parent?._children.Add(this);
+        ParentId = parentId;
     }
 
     public static Result<Department, Error> CreateParent(
@@ -117,7 +111,9 @@ public class Department
         var path = GetPath(identifier.Identify, parent.Path);
         var depth = parent.Depth++;
 
-        var department = new Department(departmentId, name, identifier, path, depth, true, departmentLocations);
+        var department = new Department(
+            departmentId, name, identifier, path, depth, true, departmentLocations, parent.Id);
+
         return department;
     }
 

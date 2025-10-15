@@ -10,7 +10,7 @@ public record PositionId(Guid Value);
 
 public class Position
 {
-    public PositionId Id { get; }
+    public PositionId Id { get; } = null!;
 
     public PositionName Name { get; private set; } = null!;
 

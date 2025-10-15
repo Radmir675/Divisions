@@ -19,6 +19,13 @@ public class DepartmentConfiguration : IEntityTypeConfiguration<Department>
                 guid => new DepartmentId(guid))
             .HasColumnName("id");
 
+        builder.Property(x => x.ParentId)
+            .HasConversion(
+                x => x!.Value,
+                guid => new DepartmentId(guid))
+            .HasColumnName("parent_id")
+            .IsRequired(false);
+
         builder.ComplexProperty(x => x.Name, n =>
         {
             n.Property(x => x.Name)
@@ -51,11 +58,11 @@ public class DepartmentConfiguration : IEntityTypeConfiguration<Department>
         builder.Property(p => p.UpdatedAt)
             .HasColumnName("updated_at");
 
-        builder.HasOne(i => i.Parent)
-            .WithMany()
-            .HasForeignKey("parent_id")
+        builder.HasOne(x => x.Parent)
+            .WithMany(x => x.Childrens)
+            .HasForeignKey(x => x.ParentId)
             .IsRequired(false)
-            .OnDelete(DeleteBehavior.SetNull);
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder
             .HasMany(x => x.DepartmentLocations)
