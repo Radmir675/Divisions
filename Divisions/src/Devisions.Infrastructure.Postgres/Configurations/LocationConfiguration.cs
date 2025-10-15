@@ -11,13 +11,13 @@ public class LocationConfiguration : IEntityTypeConfiguration<Location>
     {
         builder.ToTable("locations");
 
-        builder.HasKey(x => x.Id)
-            .HasName("id");
+        builder.HasKey(x => x.Id);
 
         builder.Property(x => x.Id)
             .HasConversion(
                 x => x.Value,
-                x => new LocationId(x));
+                x => new LocationId(x))
+            .HasColumnName("id");
 
         builder.Property(x => x.Name)
             .HasColumnName("name");
@@ -45,7 +45,8 @@ public class LocationConfiguration : IEntityTypeConfiguration<Location>
 
             adr.Property(x => x.RoomNumber)
                 .HasColumnName("roomNumber")
-                .HasMaxLength(LengthConstants.LENGTH5);
+                .HasMaxLength(LengthConstants.LENGTH5)
+                .IsRequired(false);
 
             adr.HasIndex(ind => new
                 {
@@ -61,14 +62,12 @@ public class LocationConfiguration : IEntityTypeConfiguration<Location>
         builder.Navigation(x => x.Address)
             .IsRequired();
 
-        builder.OwnsOne(n => n.Timezone, tz =>
+        builder.ComplexProperty(n => n.Timezone, tz =>
         {
             tz.Property(x => x.IanaTimeZone)
                 .HasColumnName("timezone")
                 .IsRequired();
         });
-        builder.Navigation(x => x.Timezone)
-            .IsRequired();
 
         builder.Property(i => i.IsActive)
             .HasColumnName("is_active")
@@ -81,5 +80,9 @@ public class LocationConfiguration : IEntityTypeConfiguration<Location>
         builder.Property(c => c.UpdatedAt)
             .HasColumnName("updated_at")
             .IsRequired(false);
+
+        builder.HasMany(x => x.DepartmentLocations)
+            .WithOne()
+            .HasForeignKey(x => x.LocationId);
     }
 }

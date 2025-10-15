@@ -14,30 +14,25 @@ public class DepartmentConfiguration : IEntityTypeConfiguration<Department>
         builder.HasKey(x => x.Id);
 
         builder.Property(x => x.Id)
-            .HasColumnName("id")
             .HasConversion(
                 x => x.Value,
-                x => new DepartmentId(x));
+                guid => new DepartmentId(guid))
+            .HasColumnName("id");
 
-        builder.OwnsOne(x => x.Name, n =>
+        builder.ComplexProperty(x => x.Name, n =>
         {
             n.Property(x => x.Name)
                 .HasColumnName("name")
                 .IsRequired();
         });
-        builder.Navigation(x => x.Name)
-            .IsRequired();
 
-        builder.OwnsOne(i => i.Identifier, idn =>
+        builder.ComplexProperty(i => i.Identifier, idn =>
         {
             idn.Property(v => v.Identify)
                 .IsRequired()
                 .HasColumnName("identify")
                 .HasMaxLength(LengthConstants.LENGTH150);
         });
-
-        builder.Navigation(i => i.Identifier)
-            .IsRequired();
 
         builder.Property(x => x.IsActive)
             .HasColumnName("is_active");
@@ -61,5 +56,15 @@ public class DepartmentConfiguration : IEntityTypeConfiguration<Department>
             .HasForeignKey("parent_id")
             .IsRequired(false)
             .OnDelete(DeleteBehavior.SetNull);
+
+        builder
+            .HasMany(x => x.DepartmentLocations)
+            .WithOne()
+            .HasForeignKey(x => x.DepartmentId);
+
+        builder
+            .HasMany(x => x.DepartmentPositions)
+            .WithOne()
+            .HasForeignKey(x => x.DepartmentId);
     }
 }

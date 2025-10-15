@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using CSharpFunctionalExtensions;
+using Devisions.Domain.Department;
 using Shared.Errors;
 
 namespace Devisions.Domain.Location;
@@ -8,19 +10,23 @@ public record LocationId(Guid Value);
 
 public class Location
 {
-    public LocationId Id { get; private set; }
+    public LocationId Id { get; }
 
-    public string Name { get; private set; }
+    public string Name { get; private set; } = null!;
 
-    public Address Address { get; private set; }
+    public Address Address { get; private set; } = null!;
 
-    public Timezone Timezone { get; private set; }
+    public Timezone Timezone { get; private set; } = null!;
 
     public bool IsActive { get; private set; }
 
     public DateTime CreatedAt { get; private set; }
 
     public DateTime? UpdatedAt { get; private set; }
+
+    public IReadOnlyList<DepartmentLocation> DepartmentLocations => _departmentLocations;
+
+    private readonly List<DepartmentLocation> _departmentLocations = [];
 
     // EF Core
     private Location() { }

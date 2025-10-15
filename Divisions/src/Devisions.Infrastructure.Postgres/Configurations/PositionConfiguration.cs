@@ -1,4 +1,5 @@
-﻿using Devisions.Domain.Position;
+﻿using Devisions.Domain;
+using Devisions.Domain.Position;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -10,16 +11,30 @@ public class PositionConfiguration : IEntityTypeConfiguration<Position>
     {
         builder.HasKey(x => x.Id);
 
-        builder.Property(x => x.Id).HasColumnName("id");
+        builder.Property(x => x.Id)
+            .HasConversion(
+                p => p.Value,
+                p => new PositionId(p))
+            .HasColumnName("id");
 
         builder.ToTable("positions");
 
-        builder.Property(x => x.Name)
-            .HasColumnName("name")
-            .IsRequired();
+        builder.ComplexProperty(x => x.Name, nb =>
+        {
+            nb.Property(x => x.Value)
+                .HasColumnName("name")
+                .IsRequired();
+        });
 
-        builder.Property(x => x.Description)
-            .HasColumnName("description")
+        builder.OwnsOne(x => x.Description, nb =>
+        {
+            nb.Property(x => x.Value)
+                .HasColumnName("description")
+                .HasMaxLength(LengthConstants.LENGTH150)
+                .IsRequired();
+        });
+
+        builder.Navigation(n => n.Description)
             .IsRequired(false);
 
         builder.Property(x => x.IsActive)
@@ -33,5 +48,9 @@ public class PositionConfiguration : IEntityTypeConfiguration<Position>
         builder.Property(x => x.UpdatedAt)
             .HasColumnName("updated_at")
             .IsRequired(false);
+
+        builder.HasMany(x => x.DepartmentPositions)
+            .WithOne()
+            .HasForeignKey(x => x.PositionId);
     }
 }

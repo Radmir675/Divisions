@@ -27,8 +27,9 @@ public class LocationRepository : ILocationRepository
         }
         catch (Exception e)
         {
-            _logger.LogError(e?.InnerException.Message);
-            return Error.Failure("locationRepository.AddAsync",
+            _logger.LogError(e?.InnerException?.Message);
+            return Error.Failure(
+                "locationRepository.AddAsync",
                 "Location could not be added in repository");
         }
 
@@ -36,7 +37,7 @@ public class LocationRepository : ILocationRepository
     }
 
     public async Task<Result<bool, Error>> ExistsByIdsAsync(
-        IEnumerable<Guid> locationsId,
+        IEnumerable<LocationId> locationsId,
         CancellationToken cancellationToken)
     {
         try
@@ -45,12 +46,13 @@ public class LocationRepository : ILocationRepository
             {
                 var isIdExist = await _dbContext
                     .Locations
-                    .AnyAsync(x => x.Id.Value == locationId, cancellationToken);
+                    .AnyAsync(x => x.Id.Value == locationId.Value, cancellationToken);
                 if (!isIdExist)
                 {
-                    return Error.NotFound("locationRepository.ExistsByIdAsync",
+                    return Error.NotFound(
+                        "locationRepository.ExistsByIdAsync",
                         "location not found",
-                        locationId);
+                        locationId.Value);
                 }
             }
 
@@ -58,8 +60,9 @@ public class LocationRepository : ILocationRepository
         }
         catch (Exception e)
         {
-            _logger.LogError(e?.InnerException.Message);
-            return Error.Failure("locationRepository.ExistsByIdAsync",
+            _logger.LogError(e?.InnerException?.Message);
+            return Error.Failure(
+                "locationRepository.ExistsByIdAsync",
                 "Location could not be found");
         }
     }

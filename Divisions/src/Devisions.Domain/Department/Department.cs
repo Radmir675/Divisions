@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using CSharpFunctionalExtensions;
 using Devisions.Domain.Location;
+using Devisions.Domain.Position;
 using Shared.Errors;
 
 namespace Devisions.Domain.Department;
@@ -13,15 +14,15 @@ public class Department
 {
     private const short DEFAULT_DEPTH = 0;
 
-    public DepartmentId Id { get; private set; }
+    public DepartmentId Id { get; }
 
-    public DepartmentName Name { get; private set; }
+    public DepartmentName Name { get; private set; } = null!;
 
-    public Identifier Identifier { get; private set; }
+    public Identifier Identifier { get; private set; } = null!;
 
     public DepartmentId? Parent { get; private set; }
 
-    public string Path { get; private set; }
+    public string Path { get; private set; } = null!;
 
     public short Depth { get; private set; }
 
@@ -39,9 +40,9 @@ public class Department
 
     public IReadOnlyList<DepartmentPosition> DepartmentPositions => _departmentPositions;
 
-    private List<DepartmentLocation> _departmentLocations;
+    private readonly List<DepartmentLocation> _departmentLocations = [];
 
-    private List<DepartmentPosition> _departmentPositions;
+    private readonly List<DepartmentPosition> _departmentPositions = [];
 
     public UnitResult<Error> Rename(string name)
     {
@@ -65,6 +66,7 @@ public class Department
         short depth,
         bool isActive,
         IEnumerable<LocationId> departmentLocations,
+        // IEnumerable<PositionId>? departmentPositions = null,
         Department? parent = null)
     {
         Id = id;
@@ -77,9 +79,13 @@ public class Department
         IsActive = isActive;
         _departmentLocations = departmentLocations
             .Select(departmentLocation => new DepartmentLocation(
-                Guid.NewGuid(),
-                this, departmentLocation))
+                Guid.NewGuid(), id, departmentLocation))
             .ToList();
+
+        // _departmentPositions = departmentPositions?
+        //     .Select(departmentPosition => new DepartmentPosition(
+        //         Guid.NewGuid(), id, departmentPosition))
+        //     .ToList()!;
         Parent = parent?.Id;
         parent?._children.Add(this);
     }

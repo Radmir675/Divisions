@@ -5,20 +5,20 @@ namespace Devisions.Domain.Department;
 
 public class DepartmentLocation
 {
-    public Guid Id { get; private set; }
+    public Guid Id { get; init; }
 
-    public Department Department { get; private set; } //TODO: сюда может ID?
+    public DepartmentId DepartmentId { get; init; } = null!;
 
-    public LocationId LocationId { get; private set; }
+    public LocationId LocationId { get; init; } = null!;
 
     // EF Core
     private DepartmentLocation() { }
 
-    public DepartmentLocation(Guid id, Department department, LocationId locationId)
+    public DepartmentLocation(Guid id, DepartmentId departmentId, LocationId locationId)
     {
         Id = id;
 
-        Department = department;
+        DepartmentId = departmentId;
 
         LocationId = locationId;
     }

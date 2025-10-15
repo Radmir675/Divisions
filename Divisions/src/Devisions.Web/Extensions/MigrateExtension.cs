@@ -1,6 +1,8 @@
 ﻿using Devisions.Infrastructure.Postgres;
 using Microsoft.EntityFrameworkCore;
 
+namespace Devisions.Web.Extensions;
+
 public static class MigrateExtension
 {
     public static async Task AddMigrateAsync(this WebApplication app)

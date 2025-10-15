@@ -6,7 +6,7 @@ namespace Devisions.Domain.Location;
 
 public record Timezone
 {
-    public string IanaTimeZone { get; }
+    public string IanaTimeZone { get; } = null!;
 
     // EF Core
     private Timezone() { }
@@ -32,11 +32,11 @@ public record Timezone
             TimeZoneInfo timeZone = TimeZoneInfo.FindSystemTimeZoneById(ianaTimeZone);
             zoneStandardName = timeZone.StandardName;
         }
-        catch (TimeZoneNotFoundException exception)
+        catch (TimeZoneNotFoundException)
         {
             return Error.NotFound("timezone.not.found", "Timezone not found.", null);
         }
-        catch (InvalidTimeZoneException exception)
+        catch (InvalidTimeZoneException)
         {
             return Error.Validation("timezone.not.valid.parse", "Timezone is invalid.");
         }

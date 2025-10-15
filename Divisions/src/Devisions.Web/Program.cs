@@ -1,5 +1,6 @@
 using Devisions.Infrastructure.Postgres;
 using Devisions.Web;
+using Devisions.Web.Extensions;
 using Devisions.Web.Middlewares;
 using Serilog;
 

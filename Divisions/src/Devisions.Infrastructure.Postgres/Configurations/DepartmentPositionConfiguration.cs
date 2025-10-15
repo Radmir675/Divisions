@@ -17,18 +17,16 @@ public class DepartmentPositionConfiguration : IEntityTypeConfiguration<Departme
             .HasColumnName("id");
 
         builder.Property(dp => dp.PositionId)
+            .HasConversion(
+                x => x.Value,
+                guid => new PositionId(guid))
             .HasColumnName("position_id");
 
-        builder.HasOne(dp => dp.Department)
-            .WithMany(dp => dp.DepartmentPositions)
-            .HasForeignKey("department_id")
-            .OnDelete(DeleteBehavior.Cascade)
-            .IsRequired();
-
-        builder.HasOne<Position>()
-            .WithMany()
-            .HasForeignKey(x => x.PositionId)
-            .OnDelete(DeleteBehavior.Cascade)
-            .IsRequired();
+        builder
+            .Property(x => x.DepartmentId)
+            .HasConversion(
+                x => x.Value,
+                guid => new DepartmentId(guid))
+            .HasColumnName("department_id");
     }
 }

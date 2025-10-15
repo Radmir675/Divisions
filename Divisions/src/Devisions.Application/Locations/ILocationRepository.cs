@@ -11,5 +11,7 @@ namespace Devisions.Application.Locations;
 public interface ILocationRepository
 {
     Task<Result<Guid, Error>> AddAsync(Location location, CancellationToken cancellationToken);
-    Task<Result<bool, Error>> ExistsByIdsAsync(IEnumerable<Guid> locationsId, CancellationToken cancellationToken);
+
+    Task<Result<bool, Error>>
+        ExistsByIdsAsync(IEnumerable<LocationId> locationsId, CancellationToken cancellationToken);
 }

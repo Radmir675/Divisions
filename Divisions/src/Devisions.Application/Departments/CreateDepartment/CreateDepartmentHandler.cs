@@ -47,11 +47,10 @@ public class CreateDepartmentHandler : ICommandHandler<Guid, CreateDepartmentCom
         var identifier = Identifier.Create(command.Request.Identifier).Value;
 
         var locations = command.Request.LocationsId.ToList();
-        var locationsExistResult = IsLocationsExist(locations, cancellationToken);
+        var locationsId = locations.Select(x => new LocationId(x)).ToList();
+        var locationsExistResult = IsLocationsExist(locationsId, cancellationToken);
         if (locationsExistResult.Result.IsFailure)
             return locationsExistResult.Result.Error.ToErrors();
-
-        var locationsId = locations.Select(x => new LocationId(x)).ToList();
 
         Result<Department, Error> departmentCreationResult;
         if (command.Request.ParentId.HasValue)
@@ -75,7 +74,7 @@ public class CreateDepartmentHandler : ICommandHandler<Guid, CreateDepartmentCom
         if (departmentCreationResult.IsFailure)
             return departmentCreationResult.Error.ToErrors();
 
-        var dbCreationResult = await _departmentRepository.Add(departmentCreationResult.Value, cancellationToken);
+        var dbCreationResult = await _departmentRepository.AddAsync(departmentCreationResult.Value, cancellationToken);
         if (dbCreationResult.IsFailure)
             return dbCreationResult.Error.ToErrors();
 
@@ -84,7 +83,7 @@ public class CreateDepartmentHandler : ICommandHandler<Guid, CreateDepartmentCom
     }
 
     private async Task<UnitResult<Error>> IsLocationsExist(
-        List<Guid> locations,
+        List<LocationId> locations,
         CancellationToken cancellationToken)
     {
         var locationExistsResult = await _locationRepository.ExistsByIdsAsync(locations, cancellationToken);

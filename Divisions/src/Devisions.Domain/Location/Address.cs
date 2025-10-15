@@ -5,10 +5,10 @@ namespace Devisions.Domain.Location;
 
 public record Address
 {
-    public string Country { get;  }
-    public string City { get; }
-    public string Street { get;  }
-    public int HouseNumber { get;  }
+    public string Country { get; } = null!;
+    public string City { get; } = null!;
+    public string Street { get; } = null!;
+    public int HouseNumber { get; }
     public int? RoomNumber { get; }
 
     // EF Core

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
@@ -11,5 +12,7 @@ public interface IDepartmentRepository
 {
     Task<Result<Department, Error>> GetByIdAsync(Guid departmentId, CancellationToken cancellationToken);
 
-    Task<Result<Guid, Error>> Add(Department value, CancellationToken cancellationToken);
+    Task<Result<Guid, Error>> AddAsync(Department value, CancellationToken cancellationToken);
+
+    Task<Result<IEnumerable<Department>, Error>> GetAllAsync(CancellationToken cancellationToken);
 }

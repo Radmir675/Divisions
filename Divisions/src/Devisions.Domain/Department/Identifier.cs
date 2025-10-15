@@ -6,7 +6,7 @@ namespace Devisions.Domain.Department;
 
 public record Identifier
 {
-    public string Identify { get; }
+    public string Identify { get; } = null!;
 
     // EF Core
     private Identifier() { }

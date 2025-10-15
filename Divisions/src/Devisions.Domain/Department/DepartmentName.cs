@@ -5,7 +5,7 @@ namespace Devisions.Domain.Department;
 
 public record DepartmentName
 {
-    public string Name { get; }
+    public string Name { get; } = null!;
 
     // EF Core
     private DepartmentName() { }
@@ -29,4 +29,4 @@ public record DepartmentName
 
         return new DepartmentName(name);
     }
-};
+}
