@@ -3,6 +3,7 @@ using Devisions.Domain.Department;
 using Devisions.Domain.Location;
 using Devisions.Domain.Position;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Devisions.Infrastructure.Postgres;
 
@@ -24,10 +25,17 @@ public sealed class AppDbContext : DbContext
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         optionsBuilder.UseNpgsql(_connectionString);
+
+        optionsBuilder.EnableDetailedErrors();
+        optionsBuilder.EnableSensitiveDataLogging();
+        optionsBuilder.UseLoggerFactory(ConsoleDBLogger());
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
     }
+
+    private ILoggerFactory ConsoleDBLogger() =>
+        LoggerFactory.Create(builder => builder.AddConsole());
 }
