@@ -117,6 +117,16 @@ public class Department
         return department;
     }
 
+    public UnitResult<Error> UpdateLocations(Guid[] departmentLocations)
+    {
+        var newDepartmentLocations = departmentLocations.Select(d =>
+            new DepartmentLocation(Guid.NewGuid(), Id, new LocationId(d)));
+
+        _departmentLocations.Clear();
+        _departmentLocations.AddRange(newDepartmentLocations);
+        return Result.Success<Error>();
+    }
+
     private static string GetPath(string identifier, string? parentPath = null) =>
         (parentPath != null ? parentPath + "/" : string.Empty) + identifier;
 }

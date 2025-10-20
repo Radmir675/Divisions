@@ -71,6 +71,24 @@ public class DepartmentRepository : IDepartmentRepository
         return errors.Any() ? new Errors(errors) : UnitResult.Success<Errors>();
     }
 
+    public async Task<UnitResult<Error>> UpdateAsync(Department department, CancellationToken cancellationToken)
+    {
+        try
+        {
+            _dbContext.Departments.Update(department);
+            await _dbContext.SaveChangesAsync(cancellationToken);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, e.Message);
+            return Error.Failure(
+                "department.repository.UpdateAsync",
+                "Department is not updated");
+        }
+
+        return UnitResult.Success<Error>();
+    }
+
     public async Task<Result<bool, Error>> IsIdentifierFreeAsync(
         Identifier identifier,
         CancellationToken cancellationToken)

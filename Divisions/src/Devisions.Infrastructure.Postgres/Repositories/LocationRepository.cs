@@ -61,4 +61,32 @@ public class LocationRepository : ILocationRepository
 
         return errors.Any() ? new Errors(errors) : UnitResult.Success<Errors>();
     }
+
+    public async Task<Result<IEnumerable<Location>, Error>> GetByIdsAsync(
+        IEnumerable<LocationId> locationsId,
+        CancellationToken cancellationToken)
+    {
+        List<Location> locations = [];
+        try
+        {
+            foreach (var locationId in locationsId)
+            {
+                var location = await _dbContext.Locations
+                    .FindAsync(locationId, cancellationToken);
+                if (location == null)
+                    return GeneralErrors.NotFound(locationId.Value);
+
+                locations.Add(location);
+            }
+
+            return locations;
+        }
+        catch (Exception exception)
+        {
+            _logger.LogError(exception, exception.Message);
+            return Error.Failure(
+                "locationRepository.GetByIdsAsync",
+                "Location could not be found by ids");
+        }
+    }
 }

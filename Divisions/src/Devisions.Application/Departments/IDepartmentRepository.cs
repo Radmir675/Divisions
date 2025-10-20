@@ -19,4 +19,5 @@ public interface IDepartmentRepository
         CancellationToken cancellationToken);
 
     Task<Result<bool, Error>> IsIdentifierFreeAsync(Identifier identifier, CancellationToken cancellationToken);
+    Task<UnitResult<Error>> UpdateAsync(Department department, CancellationToken cancellationToken);
 }
