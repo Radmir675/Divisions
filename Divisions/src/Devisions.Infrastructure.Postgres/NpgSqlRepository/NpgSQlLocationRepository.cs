@@ -1,5 +1,4 @@
 ﻿using CSharpFunctionalExtensions;
-using Dapper;
 using Devisions.Application.Locations;
 using Devisions.Domain.Location;
 using Shared.Errors;
@@ -23,10 +22,10 @@ public class NpgSQlLocationRepository : ILocationRepository
         CancellationToken cancellationToken)
     {
         using var connection = await _connectionFactory.GetConnectionAsync();
-        
-        const string sqlQuery= ""SELECT* FROM  """;
-        connection.ExecuteAsync()
 
+        // const string sqlQuery= ""SELECT* FROM  """;
+        // connection.ExecuteAsync()
+        return null;
     }
 
     public Task<Result<IEnumerable<Location>, Error>> GetByIdsAsync(IEnumerable<LocationId> locationsId,
