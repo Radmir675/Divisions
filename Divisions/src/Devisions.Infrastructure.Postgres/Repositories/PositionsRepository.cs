@@ -27,7 +27,7 @@ public class PositionsRepository : IPositionsRepository
         }
         catch (Exception e)
         {
-            _logger.LogError(e?.InnerException?.Message);
+            _logger.LogError(e, e.Message);
             return Error.Failure(
                 "positionsRepository.AddAsync",
                 "Position could not be added in repository");
@@ -36,17 +36,18 @@ public class PositionsRepository : IPositionsRepository
         return position.Id.Value;
     }
 
-    public async Task<Result<bool, Error>> IsNameReservedAsync(PositionName name, CancellationToken cancellationToken)
+    public async Task<Result<bool, Error>> IsNameActiveAndFreeAsync(PositionName name,
+        CancellationToken cancellationToken)
     {
         try
         {
             var positions = await _dbContext.Positions.AsNoTracking().ToListAsync(cancellationToken);
             var position = positions.FirstOrDefault(p => p.Name == name && p.IsActive);
-            return position != null;
+            return position == null;
         }
         catch (Exception e)
         {
-            _logger.LogError(e?.InnerException?.Message);
+            _logger.LogError(e, e.Message);
             return Error.Failure(
                 "positionsRepository.IsNameReservedAsync",
                 "Something went wrong");

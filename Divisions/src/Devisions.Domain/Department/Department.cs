@@ -109,7 +109,7 @@ public class Department
     {
         var departmentId = new DepartmentId(Guid.NewGuid());
         var path = GetPath(identifier.Identify, parent.Path);
-        var depth = parent.Depth++;
+        var depth =(short) (parent.Depth+1);
 
         var department = new Department(
             departmentId, name, identifier, path, depth, true, departmentLocations, parent.Id);

@@ -3,6 +3,7 @@ using Devisions.Domain.Department;
 using Devisions.Domain.Location;
 using Devisions.Domain.Position;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.Logging;
 
 namespace Devisions.Infrastructure.Postgres;
@@ -16,6 +17,8 @@ public sealed class AppDbContext : DbContext
     public DbSet<Department> Departments { get; set; }
 
     public DbSet<Position> Positions { get; set; }
+
+    private ChangeTracker ChangeTracker { get; } = null!;
 
     public AppDbContext(string connectionString)
     {

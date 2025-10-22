@@ -44,14 +44,11 @@ public class CreatePositionsHandler : ICommandHandler<Guid, CreatePositionComman
         if (positionNameResult.IsFailure)
             return positionNameResult.Error.ToErrors();
 
-        // TODO: посмотреть как это будет работать
-        Result<Description, Error> descriptionResult = default;
-        if (command.Request.Description != null)
-        {
-            descriptionResult = Description.Create(command.Request.Description);
-            if (descriptionResult.IsFailure)
-                return descriptionResult.Error.ToErrors();
-        }
+        var descriptionResult = command.Request.Description == null
+            ? default
+            : Description.Create(command.Request.Description);
+        if (descriptionResult.IsFailure)
+            return descriptionResult.Error.ToErrors();
 
         // бизнес-логика
         var checkDepartmentsIdAsync = await CheckDepartmentsIdAsync(
@@ -61,9 +58,12 @@ public class CreatePositionsHandler : ICommandHandler<Guid, CreatePositionComman
             return checkDepartmentsIdAsync.Error;
 
         var nameFreeResult =
-            await _positionsRepository.IsNameReservedAsync(positionNameResult.Value, cancellationToken);
-        if (!nameFreeResult.IsFailure)
+            await _positionsRepository.IsNameActiveAndFreeAsync(positionNameResult.Value, cancellationToken);
+        if (nameFreeResult.IsFailure)
             nameFreeResult.Error.ToErrors();
+
+        if (!nameFreeResult.Value)
+            return Error.Conflict("active.name", "Name is engaged").ToErrors();
 
         var positionId = new PositionId(Guid.NewGuid());
 

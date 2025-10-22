@@ -44,7 +44,17 @@ public class CreateDepartmentHandler : ICommandHandler<Guid, CreateDepartmentCom
             return validationResult.ToErrors();
 
         var departmentName = DepartmentName.Create(command.Request.Name).Value;
-        var identifier = Identifier.Create(command.Request.Identifier).Value;
+
+        var identifier = Identifier.Create(command.Request.Identifier).Value; 
+        var identifierFreeCheckResult = await _departmentRepository.IsIdentifierFreeAsync(
+            identifier,
+            cancellationToken);
+
+        if (identifierFreeCheckResult.IsFailure)
+            return identifierFreeCheckResult.Error.ToErrors();
+
+        if (!identifierFreeCheckResult.Value)
+            return GeneralErrors.AlreadyExist("identifier").ToErrors();
 
         var locations = command.Request.LocationsId.ToList();
         var locationsId = locations.Select(x => new LocationId(x)).ToList();
@@ -55,8 +65,9 @@ public class CreateDepartmentHandler : ICommandHandler<Guid, CreateDepartmentCom
         Result<Department, Error> departmentCreationResult;
         if (command.Request.ParentId.HasValue)
         {
+            var parentId = new DepartmentId(command.Request.ParentId.Value);
             var departmentResult = await _departmentRepository.GetByIdAsync(
-                command.Request.ParentId.Value,
+                parentId,
                 cancellationToken);
 
             if (departmentResult.IsFailure)

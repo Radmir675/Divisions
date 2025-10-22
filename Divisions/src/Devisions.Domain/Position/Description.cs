@@ -20,7 +20,7 @@ public record Description
         if (string.IsNullOrEmpty(description))
             return GeneralErrors.ValueIsRequired(nameof(description));
 
-        if (description.Length <= LengthConstants.LENGTH1000)
+        if (description.Length >= LengthConstants.LENGTH1000)
         {
             return Error.Validation(
                 "description.create",

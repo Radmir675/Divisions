@@ -44,7 +44,7 @@ public class ErrorsResult : IResult
 
         var options = new JsonSerializerOptions
         {
-            Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) },
+            Converters = { new JsonStringEnumConverter() },
         };
         return httpContext.Response.WriteAsJsonAsync(envelope, options);
     }

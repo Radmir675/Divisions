@@ -10,9 +10,9 @@ namespace Devisions.Web.Controllers;
 [Route("[controller]")]
 public class DepartmentController(ILogger<DepartmentController> logger) : ControllerBase
 {
-    [HttpGet]
+    [HttpPost]
     public async Task<EndPointResult<Guid>> Create(
-        CreateDepartmentRequest createDepartmentRequest,
+        [FromBody] CreateDepartmentRequest createDepartmentRequest,
         [FromServices] ICommandHandler<Guid, CreateDepartmentCommand> handler,
         CancellationToken cancellationToken)
     {

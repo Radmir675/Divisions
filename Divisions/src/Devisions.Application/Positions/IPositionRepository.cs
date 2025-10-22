@@ -11,5 +11,5 @@ public interface IPositionsRepository
 {
     Task<Result<Guid, Error>> AddAsync(Position position, CancellationToken cancellationToken);
 
-    Task<Result<bool, Error>> IsNameReservedAsync(PositionName name, CancellationToken cancellationToken);
+    Task<Result<bool, Error>> IsNameActiveAndFreeAsync(PositionName name, CancellationToken cancellationToken);
 }

@@ -27,7 +27,7 @@ public class LocationRepository : ILocationRepository
         }
         catch (Exception e)
         {
-            _logger.LogError(e?.InnerException?.Message);
+            _logger.LogError(e, e.Message);
             return Error.Failure(
                 "locationRepository.AddAsync",
                 "Location could not be added in repository");
@@ -44,10 +44,10 @@ public class LocationRepository : ILocationRepository
         {
             foreach (var locationId in locationsId)
             {
-                var isIdExist = await _dbContext
+                var location = await _dbContext
                     .Locations
-                    .AnyAsync(x => x.Id.Value == locationId.Value, cancellationToken);
-                if (!isIdExist)
+                    .AnyAsync(x => x.Id == locationId, cancellationToken);
+                if (!location)
                 {
                     return Error.NotFound(
                         "locationRepository.ExistsByIdAsync",
@@ -60,7 +60,7 @@ public class LocationRepository : ILocationRepository
         }
         catch (Exception e)
         {
-            _logger.LogError(e?.InnerException?.Message);
+            _logger.LogError(e, e.Message);
             return Error.Failure(
                 "locationRepository.ExistsByIdAsync",
                 "Location could not be found");

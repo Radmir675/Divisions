@@ -33,13 +33,18 @@ public class DepartmentConfiguration : IEntityTypeConfiguration<Department>
                 .IsRequired();
         });
 
-        builder.ComplexProperty(i => i.Identifier, idn =>
+        builder.OwnsOne(i => i.Identifier, idn =>
         {
             idn.Property(v => v.Identify)
                 .IsRequired()
-                .HasColumnName("identify")
+                .HasColumnName("identifier")
                 .HasMaxLength(LengthConstants.LENGTH150);
+            
+            idn.HasIndex(ind => new { ind.Identify })
+                .IsUnique();
         });
+        builder.Navigation(x => x.Identifier)
+            .IsRequired();
 
         builder.Property(x => x.IsActive)
             .HasColumnName("is_active");

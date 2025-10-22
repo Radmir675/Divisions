@@ -20,8 +20,8 @@ public static class GeneralErrors
         return Error.NotFound("record.not.found", $"{name ?? "record"} not found{forId}", null);
     }
 
-    public static Error AlreadyExist()
+    public static Error AlreadyExist(string? label = null)
     {
-        return Error.Validation("record.already.exist", "Record is exist");
+        return Error.Validation("record.already.exist", $"{label ?? "record"} is exists");
     }
 }
