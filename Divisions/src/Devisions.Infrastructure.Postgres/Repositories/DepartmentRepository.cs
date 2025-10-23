@@ -57,20 +57,23 @@ public class DepartmentRepository : IDepartmentRepository
         }
     }
 
-    public async Task<Result<IEnumerable<Department>, Error>> GetAllAsync(CancellationToken cancellationToken)
+    public async Task<UnitResult<Errors>> AllActiveAsync(
+        IEnumerable<DepartmentId> departmentIds,
+        CancellationToken cancellationToken)
     {
-        try
+        List<Error> errors = [];
+
+        foreach (var departmentId in departmentIds)
         {
-            var departments = await _dbContext.Departments.ToListAsync(cancellationToken);
-            return departments;
+            var department = await _dbContext.Departments
+                .FindAsync(departmentId, cancellationToken);
+            if (department == null || !department.IsActive)
+            {
+                errors.Add(Error.NotFound("department.", "Not found active department", departmentId.Value));
+            }
         }
-        catch (Exception e)
-        {
-            _logger.LogError(e, e.Message);
-            return Error.Failure(
-                "department.repository.GetAllAsync",
-                "Departments is not founded in repository");
-        }
+
+        return errors.Any() ? new Errors(errors) : UnitResult.Success<Errors>();
     }
 
     public async Task<Result<bool, Error>> IsIdentifierFreeAsync(
@@ -83,7 +86,6 @@ public class DepartmentRepository : IDepartmentRepository
                 x => x.Identifier.Identify == identifier.Identify,
                 cancellationToken);
             return !result;
-           
         }
         catch (Exception e)
         {

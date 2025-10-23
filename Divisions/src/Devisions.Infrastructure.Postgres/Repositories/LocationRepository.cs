@@ -36,34 +36,25 @@ public class LocationRepository : ILocationRepository
         return location.Id.Value;
     }
 
-    public async Task<Result<bool, Error>> ExistsByIdsAsync(
+    public async Task<UnitResult<Errors>> ExistsByIdsAsync(
         IEnumerable<LocationId> locationsId,
         CancellationToken cancellationToken)
     {
-        try
+        List<Error> errors = [];
+        foreach (var locationId in locationsId)
         {
-            foreach (var locationId in locationsId)
+            var location = await _dbContext
+                .Locations
+                .AnyAsync(x => x.Id == locationId, cancellationToken);
+            if (!location)
             {
-                var location = await _dbContext
-                    .Locations
-                    .AnyAsync(x => x.Id == locationId, cancellationToken);
-                if (!location)
-                {
-                    return Error.NotFound(
-                        "locationRepository.ExistsByIdAsync",
-                        "location not found",
-                        locationId.Value);
-                }
+                errors.Add(Error.NotFound(
+                    "locationRepository.ExistsByIdAsync",
+                    "location not found",
+                    locationId.Value));
             }
+        }
 
-            return true;
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, e.Message);
-            return Error.Failure(
-                "locationRepository.ExistsByIdAsync",
-                "Location could not be found");
-        }
+        return errors.Any() ? new Errors(errors) : UnitResult.Success<Errors>();
     }
 }

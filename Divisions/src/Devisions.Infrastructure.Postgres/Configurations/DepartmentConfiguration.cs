@@ -39,7 +39,7 @@ public class DepartmentConfiguration : IEntityTypeConfiguration<Department>
                 .IsRequired()
                 .HasColumnName("identifier")
                 .HasMaxLength(LengthConstants.LENGTH150);
-            
+
             idn.HasIndex(ind => new { ind.Identify })
                 .IsUnique();
         });

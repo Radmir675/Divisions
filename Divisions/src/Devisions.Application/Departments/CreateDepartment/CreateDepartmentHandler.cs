@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -45,7 +44,7 @@ public class CreateDepartmentHandler : ICommandHandler<Guid, CreateDepartmentCom
 
         var departmentName = DepartmentName.Create(command.Request.Name).Value;
 
-        var identifier = Identifier.Create(command.Request.Identifier).Value; 
+        var identifier = Identifier.Create(command.Request.Identifier).Value;
         var identifierFreeCheckResult = await _departmentRepository.IsIdentifierFreeAsync(
             identifier,
             cancellationToken);
@@ -58,9 +57,9 @@ public class CreateDepartmentHandler : ICommandHandler<Guid, CreateDepartmentCom
 
         var locations = command.Request.LocationsId.ToList();
         var locationsId = locations.Select(x => new LocationId(x)).ToList();
-        var locationsExistResult = IsLocationsExist(locationsId, cancellationToken);
-        if (locationsExistResult.Result.IsFailure)
-            return locationsExistResult.Result.Error.ToErrors();
+        var locationsExistResult = await _locationRepository.ExistsByIdsAsync(locationsId, cancellationToken);
+        if (locationsExistResult.IsFailure)
+            return locationsExistResult.Error;
 
         Result<Department, Error> departmentCreationResult;
         if (command.Request.ParentId.HasValue)
@@ -91,13 +90,5 @@ public class CreateDepartmentHandler : ICommandHandler<Guid, CreateDepartmentCom
 
         _logger.LogInformation("Department is created with id: {Id}", departmentCreationResult.Value.Id);
         return departmentCreationResult.Value.Id.Value;
-    }
-
-    private async Task<UnitResult<Error>> IsLocationsExist(
-        List<LocationId> locations,
-        CancellationToken cancellationToken)
-    {
-        var locationExistsResult = await _locationRepository.ExistsByIdsAsync(locations, cancellationToken);
-        return locationExistsResult.IsFailure ? locationExistsResult.Error : Result.Success<Error>();
     }
 }

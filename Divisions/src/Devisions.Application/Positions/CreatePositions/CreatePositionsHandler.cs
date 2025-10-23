@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -51,8 +50,11 @@ public class CreatePositionsHandler : ICommandHandler<Guid, CreatePositionComman
             return descriptionResult.Error.ToErrors();
 
         // бизнес-логика
-        var checkDepartmentsIdAsync = await CheckDepartmentsIdAsync(
-            command.Request.DepartmentIds,
+        var departmentsId = command.Request.DepartmentIds
+            .Select(x => new DepartmentId(x))
+            .ToList();
+        var checkDepartmentsIdAsync = await _departmentRepository.AllActiveAsync(
+            departmentsId,
             cancellationToken);
         if (checkDepartmentsIdAsync.IsFailure)
             return checkDepartmentsIdAsync.Error;
@@ -71,45 +73,15 @@ public class CreatePositionsHandler : ICommandHandler<Guid, CreatePositionComman
             .Select(x => new DepartmentPosition(
                 Guid.NewGuid(), new DepartmentId(x), positionId)).ToList();
 
-        var positionResult = Position.Create(positionId, positionNameResult.Value,
+        var createPositionResult = Position.Create(positionId, positionNameResult.Value,
             descriptionResult.IsFailure ? null : descriptionResult.Value, departmentPositions);
 
-        var positionIdResult = await _positionsRepository.AddAsync(positionResult.Value, cancellationToken);
+        var positionIdResult = await _positionsRepository.AddAsync(createPositionResult.Value, cancellationToken);
         if (positionIdResult.IsFailure)
             return positionIdResult.Error.ToErrors();
 
         _logger.LogInformation("Position created with ID:{id}", positionIdResult.Value);
 
         return positionIdResult.Value;
-    }
-
-    private async Task<UnitResult<Errors>> CheckDepartmentsIdAsync(
-        Guid[] departmentIds,
-        CancellationToken cancellationToken)
-    {
-        var departmentsResult = await _departmentRepository.GetAllAsync(cancellationToken);
-        if (departmentsResult.IsFailure)
-            return departmentsResult.Error.ToErrors();
-
-        var departmentsIdDb = departmentsResult.Value.Select(x => x.Id.Value).ToList();
-        List<Error> errors = [];
-        foreach (var departmentId in departmentIds)
-        {
-            if (!departmentsIdDb.Contains(departmentId))
-            {
-                errors.Add(GeneralErrors.NotFound(departmentId, "department"));
-                continue;
-            }
-
-            if (departmentsResult.Value.SingleOrDefault(x => x.Id.Value == departmentId)
-                is not { IsActive: true })
-            {
-                errors.Add(Error.Failure(
-                    "department.activity.check",
-                    $"department with ID:{departmentId} is not active"));
-            }
-        }
-
-        return errors.Any() ? new Errors(errors) : UnitResult.Success<Errors>();
     }
 }
