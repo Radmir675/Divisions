@@ -27,10 +27,10 @@ public class DepartmentController(ILogger<DepartmentController> logger) : Contro
 
     [HttpPut]
     [Route("{departmentId:Guid}/locations")]
-    public async Task<EndPointResult> Update(
+    public async Task<EndPointResult<Guid>> Update(
         [FromRoute] Guid departmentId,
         [FromBody] UpdateLocationsRequest updateLocationsRequest,
-        [FromServices] ICommandHandler<UpdateLocationsCommand> handler,
+        [FromServices] ICommandHandler<Guid, UpdateLocationsCommand> handler,
         CancellationToken cancellationToken)
     {
         var command = new UpdateLocationsCommand(departmentId, updateLocationsRequest);

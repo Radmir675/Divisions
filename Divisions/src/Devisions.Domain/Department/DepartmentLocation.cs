@@ -22,4 +22,11 @@ public class DepartmentLocation
 
         LocationId = locationId;
     }
+
+    public DepartmentLocation(DepartmentId departmentId, LocationId locationId)
+    {
+        DepartmentId = departmentId;
+
+        LocationId = locationId;
+    }
 }

@@ -62,31 +62,22 @@ public class LocationRepository : ILocationRepository
         return errors.Any() ? new Errors(errors) : UnitResult.Success<Errors>();
     }
 
-    public async Task<Result<IEnumerable<Location>, Error>> GetByIdsAsync(
+    public async Task<UnitResult<Errors>> AllActiveAsync(
         IEnumerable<LocationId> locationsId,
         CancellationToken cancellationToken)
     {
-        List<Location> locations = [];
-        try
+        List<Error> errors = [];
+
+        foreach (var locationId in locationsId)
         {
-            foreach (var locationId in locationsId)
+            var location = await _dbContext.Locations
+                .FindAsync(locationId, cancellationToken);
+            if (location == null || !location.IsActive)
             {
-                var location = await _dbContext.Locations
-                    .FindAsync(locationId, cancellationToken);
-                if (location == null)
-                    return GeneralErrors.NotFound(locationId.Value);
-
-                locations.Add(location);
+                errors.Add(Error.NotFound("location.", "Not found active location", locationId.Value));
             }
+        }
 
-            return locations;
-        }
-        catch (Exception exception)
-        {
-            _logger.LogError(exception, exception.Message);
-            return Error.Failure(
-                "locationRepository.GetByIdsAsync",
-                "Location could not be found by ids");
-        }
+        return errors.Any() ? new Errors(errors) : UnitResult.Success<Errors>();
     }
 }

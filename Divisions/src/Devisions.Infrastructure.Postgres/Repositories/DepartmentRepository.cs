@@ -23,7 +23,22 @@ public class DepartmentRepository : IDepartmentRepository
         CancellationToken cancellationToken)
     {
         var department =
-            await _dbContext.Departments.FirstOrDefaultAsync(x => x.Id == departmentId, cancellationToken);
+            await _dbContext.Departments
+                .FirstOrDefaultAsync(x => x.Id == departmentId, cancellationToken);
+        if (department == null)
+            return Error.NotFound("department.repository", "Department not found", null);
+
+        return department;
+    }
+
+    public async Task<Result<Department, Error>> GetByIdWithLocationsAsync(
+        DepartmentId departmentId,
+        CancellationToken cancellationToken)
+    {
+        var department =
+            await _dbContext.Departments
+                .Include(x => x.DepartmentLocations)
+                .FirstOrDefaultAsync(x => x.Id == departmentId, cancellationToken);
         if (department == null)
             return Error.NotFound("department.repository", "Department not found", null);
 

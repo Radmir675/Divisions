@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using System.Text.Json.Serialization;
 using Devisions.Application.Exceptions;
 using Shared.Errors;
 
@@ -42,6 +43,10 @@ public class ExceptionMiddleware
         };
         httpContext.Response.ContentType = "application/json";
         httpContext.Response.StatusCode = code;
-        await httpContext.Response.WriteAsJsonAsync(errors);
+        var options = new JsonSerializerOptions
+        {
+            Converters = { new JsonStringEnumConverter() },
+        };
+        await httpContext.Response.WriteAsJsonAsync(errors, options);
     }
 }
