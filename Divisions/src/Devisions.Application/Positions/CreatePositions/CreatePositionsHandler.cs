@@ -53,7 +53,7 @@ public class CreatePositionsHandler : ICommandHandler<Guid, CreatePositionComman
         var departmentsId = command.Request.DepartmentIds
             .Select(x => new DepartmentId(x))
             .ToList();
-        var checkDepartmentsIdAsync = await _departmentRepository.AllActiveAsync(
+        var checkDepartmentsIdAsync = await _departmentRepository.AllExistAndActiveAsync(
             departmentsId,
             cancellationToken);
         if (checkDepartmentsIdAsync.IsFailure)

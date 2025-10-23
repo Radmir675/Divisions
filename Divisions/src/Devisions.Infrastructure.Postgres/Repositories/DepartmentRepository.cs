@@ -22,22 +22,12 @@ public class DepartmentRepository : IDepartmentRepository
         DepartmentId departmentId,
         CancellationToken cancellationToken)
     {
-        try
-        {
-            var department =
-                await _dbContext.Departments.FirstOrDefaultAsync(x => x.Id == departmentId, cancellationToken);
-            if (department == null)
-                return Error.NotFound("department.repository", "Department not found", null);
+        var department =
+            await _dbContext.Departments.FirstOrDefaultAsync(x => x.Id == departmentId, cancellationToken);
+        if (department == null)
+            return Error.NotFound("department.repository", "Department not found", null);
 
-            return department;
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, e.Message);
-            return Error.Failure(
-                "department.repository.getById",
-                "department could not be founded");
-        }
+        return department;
     }
 
     public async Task<Result<Guid, Error>> AddAsync(Department department, CancellationToken cancellationToken)
@@ -57,20 +47,25 @@ public class DepartmentRepository : IDepartmentRepository
         }
     }
 
-    public async Task<UnitResult<Errors>> AllActiveAsync(
+    public async Task<UnitResult<Errors>> AllExistAndActiveAsync(
         IEnumerable<DepartmentId> departmentIds,
         CancellationToken cancellationToken)
     {
         List<Error> errors = [];
+        var activeDepartmentIds = await _dbContext.Departments
+            .Where(x => departmentIds
+                .Contains(x.Id))
+            .Select(x => x.Id)
+            .ToListAsync(cancellationToken);
 
-        foreach (var departmentId in departmentIds)
+        var invalidDepartments = departmentIds.Except(activeDepartmentIds).ToList();
+
+        if (invalidDepartments.Any())
         {
-            var department = await _dbContext.Departments
-                .FindAsync(departmentId, cancellationToken);
-            if (department == null || !department.IsActive)
-            {
-                errors.Add(Error.NotFound("department.", "Not found active department", departmentId.Value));
-            }
+            invalidDepartments.ForEach(locationId => errors.Add(Error.NotFound(
+                "locationRepository.ExistsByIdAsync",
+                "location not found",
+                locationId.Value)));
         }
 
         return errors.Any() ? new Errors(errors) : UnitResult.Success<Errors>();
@@ -90,7 +85,8 @@ public class DepartmentRepository : IDepartmentRepository
         catch (Exception e)
         {
             _logger.LogError(e, e.Message);
-            return Error.Failure("department.repository.isIdentifierFreeAsync",
+            return Error.Failure(
+                "department.repository.isIdentifierFreeAsync",
                 "Repository error");
         }
     }

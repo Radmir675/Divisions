@@ -41,18 +41,22 @@ public class LocationRepository : ILocationRepository
         CancellationToken cancellationToken)
     {
         List<Error> errors = [];
-        foreach (var locationId in locationsId)
+        var existingIds = await _dbContext.Locations
+            .Where(x => locationsId
+                .Contains(x.Id))
+            .Select(x => x.Id)
+            .ToListAsync(cancellationToken);
+
+        var invalidLocations = locationsId
+            .Except(existingIds)
+            .ToList();
+
+        if (invalidLocations.Any())
         {
-            var location = await _dbContext
-                .Locations
-                .AnyAsync(x => x.Id == locationId, cancellationToken);
-            if (!location)
-            {
-                errors.Add(Error.NotFound(
-                    "locationRepository.ExistsByIdAsync",
-                    "location not found",
-                    locationId.Value));
-            }
+            invalidLocations.ForEach(locationId => errors.Add(Error.NotFound(
+                "locationRepository.ExistsByIdAsync",
+                "location not found",
+                locationId.Value)));
         }
 
         return errors.Any() ? new Errors(errors) : UnitResult.Success<Errors>();

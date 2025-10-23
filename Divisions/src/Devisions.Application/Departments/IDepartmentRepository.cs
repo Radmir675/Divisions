@@ -14,7 +14,7 @@ public interface IDepartmentRepository
 
     Task<Result<Guid, Error>> AddAsync(Department value, CancellationToken cancellationToken);
 
-    Task<UnitResult<Errors>> AllActiveAsync(
+    Task<UnitResult<Errors>> AllExistAndActiveAsync(
         IEnumerable<DepartmentId> departmentIds,
         CancellationToken cancellationToken);
 
