@@ -1,15 +1,20 @@
 ﻿using System;
+using System.Collections.Generic;
 using CSharpFunctionalExtensions;
+using Devisions.Domain.Department;
+using Shared.Errors;
 
 namespace Devisions.Domain.Position;
 
+public record PositionId(Guid Value);
+
 public class Position
 {
-    public Guid Id { get; private set; }
+    public PositionId Id { get; } = null!;
 
-    public string Name { get; private set; }
+    public PositionName Name { get; private set; } = null!;
 
-    public string? Description { get; private set; }
+    public Description? Description { get; private set; }
 
     public bool IsActive { get; private set; }
 
@@ -17,10 +22,19 @@ public class Position
 
     public DateTime? UpdatedAt { get; private set; }
 
+    public IReadOnlyList<DepartmentPosition> DepartmentPositions => _departmentPositions;
+
+    private List<DepartmentPosition> _departmentPositions = [];
+
     // EF Core
     private Position() { }
 
-    private Position(Guid id, string name, string? description, bool isActive)
+    private Position(
+        PositionId id,
+        PositionName name,
+        Description? description,
+        bool isActive,
+        List<DepartmentPosition> departmentPositions)
     {
         Id = id;
         Name = name;
@@ -28,17 +42,19 @@ public class Position
         IsActive = isActive;
         CreatedAt = DateTime.UtcNow;
         UpdatedAt = CreatedAt;
+        _departmentPositions = departmentPositions;
     }
 
-    public static Result<Position, string> Create(string name, string? description)
+    public static Result<Position, Error> Create(PositionId? id, PositionName name, Description? description,
+        List<DepartmentPosition> departmentPositions)
     {
-        if (name.Length is < LengthConstants.LENGTH3 or > LengthConstants.LENGTH100)
-            return $"Name must be between 3 and 100 characters.";
+        var model = new Position(
+            id ?? new PositionId(Guid.NewGuid()),
+            name,
+            description,
+            true,
+            departmentPositions);
 
-        if ((description?.Length ?? 0) > LengthConstants.LENGTH1000)
-            return $"Description must be less than  1000 characters.";
-
-        var model = new Position(Guid.NewGuid(), name, description, true);
-        return Result.Success<Position, string>(model);
+        return model;
     }
 }

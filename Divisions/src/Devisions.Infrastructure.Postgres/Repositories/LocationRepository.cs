@@ -1,6 +1,7 @@
 ﻿using CSharpFunctionalExtensions;
 using Devisions.Application.Locations;
 using Devisions.Domain.Location;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Shared.Errors;
 
@@ -26,10 +27,38 @@ public class LocationRepository : ILocationRepository
         }
         catch (Exception e)
         {
-            _logger.LogError(e.Message);
-            return Error.Failure("locationRepository.AddAsync", "Location could not be added in repository");
+            _logger.LogError(e, e.Message);
+            return Error.Failure(
+                "locationRepository.AddAsync",
+                "Location could not be added in repository");
         }
 
-        return location.Id;
+        return location.Id.Value;
+    }
+
+    public async Task<UnitResult<Errors>> ExistsByIdsAsync(
+        IEnumerable<LocationId> locationsId,
+        CancellationToken cancellationToken)
+    {
+        List<Error> errors = [];
+        var existingIds = await _dbContext.Locations
+            .Where(x => locationsId
+                .Contains(x.Id))
+            .Select(x => x.Id)
+            .ToListAsync(cancellationToken);
+
+        var invalidLocations = locationsId
+            .Except(existingIds)
+            .ToList();
+
+        if (invalidLocations.Any())
+        {
+            invalidLocations.ForEach(locationId => errors.Add(Error.NotFound(
+                "locationRepository.ExistsByIdAsync",
+                "location not found",
+                locationId.Value)));
+        }
+
+        return errors.Any() ? new Errors(errors) : UnitResult.Success<Errors>();
     }
 }

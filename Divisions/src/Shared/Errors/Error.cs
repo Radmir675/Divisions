@@ -8,6 +8,8 @@ public record Error
     public string? InvalidField { get; }
     public Guid? Id { get; }
 
+    private const string SEPARATOR = "||";
+
     private Error(string code, string message, ErrorType errorType, string? invalidField = null, Guid? id = null)
     {
         Code = code;
@@ -30,4 +32,25 @@ public record Error
         new Error(code ?? "failure", message, ErrorType.FAILURE);
 
     public Errors ToErrors() => this;
+
+    public string Serialize()
+    {
+        return string.Join(SEPARATOR, Code, Message, ErrorType);
+    }
+
+    public static Error Deserialize(string serializedString)
+    {
+        string[] parts = serializedString.Split(SEPARATOR);
+        if (parts.Length < 3)
+        {
+            throw new ArgumentException($"Invalid format: {serializedString}");
+        }
+
+        if (Enum.TryParse<ErrorType>(parts[2], out var errorType) == false)
+        {
+            throw new ArgumentException("Invalid serialized format: " + serializedString);
+        }
+
+        return new Error(parts[0], parts[1], errorType);
+    }
 }

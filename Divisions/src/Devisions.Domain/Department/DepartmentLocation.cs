@@ -1,23 +1,24 @@
 ﻿using System;
+using Devisions.Domain.Location;
 
 namespace Devisions.Domain.Department;
 
 public class DepartmentLocation
 {
-    public Guid Id { get; private set; }
+    public Guid Id { get; init; }
 
-    public Department Department { get; private set; }
+    public DepartmentId DepartmentId { get; init; } = null!;
 
-    public Guid LocationId { get; private set; }
+    public LocationId LocationId { get; init; } = null!;
 
     // EF Core
     private DepartmentLocation() { }
 
-    public DepartmentLocation(Guid id, Department department, Guid locationId)
+    public DepartmentLocation(Guid id, DepartmentId departmentId, LocationId locationId)
     {
         Id = id;
 
-        Department = department;
+        DepartmentId = departmentId;
 
         LocationId = locationId;
     }

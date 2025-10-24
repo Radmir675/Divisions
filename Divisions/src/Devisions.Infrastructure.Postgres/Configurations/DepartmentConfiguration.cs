@@ -14,21 +14,36 @@ public class DepartmentConfiguration : IEntityTypeConfiguration<Department>
         builder.HasKey(x => x.Id);
 
         builder.Property(x => x.Id)
+            .HasConversion(
+                x => x.Value,
+                guid => new DepartmentId(guid))
             .HasColumnName("id");
 
-        builder.Property(x => x.Name)
-            .HasColumnName("name")
-            .IsRequired();
+        builder.Property(x => x.ParentId)
+            .HasConversion(
+                x => x!.Value,
+                guid => new DepartmentId(guid))
+            .HasColumnName("parent_id")
+            .IsRequired(false);
+
+        builder.ComplexProperty(x => x.Name, n =>
+        {
+            n.Property(x => x.Name)
+                .HasColumnName("name")
+                .IsRequired();
+        });
 
         builder.OwnsOne(i => i.Identifier, idn =>
         {
             idn.Property(v => v.Identify)
                 .IsRequired()
-                .HasColumnName("identify")
+                .HasColumnName("identifier")
                 .HasMaxLength(LengthConstants.LENGTH150);
-        });
 
-        builder.Navigation(i => i.Identifier)
+            idn.HasIndex(ind => new { ind.Identify })
+                .IsUnique();
+        });
+        builder.Navigation(x => x.Identifier)
             .IsRequired();
 
         builder.Property(x => x.IsActive)
@@ -48,10 +63,20 @@ public class DepartmentConfiguration : IEntityTypeConfiguration<Department>
         builder.Property(p => p.UpdatedAt)
             .HasColumnName("updated_at");
 
-        builder.HasOne(i => i.Parent)
-            .WithMany(x => x.Children)
-            .HasForeignKey("parent_id")
+        builder.HasOne(x => x.Parent)
+            .WithMany(x => x.Childrens)
+            .HasForeignKey(x => x.ParentId)
             .IsRequired(false)
-            .OnDelete(DeleteBehavior.SetNull);
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder
+            .HasMany(x => x.DepartmentLocations)
+            .WithOne()
+            .HasForeignKey(x => x.DepartmentId);
+
+        builder
+            .HasMany(x => x.DepartmentPositions)
+            .WithOne()
+            .HasForeignKey(x => x.DepartmentId);
     }
 }

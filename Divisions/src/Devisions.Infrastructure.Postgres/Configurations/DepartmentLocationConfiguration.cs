@@ -18,18 +18,16 @@ public class DepartmentLocationConfiguration : IEntityTypeConfiguration<Departme
 
         builder
             .Property(x => x.LocationId)
+            .HasConversion(
+                x => x.Value,
+                guid => new LocationId(guid))
             .HasColumnName("location_id");
 
-        builder.HasOne(dp => dp.Department)
-            .WithMany(dp => dp.DepartmentLocations)
-            .HasForeignKey("department_id")
-            .IsRequired()
-            .OnDelete(DeleteBehavior.Cascade);
-
-        builder.HasOne<Location>()
-            .WithMany()
-            .HasForeignKey(x => x.LocationId)
-            .IsRequired()
-            .OnDelete(DeleteBehavior.Cascade);
+        builder
+            .Property(x => x.DepartmentId)
+            .HasConversion(
+                x => x.Value,
+                guid => new DepartmentId(guid))
+            .HasColumnName("department_id");
     }
 }
