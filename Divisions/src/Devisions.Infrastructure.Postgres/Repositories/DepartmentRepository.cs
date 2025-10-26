@@ -109,9 +109,9 @@ public class DepartmentRepository : IDepartmentRepository
         Identifier identifier,
         CancellationToken cancellationToken)
     {
-        bool result = await _dbContext.Departments.AnyAsync(
-            x => x.Identifier.Identify == identifier.Identify,
-            cancellationToken);
-        return result;
+            bool result = await _dbContext.Departments.AnyAsync(
+                x => x.Identifier.Identify == identifier.Identify,
+                cancellationToken);
+            return result;
     }
 }

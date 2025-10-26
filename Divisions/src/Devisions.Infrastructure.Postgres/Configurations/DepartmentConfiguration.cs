@@ -37,7 +37,7 @@ public class DepartmentConfiguration : IEntityTypeConfiguration<Department>
         {
             idn.Property(v => v.Identify)
                 .IsRequired()
-                .HasColumnName("identifier")
+                .HasColumnName("identify")
                 .HasMaxLength(LengthConstants.LENGTH150);
 
             idn.HasIndex(ind => new { ind.Identify })
