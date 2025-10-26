@@ -14,5 +14,7 @@ public interface ILocationRepository
 
     Task<UnitResult<Errors>> ExistsByIdsAsync(IEnumerable<LocationId> locationsId, CancellationToken cancellationToken);
 
-    Task<UnitResult<Errors>> AllActiveAsync(IEnumerable<LocationId> locationsId, CancellationToken cancellationToken);
+    Task<UnitResult<Errors>> AllExistsAndActiveAsync(
+        IEnumerable<LocationId> locationsId,
+        CancellationToken cancellationToken);
 }

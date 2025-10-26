@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.Logging;
 
-namespace Devisions.Infrastructure.Postgres;
+namespace Devisions.Infrastructure.Postgres.Database;
 
 public sealed class AppDbContext : DbContext
 {
@@ -17,8 +17,6 @@ public sealed class AppDbContext : DbContext
     public DbSet<Department> Departments { get; set; }
 
     public DbSet<Position> Positions { get; set; }
-
-    private ChangeTracker ChangeTracker { get; } = null!;
 
     public AppDbContext(string connectionString)
     {

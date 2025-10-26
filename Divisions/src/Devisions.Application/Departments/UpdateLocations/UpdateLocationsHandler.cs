@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using Devisions.Application.Abstractions;
+using Devisions.Application.Database;
 using Devisions.Application.Extensions;
 using Devisions.Application.Locations;
 using Devisions.Contracts.Departments;
@@ -22,17 +23,20 @@ public class UpdateLocationsHandler : ICommandHandler<Guid, UpdateLocationsComma
     private readonly IValidator<UpdateLocationsCommand> _validator;
     private readonly IDepartmentRepository _departmentRepository;
     private readonly ILocationRepository _locationRepository;
+    private readonly ITransactionManager _transactionManager;
     private readonly ILogger<UpdateLocationsHandler> _logger;
 
     public UpdateLocationsHandler(
         IValidator<UpdateLocationsCommand> validator,
         IDepartmentRepository departmentRepository,
         ILocationRepository locationRepository,
+        ITransactionManager transactionManager,
         ILogger<UpdateLocationsHandler> logger)
     {
         _validator = validator;
         _departmentRepository = departmentRepository;
         _locationRepository = locationRepository;
+        _transactionManager = transactionManager;
         _logger = logger;
     }
 
@@ -42,26 +46,40 @@ public class UpdateLocationsHandler : ICommandHandler<Guid, UpdateLocationsComma
         if (!validationResult.IsValid)
             return validationResult.ToErrors();
 
+        // бизнес логика
+        var transactionResult = await _transactionManager.BeginTransactionAsync(cancellationToken);
+        if (transactionResult.IsFailure)
+            return transactionResult.Error.ToErrors();
+        using var transactionScope = transactionResult.Value;
+
         var departmentResult = await GetActiveDepartment(command, cancellationToken);
         if (departmentResult.IsFailure)
+        {
+            transactionScope.Rollback();
             return departmentResult.Error;
+        }
 
         var locations = command.Request.LocationsId.Select(x => new LocationId(x)).ToList();
-        var isLocationsActiveResult = await _locationRepository.AllActiveAsync(locations, cancellationToken);
+        var isLocationsActiveResult = await _locationRepository.AllExistsAndActiveAsync(locations, cancellationToken);
         if (isLocationsActiveResult.IsFailure)
+        {
+            transactionScope.Rollback();
             return isLocationsActiveResult.Error;
+        }
 
         var departmentLocations = command.Request.LocationsId;
         var department = departmentResult.Value;
 
         var updateLocationsResult = department.UpdateLocations(departmentLocations);
         if (updateLocationsResult.IsFailure)
+        {
+            transactionScope.Rollback();
             return updateLocationsResult.Error.ToErrors();
+        }
 
-        var updateResult = await _departmentRepository.SaveChangesAsync(cancellationToken);
-        if (updateResult.IsFailure)
-            return updateResult.Error.ToErrors();
-
+        var commitResult = transactionScope.Commit();
+        if (commitResult.IsFailure)
+            return commitResult.Error.ToErrors();
 
         return command.DepartmentId;
     }

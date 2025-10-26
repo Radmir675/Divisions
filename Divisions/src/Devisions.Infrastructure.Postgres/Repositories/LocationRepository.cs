@@ -1,6 +1,7 @@
 ﻿using CSharpFunctionalExtensions;
 using Devisions.Application.Locations;
 using Devisions.Domain.Location;
+using Devisions.Infrastructure.Postgres.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Shared.Errors;
@@ -62,20 +63,25 @@ public class LocationRepository : ILocationRepository
         return errors.Any() ? new Errors(errors) : UnitResult.Success<Errors>();
     }
 
-    public async Task<UnitResult<Errors>> AllActiveAsync(
+    public async Task<UnitResult<Errors>> AllExistsAndActiveAsync(
         IEnumerable<LocationId> locationsId,
         CancellationToken cancellationToken)
     {
         List<Error> errors = [];
+        var activeLocationsId = await _dbContext.Locations
+            .Where(x => locationsId
+                .Contains(x.Id))
+            .Select(x => x.Id)
+            .ToListAsync(cancellationToken);
 
-        foreach (var locationId in locationsId)
+        var invalidLocations = locationsId.Except(activeLocationsId).ToList();
+
+        if (invalidLocations.Any())
         {
-            var location = await _dbContext.Locations
-                .FindAsync(locationId, cancellationToken);
-            if (location == null || !location.IsActive)
-            {
-                errors.Add(Error.NotFound("location.", "Not found active location", locationId.Value));
-            }
+            invalidLocations.ForEach(locationId => errors.Add(Error.NotFound(
+                "locationRepository.ExistsByIdAsync",
+                "location not found or inactive",
+                locationId.Value)));
         }
 
         return errors.Any() ? new Errors(errors) : UnitResult.Success<Errors>();

@@ -1,6 +1,7 @@
 ﻿using CSharpFunctionalExtensions;
 using Devisions.Application.Departments;
 using Devisions.Domain.Department;
+using Devisions.Infrastructure.Postgres.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Shared.Errors;
@@ -79,7 +80,7 @@ public class DepartmentRepository : IDepartmentRepository
         {
             invalidDepartments.ForEach(locationId => errors.Add(Error.NotFound(
                 "locationRepository.ExistsByIdAsync",
-                "location not found",
+                "location not found or inactive",
                 locationId.Value)));
         }
 
@@ -104,23 +105,13 @@ public class DepartmentRepository : IDepartmentRepository
         return UnitResult.Success<Error>();
     }
 
-    public async Task<Result<bool, Error>> IsIdentifierFreeAsync(
+    public async Task<Result<bool, Error>> IsIdentifierAlreadyExistsAsync(
         Identifier identifier,
         CancellationToken cancellationToken)
     {
-        try
-        {
-            bool result = await _dbContext.Departments.AnyAsync(
-                x => x.Identifier.Identify == identifier.Identify,
-                cancellationToken);
-            return !result;
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, e.Message);
-            return Error.Failure(
-                "department.repository.isIdentifierFreeAsync",
-                "Repository error");
-        }
+        bool result = await _dbContext.Departments.AnyAsync(
+            x => x.Identifier.Identify == identifier.Identify,
+            cancellationToken);
+        return result;
     }
 }

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using Devisions.Infrastructure.Postgres;
+using Devisions.Infrastructure.Postgres.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;

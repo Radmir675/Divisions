@@ -22,10 +22,7 @@ public interface IDepartmentRepository
         IEnumerable<DepartmentId> departmentIds,
         CancellationToken cancellationToken);
 
-    Task<Result<IEnumerable<Department>, Error>> GetAllAsync(CancellationToken cancellationToken);
-
-    Task<Result<bool, Error>> IsIdentifierFreeAsync(Identifier identifier, CancellationToken cancellationToken);
+    Task<Result<bool, Error>> IsIdentifierAlreadyExistsAsync(Identifier identifier, CancellationToken cancellationToken);
 
     Task<UnitResult<Error>> UpdateAsync(Department department, CancellationToken cancellationToken);
-    Task<UnitResult<Error>> SaveChangesAsync(CancellationToken cancellationToken);
 }
