@@ -200,7 +200,7 @@ namespace Devisions.Infrastructure.Postgres.Migrations
                         .HasForeignKey("ParentId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.OwnsOne("Devisions.Domain.Department.Identifier", "Identifier", b1 =>
+                    b.OwnsOne("Devisions.Domain.Department.Department.Identifier#Devisions.Domain.Department.Identifier", "Identifier", b1 =>
                         {
                             b1.Property<Guid>("DepartmentId")
                                 .HasColumnType("uuid");
@@ -216,7 +216,7 @@ namespace Devisions.Infrastructure.Postgres.Migrations
                             b1.HasIndex("Identify")
                                 .IsUnique();
 
-                            b1.ToTable("departments");
+                            b1.ToTable("departments", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("DepartmentId");
@@ -260,7 +260,7 @@ namespace Devisions.Infrastructure.Postgres.Migrations
 
             modelBuilder.Entity("Devisions.Domain.Location.Location", b =>
                 {
-                    b.OwnsOne("Devisions.Domain.Location.Address", "Address", b1 =>
+                    b.OwnsOne("Devisions.Domain.Location.Location.Address#Devisions.Domain.Location.Address", "Address", b1 =>
                         {
                             b1.Property<Guid>("LocationId")
                                 .HasColumnType("uuid");
@@ -299,7 +299,7 @@ namespace Devisions.Infrastructure.Postgres.Migrations
                                 .IsUnique()
                                 .HasDatabaseName("address_unique");
 
-                            b1.ToTable("locations");
+                            b1.ToTable("locations", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("LocationId");
@@ -311,7 +311,7 @@ namespace Devisions.Infrastructure.Postgres.Migrations
 
             modelBuilder.Entity("Devisions.Domain.Position.Position", b =>
                 {
-                    b.OwnsOne("Devisions.Domain.Position.Description", "Description", b1 =>
+                    b.OwnsOne("Devisions.Domain.Position.Position.Description#Devisions.Domain.Position.Description", "Description", b1 =>
                         {
                             b1.Property<Guid>("PositionId")
                                 .HasColumnType("uuid");
@@ -324,7 +324,7 @@ namespace Devisions.Infrastructure.Postgres.Migrations
 
                             b1.HasKey("PositionId");
 
-                            b1.ToTable("positions");
+                            b1.ToTable("positions", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("PositionId");
