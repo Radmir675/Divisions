@@ -1,6 +1,7 @@
 using CSharpFunctionalExtensions;
 using Devisions.Application.Positions;
 using Devisions.Domain.Position;
+using Devisions.Infrastructure.Postgres.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Shared.Errors;
@@ -36,21 +37,16 @@ public class PositionsRepository : IPositionsRepository
         return position.Id.Value;
     }
 
-    public async Task<Result<bool, Error>> IsNameActiveAndFreeAsync(PositionName name,
+    public async Task<Result<bool, Error>> IsNameActiveAndFreeAsync(
+        PositionName name,
         CancellationToken cancellationToken)
     {
-        try
-        {
-            var positions = await _dbContext.Positions.AsNoTracking().ToListAsync(cancellationToken);
-            var position = positions.FirstOrDefault(p => p.Name == name && p.IsActive);
-            return position == null;
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, e.Message);
-            return Error.Failure(
-                "positionsRepository.IsNameReservedAsync",
-                "Something went wrong");
-        }
+        var existActiveName = await _dbContext.Positions
+            .AsNoTracking()
+            .AnyAsync(
+                p => p.Name == name && p.IsActive,
+                cancellationToken);
+
+        return !existActiveName;
     }
 }

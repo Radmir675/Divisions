@@ -1,6 +1,7 @@
 ﻿using CSharpFunctionalExtensions;
 using Devisions.Application.Departments;
 using Devisions.Domain.Department;
+using Devisions.Infrastructure.Postgres.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Shared.Errors;
@@ -23,7 +24,22 @@ public class DepartmentRepository : IDepartmentRepository
         CancellationToken cancellationToken)
     {
         var department =
-            await _dbContext.Departments.FirstOrDefaultAsync(x => x.Id == departmentId, cancellationToken);
+            await _dbContext.Departments
+                .FirstOrDefaultAsync(x => x.Id == departmentId, cancellationToken);
+        if (department == null)
+            return Error.NotFound("department.repository", "Department not found", null);
+
+        return department;
+    }
+
+    public async Task<Result<Department, Error>> GetByIdWithLocationsAsync(
+        DepartmentId departmentId,
+        CancellationToken cancellationToken)
+    {
+        var department =
+            await _dbContext.Departments
+                .Include(x => x.DepartmentLocations)
+                .FirstOrDefaultAsync(x => x.Id == departmentId, cancellationToken);
         if (department == null)
             return Error.NotFound("department.repository", "Department not found", null);
 
@@ -64,30 +80,38 @@ public class DepartmentRepository : IDepartmentRepository
         {
             invalidDepartments.ForEach(locationId => errors.Add(Error.NotFound(
                 "locationRepository.ExistsByIdAsync",
-                "location not found",
+                "location not found or inactive",
                 locationId.Value)));
         }
 
         return errors.Any() ? new Errors(errors) : UnitResult.Success<Errors>();
     }
 
-    public async Task<Result<bool, Error>> IsIdentifierFreeAsync(
-        Identifier identifier,
-        CancellationToken cancellationToken)
+    public async Task<UnitResult<Error>> UpdateAsync(Department department, CancellationToken cancellationToken)
     {
         try
         {
-            bool result = await _dbContext.Departments.AnyAsync(
-                x => x.Identifier.Identify == identifier.Identify,
-                cancellationToken);
-            return !result;
+            _dbContext.Departments.Update(department);
+            await _dbContext.SaveChangesAsync(cancellationToken);
         }
         catch (Exception e)
         {
             _logger.LogError(e, e.Message);
             return Error.Failure(
-                "department.repository.isIdentifierFreeAsync",
-                "Repository error");
+                "department.repository.UpdateAsync",
+                "Department is not updated");
         }
+
+        return UnitResult.Success<Error>();
+    }
+
+    public async Task<Result<bool, Error>> IsIdentifierAlreadyExistsAsync(
+        Identifier identifier,
+        CancellationToken cancellationToken)
+    {
+            bool result = await _dbContext.Departments.AnyAsync(
+                x => x.Identifier.Identify == identifier.Identify,
+                cancellationToken);
+            return result;
     }
 }

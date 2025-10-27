@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using Devisions.Application.Abstractions;
+using Devisions.Application.Database;
 using Devisions.Application.Departments;
 using Devisions.Application.Extensions;
 using Devisions.Domain.Department;
@@ -19,17 +20,20 @@ public class CreatePositionsHandler : ICommandHandler<Guid, CreatePositionComman
     private readonly IValidator<CreatePositionCommand> _validator;
     private readonly IPositionsRepository _positionsRepository;
     private readonly IDepartmentRepository _departmentRepository;
+    private readonly ITransactionManager _transactionManager;
     private readonly ILogger<CreatePositionsHandler> _logger;
 
     public CreatePositionsHandler(
         IValidator<CreatePositionCommand> validator,
         IPositionsRepository positionsRepository,
         IDepartmentRepository departmentRepository,
+        ITransactionManager transactionManager,
         ILogger<CreatePositionsHandler> logger)
     {
         _validator = validator;
         _positionsRepository = positionsRepository;
         _departmentRepository = departmentRepository;
+        _transactionManager = transactionManager;
         _logger = logger;
     }
 
@@ -50,22 +54,38 @@ public class CreatePositionsHandler : ICommandHandler<Guid, CreatePositionComman
             return descriptionResult.Error.ToErrors();
 
         // бизнес-логика
+        var transactionScopeResult = await _transactionManager.BeginTransactionAsync(cancellationToken);
+        if (transactionScopeResult.IsFailure)
+            return transactionScopeResult.Error.ToErrors();
+        using var transactionScope = transactionScopeResult.Value;
+
         var departmentsId = command.Request.DepartmentIds
             .Select(x => new DepartmentId(x))
             .ToList();
+
         var checkDepartmentsIdAsync = await _departmentRepository.AllExistAndActiveAsync(
             departmentsId,
             cancellationToken);
         if (checkDepartmentsIdAsync.IsFailure)
+        {
+            transactionScope.Rollback();
             return checkDepartmentsIdAsync.Error;
+        }
 
         var nameFreeResult =
             await _positionsRepository.IsNameActiveAndFreeAsync(positionNameResult.Value, cancellationToken);
+
         if (nameFreeResult.IsFailure)
+        {
+            transactionScope.Rollback();
             nameFreeResult.Error.ToErrors();
+        }
 
         if (!nameFreeResult.Value)
+        {
+            transactionScope.Rollback();
             return Error.Conflict("active.name", "Name is engaged").ToErrors();
+        }
 
         var positionId = new PositionId(Guid.NewGuid());
 
@@ -78,7 +98,14 @@ public class CreatePositionsHandler : ICommandHandler<Guid, CreatePositionComman
 
         var positionIdResult = await _positionsRepository.AddAsync(createPositionResult.Value, cancellationToken);
         if (positionIdResult.IsFailure)
+        {
+            transactionScope.Rollback();
             return positionIdResult.Error.ToErrors();
+        }
+
+        var commitResult = transactionScope.Commit();
+        if (commitResult.IsFailure)
+            return commitResult.Error.ToErrors();
 
         _logger.LogInformation("Position created with ID:{id}", positionIdResult.Value);
 

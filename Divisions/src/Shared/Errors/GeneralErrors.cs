@@ -24,4 +24,9 @@ public static class GeneralErrors
     {
         return Error.Validation("record.already.exist", $"{label ?? "record"} is exists");
     }
+
+    public static Error NonUniqueValues(string? value = null)
+    {
+        return Error.Validation("identical .values", "Collection exists identical values", value);
+    }
 }

@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using Devisions.Application.Abstractions;
+using Devisions.Application.Database;
 using Devisions.Application.Extensions;
 using Devisions.Application.Locations;
 using Devisions.Contracts.Departments;
@@ -21,19 +22,22 @@ public class CreateDepartmentHandler : ICommandHandler<Guid, CreateDepartmentCom
 {
     private readonly IValidator<CreateDepartmentCommand> _validator;
     private readonly IDepartmentRepository _departmentRepository;
-    private readonly ILogger<CreateDepartmentHandler> _logger;
     private readonly ILocationRepository _locationRepository;
+    private readonly ITransactionManager _transactionManager;
+    private readonly ILogger<CreateDepartmentHandler> _logger;
 
     public CreateDepartmentHandler(
         IValidator<CreateDepartmentCommand> validator,
         IDepartmentRepository departmentRepository,
         ILocationRepository locationRepository,
+        ITransactionManager transactionManager,
         ILogger<CreateDepartmentHandler> logger)
     {
         _validator = validator;
         _departmentRepository = departmentRepository;
-        _logger = logger;
         _locationRepository = locationRepository;
+        _transactionManager = transactionManager;
+        _logger = logger;
     }
 
     public async Task<Result<Guid, Errors>> Handle(CreateDepartmentCommand command, CancellationToken cancellationToken)
@@ -45,21 +49,39 @@ public class CreateDepartmentHandler : ICommandHandler<Guid, CreateDepartmentCom
         var departmentName = DepartmentName.Create(command.Request.Name).Value;
 
         var identifier = Identifier.Create(command.Request.Identifier).Value;
-        var identifierFreeCheckResult = await _departmentRepository.IsIdentifierFreeAsync(
+
+
+        // бизнес логика
+        var transactionScopeResult = await _transactionManager.BeginTransactionAsync(cancellationToken);
+        if (transactionScopeResult.IsFailure)
+            return transactionScopeResult.Error.ToErrors();
+
+        using var transactionScope = transactionScopeResult.Value;
+
+        var identifierExistsResult = await _departmentRepository.IsIdentifierAlreadyExistsAsync(
             identifier,
             cancellationToken);
 
-        if (identifierFreeCheckResult.IsFailure)
-            return identifierFreeCheckResult.Error.ToErrors();
+        if (identifierExistsResult.IsFailure)
+        {
+            transactionScope.Rollback();
+            return identifierExistsResult.Error.ToErrors();
+        }
 
-        if (!identifierFreeCheckResult.Value)
+        if (identifierExistsResult.Value)
+        {
+            transactionScope.Rollback();
             return GeneralErrors.AlreadyExist("identifier").ToErrors();
+        }
 
         var locations = command.Request.LocationsId.ToList();
         var locationsId = locations.Select(x => new LocationId(x)).ToList();
         var locationsExistResult = await _locationRepository.ExistsByIdsAsync(locationsId, cancellationToken);
         if (locationsExistResult.IsFailure)
+        {
+            transactionScope.Rollback();
             return locationsExistResult.Error;
+        }
 
         Result<Department, Error> departmentCreationResult;
         if (command.Request.ParentId.HasValue)
@@ -70,7 +92,10 @@ public class CreateDepartmentHandler : ICommandHandler<Guid, CreateDepartmentCom
                 cancellationToken);
 
             if (departmentResult.IsFailure)
+            {
+                transactionScope.Rollback();
                 return departmentResult.Error.ToErrors();
+            }
 
             departmentCreationResult = Department.CreateChild(
                 departmentName, identifier, departmentResult.Value, locationsId);
@@ -82,11 +107,21 @@ public class CreateDepartmentHandler : ICommandHandler<Guid, CreateDepartmentCom
         }
 
         if (departmentCreationResult.IsFailure)
+        {
+            transactionScope.Rollback();
             return departmentCreationResult.Error.ToErrors();
+        }
 
         var dbCreationResult = await _departmentRepository.AddAsync(departmentCreationResult.Value, cancellationToken);
         if (dbCreationResult.IsFailure)
+        {
+            transactionScope.Rollback();
             return dbCreationResult.Error.ToErrors();
+        }
+
+        var transactionResult = transactionScope.Commit();
+        if (transactionResult.IsFailure)
+            return transactionResult.Error.ToErrors();
 
         _logger.LogInformation("Department is created with id: {Id}", departmentCreationResult.Value.Id);
         return departmentCreationResult.Value.Id.Value;

@@ -41,9 +41,9 @@ public class Department
 
     public IReadOnlyList<DepartmentPosition> DepartmentPositions => _departmentPositions;
 
-    private readonly List<DepartmentLocation> _departmentLocations = [];
+    private List<DepartmentLocation> _departmentLocations = [];
 
-    private readonly List<DepartmentPosition> _departmentPositions = [];
+    private List<DepartmentPosition> _departmentPositions = [];
 
     public UnitResult<Error> Rename(string name)
     {
@@ -109,12 +109,25 @@ public class Department
     {
         var departmentId = new DepartmentId(Guid.NewGuid());
         var path = GetPath(identifier.Identify, parent.Path);
-        var depth =(short) (parent.Depth+1);
+        var depth = (short)(parent.Depth + 1);
 
         var department = new Department(
             departmentId, name, identifier, path, depth, true, departmentLocations, parent.Id);
 
         return department;
+    }
+
+    public UnitResult<Error> UpdateLocations(Guid[] departmentLocations)
+    {
+        if (!departmentLocations.Any())
+            return GeneralErrors.ValueIsRequired("departmentLocations");
+
+        var newDepartmentLocations = departmentLocations.Select(d =>
+            new DepartmentLocation(Id, new LocationId(d)));
+
+        _departmentLocations = newDepartmentLocations.ToList();
+
+        return Result.Success<Error>();
     }
 
     private static string GetPath(string identifier, string? parentPath = null) =>

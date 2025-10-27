@@ -1,4 +1,5 @@
 using Devisions.Infrastructure.Postgres;
+using Devisions.Infrastructure.Postgres.Database;
 using Devisions.Web;
 using Devisions.Web.Extensions;
 using Devisions.Web.Middlewares;
