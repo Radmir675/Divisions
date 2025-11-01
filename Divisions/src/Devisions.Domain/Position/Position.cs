@@ -8,7 +8,7 @@ namespace Devisions.Domain.Position;
 
 public record PositionId(Guid Value);
 
-public class Position
+public sealed class Position
 {
     public PositionId Id { get; } = null!;
 
@@ -18,7 +18,7 @@ public class Position
 
     public bool IsActive { get; private set; }
 
-    public DateTime CreatedAt { get; private set; }
+    public DateTime CreatedAt { get;  }
 
     public DateTime? UpdatedAt { get; private set; }
 

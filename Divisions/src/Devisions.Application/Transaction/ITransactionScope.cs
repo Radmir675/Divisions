@@ -2,7 +2,7 @@
 using CSharpFunctionalExtensions;
 using Shared.Errors;
 
-namespace Devisions.Application.Database;
+namespace Devisions.Application.Transaction;
 
 public interface ITransactionScope : IDisposable
 {

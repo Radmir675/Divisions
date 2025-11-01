@@ -1,10 +1,13 @@
 ﻿using CSharpFunctionalExtensions;
+using Dapper;
 using Devisions.Application.Departments;
 using Devisions.Domain.Department;
 using Devisions.Infrastructure.Postgres.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Npgsql;
 using Shared.Errors;
+using Path = Devisions.Domain.Department.Path;
 
 namespace Devisions.Infrastructure.Postgres.Repositories;
 
@@ -13,7 +16,9 @@ public class DepartmentRepository : IDepartmentRepository
     private readonly AppDbContext _dbContext;
     private readonly ILogger<LocationRepository> _logger;
 
-    public DepartmentRepository(AppDbContext dbContext, ILogger<LocationRepository> logger)
+    public DepartmentRepository(
+        AppDbContext dbContext,
+        ILogger<LocationRepository> logger)
     {
         _dbContext = dbContext;
         _logger = logger;
@@ -109,9 +114,107 @@ public class DepartmentRepository : IDepartmentRepository
         Identifier identifier,
         CancellationToken cancellationToken)
     {
-            bool result = await _dbContext.Departments.AnyAsync(
-                x => x.Identifier.Identify == identifier.Identify,
-                cancellationToken);
-            return result;
+        bool result = await _dbContext.Departments.AnyAsync(
+            x => x.Identifier.Identify == identifier.Identify,
+            cancellationToken);
+        return result;
+    }
+
+    public async Task<Result<IEnumerable<DepartmentId>, Error>> LockDescendants(
+        Path rootPath,
+        CancellationToken cancellationToken)
+    {
+        // TODO: нужну заблочить только дочерние
+        try
+        {
+            const string query = """
+                                 SELECT *
+                                 FROM departments
+                                 WHERE path <@ @rootPath::ltree
+                                 ORDER BY depth
+                                 FOR UPDATE
+                                 """;
+
+            await using var connection = _dbContext.Database.GetDbConnection();
+            var departmentIds = (await connection
+                    .QueryAsync<Department>(query, new { rootPath.PathValue }))
+                .Select(x => x.Id)
+                .ToList();
+
+            return departmentIds;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to lock descendants");
+            return Error.Failure("fail.lock.descendance.", "Failed to lock descendants");
+        }
+    }
+
+    public async Task<Result<Department, Error>> GetByIdWithLock(
+        DepartmentId departmentId,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            const string query = """
+                                  SELECT * 
+                                  FROM departments
+                                  WHERE id=@departmentId
+                                  FOR UPDATE
+                                 """;
+            await using var connection = _dbContext.Database.GetDbConnection();
+            var department = await connection.QueryFirstAsync<Department>(query, new { departmentId });
+            return department;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to lock by id");
+            return Error.Failure("fail.lock", "Failed to lock by id");
+        }
+    }
+
+    public async Task<UnitResult<Error>> UpdatePathDescendants(Path oldPath, Path newPath,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            string query = @"UPDATE departments
+                           SET path= @newPath::ltree || subpath(path, nlevel(@oldPath::ltree))
+                           WHERE path <@ @basePath::ltree";
+
+            await _dbContext.Database.ExecuteSqlRawAsync(
+                query,
+                new NpgsqlParameter("oldPath", oldPath.PathValue),
+                new NpgsqlParameter("newPath", newPath.PathValue));
+
+            return UnitResult.Success<Error>();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to update path");
+            return UnitResult.Failure(Error.Failure("fail.update.path.", "Failed to update path"));
+        }
+    }
+
+    public async Task<UnitResult<Error>> UpdateDepthDescendants(
+        Path path,
+        int deltaDepth,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            string query = @"UPDATE departments
+                         SET depth =depth + @depth
+                         WHERE path <@ @basePath::ltree";
+            await _dbContext.Database.ExecuteSqlRawAsync(
+                query,
+                new NpgsqlParameter("basePath", path.PathValue), cancellationToken);
+            return UnitResult.Success<Error>();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to update path");
+            return UnitResult.Failure(Error.Failure("fail.update.depth.", "Failed to update depth"));
+        }
     }
 }

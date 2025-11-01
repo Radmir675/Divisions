@@ -3,7 +3,7 @@ using Devisions.Domain.Location;
 
 namespace Devisions.Domain.Department;
 
-public class DepartmentLocation
+public sealed class DepartmentLocation
 {
     public Guid Id { get; init; }
 

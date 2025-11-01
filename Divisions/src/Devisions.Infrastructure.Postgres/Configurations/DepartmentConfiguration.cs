@@ -2,6 +2,7 @@
 using Devisions.Domain.Department;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Path = Devisions.Domain.Department.Path;
 
 namespace Devisions.Infrastructure.Postgres.Configurations;
 
@@ -51,7 +52,15 @@ public class DepartmentConfiguration : IEntityTypeConfiguration<Department>
 
         builder.Property(p => p.Path)
             .HasColumnName("path")
+            .HasColumnType("ltree")
+            .HasConversion(
+                value => value.PathValue,
+                value => Path.Create(value, null))
             .IsRequired();
+
+        builder.HasIndex(x => x.Path)
+            .HasMethod("gist")
+            .HasDatabaseName("idx_departments_path");
 
         builder.Property(p => p.Depth)
             .HasColumnName("depth")

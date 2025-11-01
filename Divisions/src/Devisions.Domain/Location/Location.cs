@@ -8,7 +8,7 @@ namespace Devisions.Domain.Location;
 
 public record LocationId(Guid Value);
 
-public class Location
+public sealed class Location
 {
     public LocationId Id { get; } = null!;
 

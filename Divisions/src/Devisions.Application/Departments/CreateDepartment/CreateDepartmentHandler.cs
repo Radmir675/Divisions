@@ -4,9 +4,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using Devisions.Application.Abstractions;
-using Devisions.Application.Database;
 using Devisions.Application.Extensions;
 using Devisions.Application.Locations;
+using Devisions.Application.Transaction;
 using Devisions.Contracts.Departments;
 using Devisions.Domain.Department;
 using Devisions.Domain.Location;
@@ -49,7 +49,6 @@ public class CreateDepartmentHandler : ICommandHandler<Guid, CreateDepartmentCom
         var departmentName = DepartmentName.Create(command.Request.Name).Value;
 
         var identifier = Identifier.Create(command.Request.Identifier).Value;
-
 
         // бизнес логика
         var transactionScopeResult = await _transactionManager.BeginTransactionAsync(cancellationToken);

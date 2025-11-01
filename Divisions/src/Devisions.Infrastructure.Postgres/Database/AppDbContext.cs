@@ -35,6 +35,7 @@ public sealed class AppDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+        modelBuilder.HasPostgresExtension("ltree");
     }
 
     private ILoggerFactory ConsoleDBLogger() =>
