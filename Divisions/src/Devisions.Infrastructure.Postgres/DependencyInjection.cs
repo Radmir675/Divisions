@@ -1,4 +1,6 @@
-﻿using Devisions.Application.Database;
+﻿using Dapper;
+using Devisions.Application.Database;
+using Devisions.Application.Transaction;
 using Devisions.Infrastructure.Postgres.Database;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -16,6 +18,8 @@ public static class DependencyInjection
             .WithScopedLifetime());
 
         services.AddScoped<ITransactionManager, TransactionManager>();
+        services.AddSingleton<IDbConnectionFactory, NpgSqlConnectionFactory>();
+        DefaultTypeMap.MatchNamesWithUnderscores = true;
 
         return services;
     }

@@ -8,13 +8,13 @@ public record Timezone
 {
     public string IanaTimeZone { get; } = null!;
 
-    // EF Core
-    private Timezone() { }
-
     private Timezone(string ianaTimeZone)
     {
         IanaTimeZone = ianaTimeZone;
     }
+
+    // EF Core
+    private Timezone() { }
 
     public static Result<Timezone, Error> Create(string ianaTimeZone)
     {

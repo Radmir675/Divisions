@@ -4,9 +4,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using Devisions.Application.Abstractions;
-using Devisions.Application.Database;
 using Devisions.Application.Departments;
 using Devisions.Application.Extensions;
+using Devisions.Application.Transaction;
 using Devisions.Domain.Department;
 using Devisions.Domain.Position;
 using FluentValidation;
@@ -105,7 +105,10 @@ public class CreatePositionsHandler : ICommandHandler<Guid, CreatePositionComman
 
         var commitResult = transactionScope.Commit();
         if (commitResult.IsFailure)
+        {
+            transactionScope.Rollback();
             return commitResult.Error.ToErrors();
+        }
 
         _logger.LogInformation("Position created with ID:{id}", positionIdResult.Value);
 

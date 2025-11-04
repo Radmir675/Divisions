@@ -7,13 +7,13 @@ public record Description
 {
     public string Value { get; } = null!;
 
-    // EF Core
-    private Description() { }
-
     private Description(string description)
     {
         Value = description;
     }
+
+    // EF Core
+    private Description() { }
 
     public static Result<Description, Error> Create(string description)
     {

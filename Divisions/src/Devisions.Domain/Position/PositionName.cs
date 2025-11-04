@@ -7,13 +7,13 @@ public record PositionName
 {
     public string Value { get; } = null!;
 
-    // EF Core
-    private PositionName() { }
-
     private PositionName(string name)
     {
         Value = name;
     }
+
+    // EF Core
+    private PositionName() { }
 
     public static Result<PositionName, Error> Create(string name)
     {

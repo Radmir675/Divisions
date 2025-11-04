@@ -3,7 +3,7 @@ using Devisions.Domain.Position;
 
 namespace Devisions.Domain.Department;
 
-public class DepartmentPosition
+public sealed class DepartmentPosition
 {
     public Guid Id { get; init; }
 
@@ -11,13 +11,13 @@ public class DepartmentPosition
 
     public PositionId PositionId { get; init; } = null!;
 
-    // EF Core
-    private DepartmentPosition() { }
-
     public DepartmentPosition(Guid id, DepartmentId departmentId, PositionId positionId)
     {
         Id = id;
         DepartmentId = departmentId;
         PositionId = positionId;
     }
+
+    // EF Core
+    private DepartmentPosition() { }
 }

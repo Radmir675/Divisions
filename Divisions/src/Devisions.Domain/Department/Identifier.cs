@@ -8,13 +8,13 @@ public record Identifier
 {
     public string Identify { get; } = null!;
 
-    // EF Core
-    private Identifier() { }
-
     private Identifier(string identifier)
     {
         Identify = identifier;
     }
+
+    // EF Core
+    private Identifier() { }
 
     public static Result<Identifier, Error> Create(string identifier)
     {

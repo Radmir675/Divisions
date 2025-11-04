@@ -22,7 +22,19 @@ public interface IDepartmentRepository
         IEnumerable<DepartmentId> departmentIds,
         CancellationToken cancellationToken);
 
-    Task<Result<bool, Error>> IsIdentifierAlreadyExistsAsync(Identifier identifier, CancellationToken cancellationToken);
+    Task<Result<bool, Error>>
+        IsIdentifierAlreadyExistsAsync(Identifier identifier, CancellationToken cancellationToken);
 
     Task<UnitResult<Error>> UpdateAsync(Department department, CancellationToken cancellationToken);
+
+    Task<Result<IEnumerable<DepartmentId>, Error>> LockDescendants(
+        Path parentPath, CancellationToken cancellationToken);
+
+    Task<Result<Department, Error>> GetByIdWithLock(
+        DepartmentId departmentId,
+        CancellationToken cancellationToken);
+
+    Task<UnitResult<Error>> UpdateDepthDescendants(Path path, int deltaDepth, CancellationToken cancellationToken);
+
+    Task<UnitResult<Error>> UpdatePathDescendants(Path oldPath, Path newPath, CancellationToken cancellationToken);
 }
