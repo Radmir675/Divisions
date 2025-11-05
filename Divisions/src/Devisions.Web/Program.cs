@@ -38,3 +38,8 @@ if (app.Environment.IsDevelopment())
 app.MapControllers();
 
 app.Run();
+
+namespace Devisions.Web
+{
+    public partial class Program;
+}
