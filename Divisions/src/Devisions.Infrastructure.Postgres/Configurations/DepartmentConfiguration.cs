@@ -2,6 +2,7 @@
 using Devisions.Domain.Department;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Path = Devisions.Domain.Department.Path;
 
 namespace Devisions.Infrastructure.Postgres.Configurations;
 
@@ -33,25 +34,31 @@ public class DepartmentConfiguration : IEntityTypeConfiguration<Department>
                 .IsRequired();
         });
 
-        builder.OwnsOne(i => i.Identifier, idn =>
-        {
-            idn.Property(v => v.Identify)
-                .IsRequired()
-                .HasColumnName("identifier")
-                .HasMaxLength(LengthConstants.LENGTH150);
+        builder.Property(x => x.Identifier)
+            .HasConversion(
+                id => id.Identify,
+                value => Identifier.Create(value).Value)
+            .HasColumnName("identifier")
+            .IsRequired()
+            .HasMaxLength(LengthConstants.LENGTH150);
 
-            idn.HasIndex(ind => new { ind.Identify })
-                .IsUnique();
-        });
-        builder.Navigation(x => x.Identifier)
-            .IsRequired();
+        builder.HasIndex(x => x.Identifier)
+            .IsUnique();
 
         builder.Property(x => x.IsActive)
             .HasColumnName("is_active");
 
         builder.Property(p => p.Path)
             .HasColumnName("path")
+            .HasColumnType("ltree")
+            .HasConversion(
+                value => value.PathValue,
+                value => Path.Create(value, null))
             .IsRequired();
+
+        builder.HasIndex(x => x.Path)
+            .HasMethod("gist")
+            .HasDatabaseName("idx_departments_path");
 
         builder.Property(p => p.Depth)
             .HasColumnName("depth")

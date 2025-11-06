@@ -11,9 +11,6 @@ public record Address
     public int HouseNumber { get; }
     public int? RoomNumber { get; }
 
-    // EF Core
-    private Address() { }
-
     private Address(string country, string city, string street, int houseNumber, int? roomNumber)
     {
         Country = country;
@@ -22,6 +19,9 @@ public record Address
         HouseNumber = houseNumber;
         RoomNumber = roomNumber;
     }
+
+    // EF Core
+    private Address() { }
 
     public static Result<Address, Error> Create(string country, string city, string street, int houseNumber,
         int? roomNumber)

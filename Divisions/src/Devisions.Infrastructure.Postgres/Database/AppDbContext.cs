@@ -3,7 +3,6 @@ using Devisions.Domain.Department;
 using Devisions.Domain.Location;
 using Devisions.Domain.Position;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.Logging;
 
 namespace Devisions.Infrastructure.Postgres.Database;
@@ -35,6 +34,7 @@ public sealed class AppDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+        modelBuilder.HasPostgresExtension("ltree");
     }
 
     private ILoggerFactory ConsoleDBLogger() =>

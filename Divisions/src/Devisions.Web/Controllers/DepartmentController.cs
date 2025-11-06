@@ -1,5 +1,6 @@
 ﻿using Devisions.Application.Abstractions;
 using Devisions.Application.Departments.CreateDepartment;
+using Devisions.Application.Departments.MoveDepartment;
 using Devisions.Application.Departments.UpdateLocations;
 using Devisions.Contracts.Departments;
 using Devisions.Web.EndPointResults;
@@ -37,6 +38,22 @@ public class DepartmentController(ILogger<DepartmentController> logger) : Contro
         var result = await handler.Handle(command, cancellationToken);
         if (result.IsSuccess)
             logger.LogInformation("Department with ID:{departmentId} is updated", departmentId);
+
+        return result;
+    }
+
+    [HttpPatch]
+    [Route("{departmentId:guid}/parent")]
+    public async Task<EndPointResult<Guid>> Move(
+        [FromRoute] Guid departmentId,
+        [FromBody] MoveDepartmentRequest request,
+        [FromServices] ICommandHandler<Guid, MoveDepartmentCommand> handler,
+        CancellationToken cancellationToken)
+    {
+        var command = new MoveDepartmentCommand(departmentId, request?.ParentId);
+        var result = await handler.Handle(command, cancellationToken);
+        if (result.IsSuccess)
+            logger.LogInformation("Department with ID:{departmentId} is moved", departmentId);
 
         return result;
     }

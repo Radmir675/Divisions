@@ -8,7 +8,7 @@ namespace Devisions.Domain.Position;
 
 public record PositionId(Guid Value);
 
-public class Position
+public sealed class Position
 {
     public PositionId Id { get; } = null!;
 
@@ -18,16 +18,13 @@ public class Position
 
     public bool IsActive { get; private set; }
 
-    public DateTime CreatedAt { get; private set; }
+    public DateTime CreatedAt { get;  }
 
     public DateTime? UpdatedAt { get; private set; }
 
     public IReadOnlyList<DepartmentPosition> DepartmentPositions => _departmentPositions;
 
     private List<DepartmentPosition> _departmentPositions = [];
-
-    // EF Core
-    private Position() { }
 
     private Position(
         PositionId id,
@@ -44,6 +41,9 @@ public class Position
         UpdatedAt = CreatedAt;
         _departmentPositions = departmentPositions;
     }
+
+    // EF Core
+    private Position() { }
 
     public static Result<Position, Error> Create(PositionId? id, PositionName name, Description? description,
         List<DepartmentPosition> departmentPositions)

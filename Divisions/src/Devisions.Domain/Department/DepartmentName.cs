@@ -7,13 +7,13 @@ public record DepartmentName
 {
     public string Name { get; } = null!;
 
-    // EF Core
-    private DepartmentName() { }
-
     private DepartmentName(string name)
     {
         Name = name;
     }
+
+    // EF Core
+    private DepartmentName() { }
 
     public static Result<DepartmentName, Error> Create(string name)
     {

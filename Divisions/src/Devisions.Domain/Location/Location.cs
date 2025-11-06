@@ -8,7 +8,7 @@ namespace Devisions.Domain.Location;
 
 public record LocationId(Guid Value);
 
-public class Location
+public sealed class Location
 {
     public LocationId Id { get; } = null!;
 
@@ -28,9 +28,6 @@ public class Location
 
     private readonly List<DepartmentLocation> _departmentLocations = [];
 
-    // EF Core
-    private Location() { }
-
     private Location(LocationId id, string name, Address address, bool isActive, Timezone timezone)
     {
         Id = id;
@@ -41,6 +38,9 @@ public class Location
         CreatedAt = DateTime.UtcNow;
         UpdatedAt = CreatedAt;
     }
+
+    // EF Core
+    private Location() { }
 
     public static Result<Location, Error> Create(string name, Address address, bool isActive, Timezone timezone)
     {

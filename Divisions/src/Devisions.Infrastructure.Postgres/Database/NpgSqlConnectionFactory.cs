@@ -1,11 +1,12 @@
 ﻿using System.Data;
+using Devisions.Application.Database;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Npgsql;
 
-namespace Devisions.Infrastructure.Postgres.NpgSqlRepository;
+namespace Devisions.Infrastructure.Postgres.Database;
 
-public class NpgSqlConnectionFactory : IDisposable, IAsyncDisposable
+public class NpgSqlConnectionFactory : IDisposable, IAsyncDisposable, IDbConnectionFactory
 {
     private readonly NpgsqlDataSource _dataSourse;
 
@@ -17,15 +18,15 @@ public class NpgSqlConnectionFactory : IDisposable, IAsyncDisposable
         _dataSourse = dataSourceBuilder.Build();
     }
 
-    public async Task<IDbConnection> GetConnectionAsync()
+    public async Task<IDbConnection> GetConnectionAsync(CancellationToken cancellationToken)
     {
-        return await _dataSourse.OpenConnectionAsync();
+        return await _dataSourse.OpenConnectionAsync(cancellationToken);
     }
-
-    private ILoggerFactory ConsoleDBLogger() =>
-        LoggerFactory.Create(builder => builder.AddConsole());
 
     public void Dispose() => _dataSourse.Dispose();
 
     public async ValueTask DisposeAsync() => await _dataSourse.DisposeAsync();
+
+    private ILoggerFactory ConsoleDBLogger() =>
+        LoggerFactory.Create(builder => builder.AddConsole());
 }

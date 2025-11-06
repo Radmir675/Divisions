@@ -21,6 +21,7 @@ namespace Devisions.Infrastructure.Postgres.Migrations
                 .HasAnnotation("ProductVersion", "8.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
+            NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "ltree");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("Devisions.Domain.Department.Department", b =>
@@ -37,6 +38,12 @@ namespace Devisions.Infrastructure.Postgres.Migrations
                         .HasColumnType("smallint")
                         .HasColumnName("depth");
 
+                    b.Property<string>("Identifier")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)")
+                        .HasColumnName("identifier");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean")
                         .HasColumnName("is_active");
@@ -47,7 +54,7 @@ namespace Devisions.Infrastructure.Postgres.Migrations
 
                     b.Property<string>("Path")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("ltree")
                         .HasColumnName("path");
 
                     b.Property<DateTime?>("UpdatedAt")
@@ -66,7 +73,15 @@ namespace Devisions.Infrastructure.Postgres.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Identifier")
+                        .IsUnique();
+
                     b.HasIndex("ParentId");
+
+                    b.HasIndex("Path")
+                        .HasDatabaseName("idx_departments_path");
+
+                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("Path"), "gist");
 
                     b.ToTable("departments", (string)null);
                 });
@@ -200,31 +215,6 @@ namespace Devisions.Infrastructure.Postgres.Migrations
                         .HasForeignKey("ParentId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.OwnsOne("Devisions.Domain.Department.Department.Identifier#Devisions.Domain.Department.Identifier", "Identifier", b1 =>
-                        {
-                            b1.Property<Guid>("DepartmentId")
-                                .HasColumnType("uuid");
-
-                            b1.Property<string>("Identify")
-                                .IsRequired()
-                                .HasMaxLength(150)
-                                .HasColumnType("character varying(150)")
-                                .HasColumnName("identifier");
-
-                            b1.HasKey("DepartmentId");
-
-                            b1.HasIndex("Identify")
-                                .IsUnique();
-
-                            b1.ToTable("departments", (string)null);
-
-                            b1.WithOwner()
-                                .HasForeignKey("DepartmentId");
-                        });
-
-                    b.Navigation("Identifier")
-                        .IsRequired();
-
                     b.Navigation("Parent");
                 });
 
@@ -260,7 +250,7 @@ namespace Devisions.Infrastructure.Postgres.Migrations
 
             modelBuilder.Entity("Devisions.Domain.Location.Location", b =>
                 {
-                    b.OwnsOne("Devisions.Domain.Location.Location.Address#Devisions.Domain.Location.Address", "Address", b1 =>
+                    b.OwnsOne("Devisions.Domain.Location.Address", "Address", b1 =>
                         {
                             b1.Property<Guid>("LocationId")
                                 .HasColumnType("uuid");
@@ -299,7 +289,7 @@ namespace Devisions.Infrastructure.Postgres.Migrations
                                 .IsUnique()
                                 .HasDatabaseName("address_unique");
 
-                            b1.ToTable("locations", (string)null);
+                            b1.ToTable("locations");
 
                             b1.WithOwner()
                                 .HasForeignKey("LocationId");
@@ -311,7 +301,7 @@ namespace Devisions.Infrastructure.Postgres.Migrations
 
             modelBuilder.Entity("Devisions.Domain.Position.Position", b =>
                 {
-                    b.OwnsOne("Devisions.Domain.Position.Position.Description#Devisions.Domain.Position.Description", "Description", b1 =>
+                    b.OwnsOne("Devisions.Domain.Position.Description", "Description", b1 =>
                         {
                             b1.Property<Guid>("PositionId")
                                 .HasColumnType("uuid");
@@ -324,7 +314,7 @@ namespace Devisions.Infrastructure.Postgres.Migrations
 
                             b1.HasKey("PositionId");
 
-                            b1.ToTable("positions", (string)null);
+                            b1.ToTable("positions");
 
                             b1.WithOwner()
                                 .HasForeignKey("PositionId");

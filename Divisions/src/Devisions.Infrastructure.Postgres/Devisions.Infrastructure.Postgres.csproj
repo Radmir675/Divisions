@@ -16,12 +16,7 @@
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.0"/>
   </ItemGroup>
   <ItemGroup>
-    <Compile Remove="NpgSqlRepository\**"/>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Remove="NpgSqlRepository\**"/>
-  </ItemGroup>
-  <ItemGroup>
-    <None Remove="NpgSqlRepository\**"/>
+    <Compile Remove="Migrations\20251022045802_Initial.cs"/>
+    <Compile Remove="Migrations\20251101182623_Initial.cs"/>
   </ItemGroup>
 </Project>

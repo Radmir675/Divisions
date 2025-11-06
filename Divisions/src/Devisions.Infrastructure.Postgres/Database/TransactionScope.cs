@@ -1,6 +1,6 @@
 ﻿using System.Data;
 using CSharpFunctionalExtensions;
-using Devisions.Application.Database;
+using Devisions.Application.Transaction;
 using Microsoft.Extensions.Logging;
 using Shared.Errors;
 
@@ -25,7 +25,7 @@ public class TransactionScope : ITransactionScope
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, ex.Message);
+            _logger.LogError(ex, "Failed to commit transaction");
             return Error.Failure("transaction.commit.failure", "Failed to commit transaction");
         }
 
@@ -40,7 +40,7 @@ public class TransactionScope : ITransactionScope
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, ex.Message);
+            _logger.LogError(ex, "Failed rollback transaction");
             return Error.Failure("transaction.rollback.failure", "Failed rollback transaction");
         }
 

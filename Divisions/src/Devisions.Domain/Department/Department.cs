@@ -9,7 +9,7 @@ namespace Devisions.Domain.Department;
 
 public record DepartmentId(Guid Value);
 
-public class Department
+public sealed class Department
 {
     private const short DEFAULT_DEPTH = 0;
 
@@ -21,7 +21,7 @@ public class Department
 
     public DepartmentId? ParentId { get; private set; }
 
-    public string Path { get; private set; } = null!;
+    public Path Path { get; private set; } = null!;
 
     public short Depth { get; private set; }
 
@@ -63,7 +63,7 @@ public class Department
         DepartmentId id,
         DepartmentName name,
         Identifier identifier,
-        string path,
+        Path path,
         short depth,
         bool isActive,
         IEnumerable<LocationId> departmentLocations,
@@ -89,13 +89,11 @@ public class Department
         Identifier identifier,
         IEnumerable<LocationId> departmentLocations)
     {
-        var currentPath = GetPath(identifier.Identify);
-
-        var depth = DEFAULT_DEPTH;
+        var currentPath = Path.Create(identifier.Identify);
 
         var departmentId = new DepartmentId(Guid.NewGuid());
 
-        var department = new Department(departmentId, name, identifier, currentPath, depth, true,
+        var department = new Department(departmentId, name, identifier, currentPath, DEFAULT_DEPTH, true,
             departmentLocations);
 
         return department;
@@ -108,8 +106,8 @@ public class Department
         IEnumerable<LocationId> departmentLocations)
     {
         var departmentId = new DepartmentId(Guid.NewGuid());
-        var path = GetPath(identifier.Identify, parent.Path);
-        var depth = (short)(parent.Depth + 1);
+        var path = Path.Create(identifier.Identify, parent.Path.PathValue);
+        short depth = (short)(parent.Depth + 1);
 
         var department = new Department(
             departmentId, name, identifier, path, depth, true, departmentLocations, parent.Id);
@@ -119,7 +117,7 @@ public class Department
 
     public UnitResult<Error> UpdateLocations(Guid[] departmentLocations)
     {
-        if (!departmentLocations.Any())
+        if (departmentLocations.Length == 0)
             return GeneralErrors.ValueIsRequired("departmentLocations");
 
         var newDepartmentLocations = departmentLocations.Select(d =>
@@ -130,6 +128,27 @@ public class Department
         return Result.Success<Error>();
     }
 
-    private static string GetPath(string identifier, string? parentPath = null) =>
-        (parentPath != null ? parentPath + "/" : string.Empty) + identifier;
+    public UnitResult<Error> MoveTo(Department? parent)
+    {
+        if (parent is null)
+        {
+            Path = Path.Create(Identifier.Identify);
+            Depth = DEFAULT_DEPTH;
+            ParentId = null;
+        }
+        else
+        {
+            Path = Path.Create(Identifier.Identify, parent.Path.PathValue);
+            Depth = (short)(parent.Depth + 1);
+            ParentId = parent.Id;
+        }
+
+        return UnitResult.Success<Error>();
+    }
+
+    public UnitResult<Error> AddChildren(Department chidren)
+    {
+        _childrens.Add(chidren);
+        return UnitResult.Success<Error>();
+    }
 }
