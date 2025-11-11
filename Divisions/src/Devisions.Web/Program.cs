@@ -19,7 +19,7 @@ builder.Host.UseSerilog((context, confuguration) =>
         .WriteTo.Seq("http://localhost:5341", restrictedToMinimumLevel: LogEventLevel.Information)
         .WriteTo.Console(
             theme: ConsoleColor.GetCustomTheme(),
-            outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} <s:{SourceContext}>{NewLine}{Exception}");
+            outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} {NewLine}{Exception}");
 });
 
 builder.Services.AddProgramDependencies();

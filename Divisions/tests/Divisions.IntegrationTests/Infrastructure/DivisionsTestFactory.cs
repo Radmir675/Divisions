@@ -1,6 +1,7 @@
 ﻿using System.Data.Common;
 using Devisions.Infrastructure.Postgres.Database;
 using Devisions.Web;
+using Divisions.IntegrationTests.Share;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
@@ -12,11 +13,11 @@ using Testcontainers.PostgreSql;
 
 namespace Divisions.IntegrationTests.Infrastructure;
 
-public abstract class DivisionsTestFactory : WebApplicationFactory<Program>, IAsyncLifetime
+public class DivisionsTestFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
     private readonly PostgreSqlContainer _dbContainer = new PostgreSqlBuilder()
         .WithImage("postgres")
-        .WithDatabase("postgres")
+        .WithDatabase("devisions_service_db")
         .WithUsername("postgres")
         .WithPassword("postgres")
         .Build();
@@ -27,14 +28,10 @@ public abstract class DivisionsTestFactory : WebApplicationFactory<Program>, IAs
     public async Task InitializeAsync()
     {
         await _dbContainer.StartAsync();
-        await using var scope = Services.CreateAsyncScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        await dbContext.Database.EnsureCreatedAsync();
-        await dbContext.Database.EnsureCreatedAsync();
-        await InitializeRespawner();
 
-        _dbConnection = new NpgsqlConnection(_dbContainer.GetConnectionString());
-        _dbConnection.Open();
+        await InitializeDatabase();
+
+        await InitializeRespawner();
     }
 
     public new async Task DisposeAsync()
@@ -48,7 +45,7 @@ public abstract class DivisionsTestFactory : WebApplicationFactory<Program>, IAs
 
     public async Task ResetDatabaseAsync()
     {
-        await _respawner.ResetAsync(_dbContainer.GetConnectionString());
+        await _respawner.ResetAsync(_dbConnection);
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -57,17 +54,26 @@ public abstract class DivisionsTestFactory : WebApplicationFactory<Program>, IAs
         {
             services.RemoveAll<AppDbContext>();
             services.AddScoped<AppDbContext>(_ => new AppDbContext(_dbContainer.GetConnectionString()));
+            services.AddScoped<LocationCreator>();
         });
+    }
+
+    private async Task InitializeDatabase()
+    {
+        await using var scope = Services.CreateAsyncScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+        await dbContext.Database.EnsureDeletedAsync();
+        await dbContext.Database.EnsureCreatedAsync();
+
+        _dbConnection = new NpgsqlConnection(_dbContainer.GetConnectionString());
+        await _dbConnection.OpenAsync();
     }
 
     private async Task InitializeRespawner()
     {
         _respawner = await Respawner.CreateAsync(
             _dbConnection,
-            new RespawnerOptions()
-            {
-                DbAdapter = DbAdapter.Postgres, 
-                SchemasToExclude = ["public"],
-            });
+            new RespawnerOptions() { DbAdapter = DbAdapter.Postgres, SchemasToInclude = ["public"] });
     }
 }

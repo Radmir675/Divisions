@@ -57,21 +57,21 @@ public class CreateDepartmentHandler : ICommandHandler<Guid, CreateDepartmentCom
 
         using var transactionScope = transactionScopeResult.Value;
 
-        var identifierExistsResult = await _departmentRepository.IsIdentifierAlreadyExistsAsync(
-            identifier,
-            cancellationToken);
-
-        if (identifierExistsResult.IsFailure)
-        {
-            transactionScope.Rollback();
-            return identifierExistsResult.Error.ToErrors();
-        }
-
-        if (identifierExistsResult.Value)
-        {
-            transactionScope.Rollback();
-            return GeneralErrors.AlreadyExist("identifier").ToErrors();
-        }
+        // var identifierExistsResult = await _departmentRepository.IsIdentifierAlreadyExistsAsync(
+        //     identifier,
+        //     cancellationToken);
+        //
+        // if (identifierExistsResult.IsFailure)
+        // {
+        //     transactionScope.Rollback();
+        //     return identifierExistsResult.Error.ToErrors();
+        // }
+        //
+        // if (identifierExistsResult.Value)
+        // {
+        //     transactionScope.Rollback();
+        //     return GeneralErrors.AlreadyExist("identifier").ToErrors();
+        // }
 
         var locations = command.Request.LocationsId.ToList();
         var locationsId = locations.Select(x => new LocationId(x)).ToList();

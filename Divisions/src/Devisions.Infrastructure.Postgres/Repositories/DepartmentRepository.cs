@@ -6,6 +6,7 @@ using Devisions.Domain.Department;
 using Devisions.Infrastructure.Postgres.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Npgsql;
 using Shared.Errors;
 using Path = Devisions.Domain.Department.Path;
 
@@ -62,9 +63,31 @@ public class DepartmentRepository : IDepartmentRepository
             await _dbContext.SaveChangesAsync(cancellationToken);
             return department.Id.Value;
         }
-        catch (Exception e)
+        catch (DbUpdateException ex)when (ex.InnerException is PostgresException pgEx)
         {
-            _logger.LogError(e, e.Message);
+            if (pgEx is { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: not null } &&
+                pgEx.ConstraintName.Contains(
+                    nameof(department.Identifier),
+                    StringComparison.InvariantCultureIgnoreCase))
+            {
+                _logger.LogError(
+                    pgEx,
+                    "Database update error while creating department with identifier:{identifier}",
+                    department.Identifier.Identify);
+
+                return GeneralErrors.AlreadyExist(nameof(department.Identifier.Identify));
+            }
+
+            return GeneralErrors.DatabaseError();
+        }
+        catch (OperationCanceledException ex)
+        {
+            _logger.LogError(ex, "Operation cancelled");
+            return GeneralErrors.CanceledOperation();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error while creating department");
             return Error.Failure(
                 "department.repository.AddAsync",
                 "Department could not be added in repository");
@@ -106,7 +129,7 @@ public class DepartmentRepository : IDepartmentRepository
         {
             _logger.LogError(e, e.Message);
             return Error.Failure(
-                "department.repository.UpdateAsync",
+                "department.repository.update",
                 "Department is not updated");
         }
 

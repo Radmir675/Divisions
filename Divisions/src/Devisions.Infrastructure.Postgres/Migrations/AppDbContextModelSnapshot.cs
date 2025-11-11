@@ -74,12 +74,13 @@ namespace Devisions.Infrastructure.Postgres.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("Identifier")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("UK_departments_identifier");
 
                     b.HasIndex("ParentId");
 
                     b.HasIndex("Path")
-                        .HasDatabaseName("idx_departments_path");
+                        .HasDatabaseName("UK_departments_path");
 
                     NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("Path"), "gist");
 
@@ -170,7 +171,8 @@ namespace Devisions.Infrastructure.Postgres.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("Name")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("UK_locations_name");
 
                     b.ToTable("locations", (string)null);
                 });
@@ -287,7 +289,7 @@ namespace Devisions.Infrastructure.Postgres.Migrations
 
                             b1.HasIndex("Country", "City", "Street", "HouseNumber", "RoomNumber")
                                 .IsUnique()
-                                .HasDatabaseName("address_unique");
+                                .HasDatabaseName("UK_address_unique");
 
                             b1.ToTable("locations");
 
