@@ -1,5 +1,4 @@
-﻿using Devisions.Infrastructure.Postgres;
-using Devisions.Infrastructure.Postgres.Database;
+﻿using Devisions.Infrastructure.Postgres.Database;
 using Microsoft.EntityFrameworkCore;
 
 namespace Devisions.Web.Extensions;
