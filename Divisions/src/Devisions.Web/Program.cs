@@ -20,6 +20,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
     await app.AddMigrateAsync();
+
+    if (args.Contains("--seeder"))
+    {
+        await app.Services.RunSeeding();
+    }
 }
 
 app.MapControllers();

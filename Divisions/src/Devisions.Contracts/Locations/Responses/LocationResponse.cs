@@ -4,11 +4,11 @@ public sealed record LocationResponse
 {
     public Guid Id { get; init; }
 
-    public string Name { get; init; }
+    public string Name { get; init; } = null!;
 
-    public AddressResponse Address { get; init; }
+    public AddressResponse Address { get; init; } = null!;
 
-    public string Timezone { get; init; }
+    public string Timezone { get; init; } = null!;
 
     public bool IsActive { get; init; }
 
