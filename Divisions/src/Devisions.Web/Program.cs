@@ -1,3 +1,4 @@
+using Devisions.Application.Database;
 using Devisions.Infrastructure.Postgres.Database;
 using Devisions.Web;
 using Devisions.Web.Extensions;
@@ -9,6 +10,9 @@ using ConsoleColor = Devisions.Web.Extensions.ConsoleColor;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddScoped<AppDbContext>(_ =>
+    new AppDbContext(builder.Configuration.GetConnectionString("DefaultConnection")!));
+
+builder.Services.AddScoped<IReadDbContext, AppDbContext>(_ =>
     new AppDbContext(builder.Configuration.GetConnectionString("DefaultConnection")!));
 
 builder.Host.UseSerilog((context, confuguration) =>

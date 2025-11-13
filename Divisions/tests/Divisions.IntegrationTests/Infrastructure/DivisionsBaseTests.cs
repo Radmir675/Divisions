@@ -1,8 +1,7 @@
 ﻿using Devisions.Infrastructure.Postgres.Database;
-using Divisions.IntegrationTests.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Divisions.IntegrationTests;
+namespace Divisions.IntegrationTests.Infrastructure;
 
 public class DivisionsBaseTests : IClassFixture<DivisionsTestFactory>, IAsyncLifetime
 {

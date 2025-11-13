@@ -3,6 +3,7 @@ using Devisions.Application.Departments.CreateDepartment;
 using Devisions.Application.Departments.MoveDepartment;
 using Devisions.Application.Departments.UpdateLocations;
 using Devisions.Contracts.Departments;
+using Devisions.Contracts.Departments.Requests;
 using Devisions.Web.EndPointResults;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,6 +14,7 @@ namespace Devisions.Web.Controllers;
 public class DepartmentController(ILogger<DepartmentController> logger) : ControllerBase
 {
     [HttpPost]
+    [Route("/api/departments")]
     public async Task<EndPointResult<Guid>> Create(
         [FromBody] CreateDepartmentRequest createDepartmentRequest,
         [FromServices] ICommandHandler<Guid, CreateDepartmentCommand> handler,
@@ -27,7 +29,7 @@ public class DepartmentController(ILogger<DepartmentController> logger) : Contro
     }
 
     [HttpPut]
-    [Route("{departmentId:Guid}/locations")]
+    [Route("/api/{departmentId:Guid}/locations")]
     public async Task<EndPointResult<Guid>> Update(
         [FromRoute] Guid departmentId,
         [FromBody] UpdateLocationsRequest updateLocationsRequest,
@@ -43,7 +45,7 @@ public class DepartmentController(ILogger<DepartmentController> logger) : Contro
     }
 
     [HttpPatch]
-    [Route("{departmentId:guid}/parent")]
+    [Route("/api/{departmentId:guid}/parent")]
     public async Task<EndPointResult<Guid>> Move(
         [FromRoute] Guid departmentId,
         [FromBody] MoveDepartmentRequest request,

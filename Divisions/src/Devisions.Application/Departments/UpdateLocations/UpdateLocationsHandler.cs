@@ -7,7 +7,7 @@ using Devisions.Application.Abstractions;
 using Devisions.Application.Extensions;
 using Devisions.Application.Locations;
 using Devisions.Application.Transaction;
-using Devisions.Contracts.Departments;
+using Devisions.Contracts.Departments.Requests;
 using Devisions.Domain.Department;
 using Devisions.Domain.Location;
 using FluentValidation;
