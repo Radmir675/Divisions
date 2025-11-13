@@ -23,7 +23,8 @@ public class LocationConfiguration : IEntityTypeConfiguration<Location>
             .HasColumnName("name");
 
         builder.HasIndex(i => i.Name)
-            .IsUnique();
+            .IsUnique()
+            .HasDatabaseName("UK_locations_name");
 
         builder.OwnsOne(ad => ad.Address, adr =>
         {
@@ -57,7 +58,7 @@ public class LocationConfiguration : IEntityTypeConfiguration<Location>
                     ind.RoomNumber,
                 })
                 .IsUnique()
-                .HasDatabaseName("address_unique");
+                .HasDatabaseName("UK_address_unique");
         });
         builder.Navigation(x => x.Address)
             .IsRequired();

@@ -43,7 +43,8 @@ public class DepartmentConfiguration : IEntityTypeConfiguration<Department>
             .HasMaxLength(LengthConstants.LENGTH150);
 
         builder.HasIndex(x => x.Identifier)
-            .IsUnique();
+            .IsUnique()
+            .HasDatabaseName("UK_departments_identifier");
 
         builder.Property(x => x.IsActive)
             .HasColumnName("is_active");
@@ -58,7 +59,7 @@ public class DepartmentConfiguration : IEntityTypeConfiguration<Department>
 
         builder.HasIndex(x => x.Path)
             .HasMethod("gist")
-            .HasDatabaseName("idx_departments_path");
+            .HasDatabaseName("UK_departments_path");
 
         builder.Property(p => p.Depth)
             .HasColumnName("depth")

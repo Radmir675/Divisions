@@ -4,6 +4,7 @@ using Devisions.Domain.Location;
 using Devisions.Infrastructure.Postgres.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Npgsql;
 using Shared.Errors;
 
 namespace Devisions.Infrastructure.Postgres.Repositories;
@@ -26,12 +27,30 @@ public class LocationRepository : ILocationRepository
             _dbContext.Locations.Add(location);
             await _dbContext.SaveChangesAsync(cancellationToken);
         }
-        catch (Exception e)
+        catch (DbUpdateException ex)when (ex.InnerException is PostgresException pgEx)
         {
-            _logger.LogError(e, e.Message);
-            return Error.Failure(
-                "locationRepository.AddAsync",
-                "Location could not be added in repository");
+            if (pgEx is { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: not null } &&
+                pgEx.ConstraintName.Contains("name", StringComparison.InvariantCultureIgnoreCase))
+            {
+                _logger.LogError(
+                    pgEx,
+                    "Database update error while creating location with name:{name}",
+                    location.Name);
+                return GeneralErrors.AlreadyExist(nameof(location.Name));
+            }
+        }
+        catch (OperationCanceledException ex)
+        {
+            _logger.LogError(ex, "Operation cancelled");
+            return GeneralErrors.CanceledOperation();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(
+                ex,
+                "Unexpected error while creating location with location id:{location}",
+                location.Id);
+            return GeneralErrors.DatabaseError();
         }
 
         return location.Id.Value;
