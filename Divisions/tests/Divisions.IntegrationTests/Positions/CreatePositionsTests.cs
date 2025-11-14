@@ -12,7 +12,7 @@ namespace Divisions.IntegrationTests.Positions;
 
 public class CreatePositionsTests : DivisionsBaseTests
 {
-    protected CreatePositionsTests(DivisionsTestFactory divisionsTestFactory)
+    public CreatePositionsTests(DivisionsTestFactory divisionsTestFactory)
         : base(divisionsTestFactory)
     { }
 

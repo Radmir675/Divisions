@@ -11,7 +11,7 @@ namespace Divisions.IntegrationTests.Locations;
 
 public class CreateLocationTests : DivisionsBaseTests
 {
-    protected CreateLocationTests(DivisionsTestFactory divisionsTestFactory)
+    public CreateLocationTests(DivisionsTestFactory divisionsTestFactory)
         : base(divisionsTestFactory)
     { }
 
