@@ -1,12 +1,12 @@
 ﻿namespace Devisions.Contracts.Locations.Responses;
 
-public sealed record LocationResponse
+public sealed record LocationDto
 {
     public Guid Id { get; init; }
 
     public string Name { get; init; } = null!;
 
-    public AddressResponse Address { get; init; } = null!;
+    public AddressDto Address { get; init; } = null!;
 
     public string Timezone { get; init; } = null!;
 

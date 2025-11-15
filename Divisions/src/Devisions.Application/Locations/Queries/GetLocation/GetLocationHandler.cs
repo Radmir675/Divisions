@@ -17,7 +17,7 @@ namespace Devisions.Application.Locations.Queries.GetLocation;
 
 public record GetLocationQuery(GetLocationsRequest Request) : IQuery;
 
-public class GetLocationsHandler : IQueryHandler<IEnumerable<LocationResponse>, GetLocationQuery>
+public class GetLocationsHandler : IQueryHandler<IEnumerable<LocationDto>, GetLocationQuery>
 {
     private readonly IValidator<GetLocationQuery> _validator;
     private readonly IReadDbContext _readDbContext;
@@ -30,7 +30,7 @@ public class GetLocationsHandler : IQueryHandler<IEnumerable<LocationResponse>, 
         _readDbContext = readDbContext;
     }
 
-    public async Task<Result<IEnumerable<LocationResponse>, Errors>> Handle(
+    public async Task<Result<IEnumerable<LocationDto>, Errors>> Handle(
         GetLocationQuery query,
         CancellationToken cancellationToken)
     {
@@ -75,7 +75,7 @@ public class GetLocationsHandler : IQueryHandler<IEnumerable<LocationResponse>, 
             .OrderBy(x => x.Name)
             .ThenBy(x => x.CreatedAt);
 
-        var locations = resultQuery.Select(l => new LocationResponse()
+        var locations = resultQuery.Select(l => new LocationDto()
         {
             Id = l.Id.Value,
             Name = l.Name,
@@ -83,7 +83,7 @@ public class GetLocationsHandler : IQueryHandler<IEnumerable<LocationResponse>, 
             UpdatedAt = l.UpdatedAt,
             IsActive = l.IsActive,
             Timezone = l.Timezone.IanaTimeZone,
-            Address = new AddressResponse()
+            Address = new AddressDto()
             {
                 City = l.Address.City,
                 Country = l.Address.Country,

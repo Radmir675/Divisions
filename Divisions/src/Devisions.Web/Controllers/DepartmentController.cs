@@ -63,11 +63,11 @@ public class DepartmentController(ILogger<DepartmentController> logger) : Contro
 
     [HttpGet]
     [Route("api/departments/top-positions")]
-    public async Task<EndPointResult<IEnumerable<TopDepartmentResponse>>> GetTopPositions(
-        [FromServices] IQueryHandler<IEnumerable<TopDepartmentResponse>, TopPositionsQuery> handler,
+    public async Task<EndPointResult<IReadOnlyList<DepartmentDto>>> GetTopDepartments(
+        [FromServices] IQueryHandler<IReadOnlyList<DepartmentDto>, TopDepartmentsQuery> handler,
         CancellationToken cancellationToken)
     {
-        var query = new TopPositionsQuery();
+        var query = new TopDepartmentsQuery();
         var result = await handler.Handle(query, cancellationToken);
         if (result.IsSuccess)
             logger.LogInformation("Top positions is received");

@@ -12,20 +12,20 @@ using Shared.Errors;
 
 namespace Devisions.Application.Departments.Queries.GetTopPositions;
 
-public record TopPositionsQuery() : IQuery;
+public record TopDepartmentsQuery() : IQuery;
 
-public class GetTopPositionsHandler : IQueryHandler<IEnumerable<TopDepartmentResponse>, TopPositionsQuery>
+public class GetTopDepartmentsHandler : IQueryHandler<IReadOnlyList<DepartmentDto>, TopDepartmentsQuery>
 {
     private const byte TOP_DEPARTMENTS_COUNT = 5;
     private readonly IReadDbContext _readDbContext;
 
-    public GetTopPositionsHandler(IReadDbContext readDbContext)
+    public GetTopDepartmentsHandler(IReadDbContext readDbContext)
     {
         _readDbContext = readDbContext;
     }
 
-    public async Task<Result<IEnumerable<TopDepartmentResponse>, Errors>> Handle(
-        TopPositionsQuery query,
+    public async Task<Result<IReadOnlyList<DepartmentDto>, Errors>> Handle(
+        TopDepartmentsQuery query,
         CancellationToken cancellationToken)
     {
         var result = await _readDbContext.DepartmentsRead
@@ -34,7 +34,7 @@ public class GetTopPositionsHandler : IQueryHandler<IEnumerable<TopDepartmentRes
             .OrderByDescending(dp => dp.DepartmentPositions.Count)
             .Take(TOP_DEPARTMENTS_COUNT)
             .Select(dp =>
-                new TopDepartmentResponse
+                new DepartmentDto
                 {
                     Id = dp.Id.Value,
                     Name = dp.Name.Name,
@@ -49,15 +49,7 @@ public class GetTopPositionsHandler : IQueryHandler<IEnumerable<TopDepartmentRes
                         .Where(p => dp.DepartmentPositions
                             .Select(x => x.PositionId)
                             .Contains(p.Id))
-                        .Select(p => new PositionResponse
-                        {
-                            Id = p.Id.Value,
-                            Name = p.Name.Value,
-                            Description = p.Description != null ? p.Description.Value : null,
-                            IsActive = p.IsActive,
-                            CreatedAt = p.CreatedAt,
-                            UpdatedAt = p.UpdatedAt,
-                        })
+                        .Select(p => new PositionInfoDto { Id = p.Id.Value, Name = p.Name.Value, })
                         .OrderBy(x => x.Name)
                         .ToList(),
                 })
