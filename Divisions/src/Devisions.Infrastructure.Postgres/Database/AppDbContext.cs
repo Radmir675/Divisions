@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using Devisions.Application.Database;
 using Devisions.Domain.Department;
 using Devisions.Domain.Location;
 using Devisions.Domain.Position;
@@ -7,7 +8,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Devisions.Infrastructure.Postgres.Database;
 
-public sealed class AppDbContext : DbContext
+public sealed class AppDbContext : DbContext, IReadDbContext
 {
     private readonly string _connectionString;
 
@@ -16,6 +17,10 @@ public sealed class AppDbContext : DbContext
     public DbSet<Department> Departments { get; set; }
 
     public DbSet<Position> Positions { get; set; }
+
+    public IQueryable<Location> LocationsRead => Set<Location>().AsQueryable().AsNoTracking();
+
+    public IQueryable<Department> DepartmentsRead => Set<Department>().AsQueryable().AsNoTracking();
 
     public AppDbContext(string connectionString)
     {
@@ -28,7 +33,7 @@ public sealed class AppDbContext : DbContext
 
         optionsBuilder.EnableDetailedErrors();
         optionsBuilder.EnableSensitiveDataLogging();
-        optionsBuilder.UseLoggerFactory(ConsoleDBLogger());
+        optionsBuilder.UseLoggerFactory(ConsoleDbLogger());
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -37,6 +42,6 @@ public sealed class AppDbContext : DbContext
         modelBuilder.HasPostgresExtension("ltree");
     }
 
-    private ILoggerFactory ConsoleDBLogger() =>
+    private ILoggerFactory ConsoleDbLogger() =>
         LoggerFactory.Create(builder => builder.AddConsole());
 }

@@ -1,6 +1,8 @@
 using Devisions.Application.Abstractions;
-using Devisions.Application.Locations.CreateLocation;
-using Devisions.Contracts.Locations;
+using Devisions.Application.Locations.Commands.CreateLocation;
+using Devisions.Application.Locations.Queries;
+using Devisions.Contracts.Locations.Requests;
+using Devisions.Contracts.Locations.Responses;
 using Devisions.Web.EndPointResults;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,6 +13,7 @@ namespace Devisions.Web.Controllers;
 public class LocationController(ILogger<LocationController> logger) : ControllerBase
 {
     [HttpPost]
+    [Route("/api/locations")]
     public async Task<EndPointResult<Guid>> Create(
         [FromServices] ICommandHandler<Guid, CreateLocationCommand> handler,
         CreateLocationRequest request,
@@ -21,6 +24,22 @@ public class LocationController(ILogger<LocationController> logger) : Controller
 
         if (result.IsSuccess)
             logger.LogInformation("Location created: {locationId}", result.Value);
+
+        return result;
+    }
+
+    [HttpGet]
+    [Route("/api/locations")]
+    public async Task<EndPointResult<IEnumerable<LocationResponse>>> Locations(
+        [FromServices] IQueryHandler<IEnumerable<LocationResponse>, GetLocationQuery> handler,
+        [FromQuery] GetLocationsRequest request,
+        CancellationToken cancellationToken)
+    {
+        var query = new GetLocationQuery(request);
+        var result = await handler.Handle(query, cancellationToken);
+
+        if (result.IsSuccess)
+            logger.LogInformation("Locations got successfully");
 
         return result;
     }

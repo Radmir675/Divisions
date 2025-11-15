@@ -7,7 +7,7 @@ using Devisions.Application.Abstractions;
 using Devisions.Application.Extensions;
 using Devisions.Application.Locations;
 using Devisions.Application.Transaction;
-using Devisions.Contracts.Departments;
+using Devisions.Contracts.Departments.Requests;
 using Devisions.Domain.Department;
 using Devisions.Domain.Location;
 using FluentValidation;
@@ -56,22 +56,6 @@ public class CreateDepartmentHandler : ICommandHandler<Guid, CreateDepartmentCom
             return transactionScopeResult.Error.ToErrors();
 
         using var transactionScope = transactionScopeResult.Value;
-
-        // var identifierExistsResult = await _departmentRepository.IsIdentifierAlreadyExistsAsync(
-        //     identifier,
-        //     cancellationToken);
-        //
-        // if (identifierExistsResult.IsFailure)
-        // {
-        //     transactionScope.Rollback();
-        //     return identifierExistsResult.Error.ToErrors();
-        // }
-        //
-        // if (identifierExistsResult.Value)
-        // {
-        //     transactionScope.Rollback();
-        //     return GeneralErrors.AlreadyExist("identifier").ToErrors();
-        // }
 
         var locations = command.Request.LocationsId.ToList();
         var locationsId = locations.Select(x => new LocationId(x)).ToList();

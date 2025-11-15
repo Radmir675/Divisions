@@ -1,6 +1,7 @@
 ﻿using Devisions.Application.Abstractions;
 using Devisions.Application.Positions.CreatePositions;
 using Devisions.Contracts.Positions;
+using Devisions.Contracts.Positions.Requests;
 using Devisions.Web.EndPointResults;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,6 +19,7 @@ public class PositionController : ControllerBase
     }
 
     [HttpPost]
+    [Route("/api/positions")]
     public async Task<EndPointResult<Guid>> Create(
         [FromServices] ICommandHandler<Guid, CreatePositionCommand> handler,
         [FromBody] CreatePositionRequest request,

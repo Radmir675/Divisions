@@ -18,6 +18,12 @@ public static class DependencyInjection
             .AsSelfWithInterfaces()
             .WithTransientLifetime());
 
+        services.Scan(scan => scan.FromAssemblies([assembly])
+            .AddClasses(class1 => class1
+                .AssignableToAny(typeof(IQueryHandler<,>), typeof(IQueryHandler<>)))
+            .AsSelfWithInterfaces()
+            .WithTransientLifetime());
+
         return services;
     }
 }

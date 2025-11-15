@@ -1,6 +1,6 @@
 ﻿using Devisions.Application.Abstractions;
-using Devisions.Contracts.Locations;
+using Devisions.Contracts.Locations.Requests;
 
-namespace Devisions.Application.Locations.CreateLocation;
+namespace Devisions.Application.Locations.Commands.CreateLocation;
 
 public record CreateLocationCommand(CreateLocationRequest Request) : ICommand;

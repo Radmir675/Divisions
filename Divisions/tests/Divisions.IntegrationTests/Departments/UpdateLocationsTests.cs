@@ -1,5 +1,5 @@
 ﻿using Devisions.Application.Departments.UpdateLocations;
-using Devisions.Contracts.Departments;
+using Devisions.Contracts.Departments.Requests;
 using Devisions.Domain.Department;
 using Devisions.Domain.Location;
 using Divisions.IntegrationTests.Infrastructure;
