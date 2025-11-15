@@ -74,4 +74,19 @@ public class DepartmentController(ILogger<DepartmentController> logger) : Contro
 
         return result;
     }
+
+    [HttpGet]
+    [Route("api/departments/roots")]
+    public async Task<EndPointResult<IReadOnlyList<DepartmentDto>>> GetRoots(
+        [FromQuery] DepartmentWithFiltersRequest request,
+        [FromServices] IQuery<IReadOnlyList<DepartmentDto, RootDepartmentsRequest>> handler,
+        CancellationToken cancellationToken)
+    {
+        var query = new Query();
+        var result = await handler.Handle(query, cancellationToken);
+        if (result.IsSuccess)
+            logger.LogInformation("Top positions is received");
+
+        return result;
+    }
 }
