@@ -2,7 +2,7 @@ using Devisions.Application.Validation;
 using FluentValidation;
 using Shared.Errors;
 
-namespace Devisions.Application.Departments.MoveDepartment;
+namespace Devisions.Application.Departments.Commands.MoveDepartment;
 
 public class MoveDepartmentValidator : AbstractValidator<MoveDepartmentCommand>
 {

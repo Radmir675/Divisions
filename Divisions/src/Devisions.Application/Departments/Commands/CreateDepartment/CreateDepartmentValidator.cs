@@ -1,10 +1,9 @@
-﻿using System;
-using Devisions.Application.Validation;
+﻿using Devisions.Application.Validation;
 using Devisions.Domain.Department;
 using FluentValidation;
 using Shared.Errors;
 
-namespace Devisions.Application.Departments.CreateDepartment;
+namespace Devisions.Application.Departments.Commands.CreateDepartment;
 
 public class CreateDepartmentValidator : AbstractValidator<CreateDepartmentCommand>
 {

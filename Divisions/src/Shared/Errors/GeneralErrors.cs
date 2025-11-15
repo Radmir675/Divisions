@@ -39,4 +39,12 @@ public static class GeneralErrors
     {
         return Error.Failure("database.error", message ?? "Database error");
     }
+
+    public static Error NotFoundInDatabase(Guid? id = null, string? name = null)
+    {
+        string forId = id == null ? string.Empty : $" by Id '{id}'";
+        return Error.NotFound(
+            "record.not.found.in.database",
+            $"{name ?? "record"} not found{forId} in database", null);
+    }
 }

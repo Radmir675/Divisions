@@ -2,7 +2,7 @@
 using FluentValidation;
 using Shared.Errors;
 
-namespace Devisions.Application.Locations.Queries;
+namespace Devisions.Application.Locations.Queries.GetLocation;
 
 public class GetLocationsValidator : AbstractValidator<GetLocationQuery>
 {

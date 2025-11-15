@@ -14,7 +14,7 @@ using FluentValidation;
 using Microsoft.Extensions.Logging;
 using Shared.Errors;
 
-namespace Devisions.Application.Departments.CreateDepartment;
+namespace Devisions.Application.Departments.Commands.CreateDepartment;
 
 public record CreateDepartmentCommand(CreateDepartmentRequest Request) : ICommand;
 

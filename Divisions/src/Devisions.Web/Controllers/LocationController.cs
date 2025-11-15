@@ -1,6 +1,6 @@
 using Devisions.Application.Abstractions;
 using Devisions.Application.Locations.Commands.CreateLocation;
-using Devisions.Application.Locations.Queries;
+using Devisions.Application.Locations.Queries.GetLocation;
 using Devisions.Contracts.Locations.Requests;
 using Devisions.Contracts.Locations.Responses;
 using Devisions.Web.EndPointResults;
@@ -30,8 +30,8 @@ public class LocationController(ILogger<LocationController> logger) : Controller
 
     [HttpGet]
     [Route("/api/locations")]
-    public async Task<EndPointResult<IEnumerable<LocationResponse>>> Locations(
-        [FromServices] IQueryHandler<IEnumerable<LocationResponse>, GetLocationQuery> handler,
+    public async Task<EndPointResult<IEnumerable<LocationDto>>> Locations(
+        [FromServices] IQueryHandler<IEnumerable<LocationDto>, GetLocationQuery> handler,
         [FromQuery] GetLocationsRequest request,
         CancellationToken cancellationToken)
     {

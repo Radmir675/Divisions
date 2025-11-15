@@ -1,4 +1,4 @@
-﻿using Devisions.Application.Departments.MoveDepartment;
+﻿using Devisions.Application.Departments.Commands.MoveDepartment;
 using Devisions.Domain.Department;
 using Divisions.IntegrationTests.Infrastructure;
 using Divisions.IntegrationTests.Share;
