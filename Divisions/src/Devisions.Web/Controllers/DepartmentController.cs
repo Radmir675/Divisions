@@ -1,9 +1,10 @@
 ﻿using Devisions.Application.Abstractions;
-using Devisions.Application.Departments.CreateDepartment;
-using Devisions.Application.Departments.MoveDepartment;
-using Devisions.Application.Departments.UpdateLocations;
-using Devisions.Contracts.Departments;
+using Devisions.Application.Departments.Commands.CreateDepartment;
+using Devisions.Application.Departments.Commands.MoveDepartment;
+using Devisions.Application.Departments.Commands.UpdateLocations;
+using Devisions.Application.Departments.Queries.GetTopPositions;
 using Devisions.Contracts.Departments.Requests;
+using Devisions.Contracts.Departments.Responses;
 using Devisions.Web.EndPointResults;
 using Microsoft.AspNetCore.Mvc;
 
@@ -56,6 +57,20 @@ public class DepartmentController(ILogger<DepartmentController> logger) : Contro
         var result = await handler.Handle(command, cancellationToken);
         if (result.IsSuccess)
             logger.LogInformation("Department with ID:{departmentId} is moved", departmentId);
+
+        return result;
+    }
+
+    [HttpGet]
+    [Route("api/departments/top-positions")]
+    public async Task<EndPointResult<IEnumerable<TopDepartmentResponse>>> GetTopPositions(
+        [FromServices] IQueryHandler<IEnumerable<TopDepartmentResponse>, TopPositionsQuery> handler,
+        CancellationToken cancellationToken)
+    {
+        var query = new TopPositionsQuery();
+        var result = await handler.Handle(query, cancellationToken);
+        if (result.IsSuccess)
+            logger.LogInformation("Top positions is received");
 
         return result;
     }

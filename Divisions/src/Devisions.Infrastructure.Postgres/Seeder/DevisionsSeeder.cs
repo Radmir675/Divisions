@@ -45,7 +45,7 @@ public class DevisionsSeeder : ISeeder
 
     private async Task SeedLocationsAsync(CancellationToken cancellationToken)
     {
-        // TODO: дописать сидировани
+        // TODO: дописать сидирование
     }
 
     private async Task SeedDepartmentsAsync(CancellationToken cancellationToken)

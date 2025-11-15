@@ -1,4 +1,4 @@
-using Devisions.Application.Departments.CreateDepartment;
+using Devisions.Application.Departments.Commands.CreateDepartment;
 using Devisions.Contracts.Departments.Requests;
 using Devisions.Domain.Department;
 using Devisions.Domain.Location;

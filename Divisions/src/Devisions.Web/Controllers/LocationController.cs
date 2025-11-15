@@ -1,6 +1,7 @@
 using Devisions.Application.Abstractions;
 using Devisions.Application.Locations.Commands.CreateLocation;
 using Devisions.Application.Locations.Queries;
+using Devisions.Application.Locations.Queries.GetLocation;
 using Devisions.Contracts.Locations.Requests;
 using Devisions.Contracts.Locations.Responses;
 using Devisions.Web.EndPointResults;

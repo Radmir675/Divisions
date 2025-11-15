@@ -22,6 +22,8 @@ public sealed class AppDbContext : DbContext, IReadDbContext
 
     public IQueryable<Department> DepartmentsRead => Set<Department>().AsQueryable().AsNoTracking();
 
+    public IQueryable<Position> PositionsRead => Set<Position>().AsQueryable().AsNoTracking();
+
     public AppDbContext(string connectionString)
     {
         _connectionString = connectionString;
