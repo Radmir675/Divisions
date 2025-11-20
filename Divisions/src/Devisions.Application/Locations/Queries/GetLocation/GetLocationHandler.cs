@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
@@ -11,13 +10,14 @@ using Devisions.Contracts.Locations.Responses;
 using Devisions.Domain.Department;
 using Devisions.Domain.Location;
 using FluentValidation;
+using Microsoft.EntityFrameworkCore;
 using Shared.Errors;
 
 namespace Devisions.Application.Locations.Queries.GetLocation;
 
 public record GetLocationQuery(GetLocationsRequest Request) : IQuery;
 
-public class GetLocationsHandler : IQueryHandler<IEnumerable<LocationDto>, GetLocationQuery>
+public class GetLocationsHandler : IQueryHandler<GetLocationDto, GetLocationQuery>
 {
     private readonly IValidator<GetLocationQuery> _validator;
     private readonly IReadDbContext _readDbContext;
@@ -30,7 +30,7 @@ public class GetLocationsHandler : IQueryHandler<IEnumerable<LocationDto>, GetLo
         _readDbContext = readDbContext;
     }
 
-    public async Task<Result<IEnumerable<LocationDto>, Errors>> Handle(
+    public async Task<Result<GetLocationDto, Errors>> Handle(
         GetLocationQuery query,
         CancellationToken cancellationToken)
     {
@@ -43,17 +43,19 @@ public class GetLocationsHandler : IQueryHandler<IEnumerable<LocationDto>, GetLo
         var departmentIds = query.Request.DepartmentIds?.Select(x => new DepartmentId(x)).ToList();
         if (departmentIds?.Any() == true)
         {
-            resultQuery = resultQuery.Where(l =>
-                _readDbContext.DepartmentsRead
-                    .Where(d => departmentIds.Contains(d.Id))
-                    .SelectMany(d => d.DepartmentLocations.Select(dl => dl.LocationId))
-                    .Contains(l.Id));
+            resultQuery = (from l in resultQuery
+                join dl in _readDbContext.DepartmentLocationsRead on l.Id equals dl.LocationId
+                join d in _readDbContext.DepartmentsRead on dl.DepartmentId equals d.Id
+                where departmentIds.Contains(d.Id)
+                select l).Distinct();
         }
 
         if (!string.IsNullOrEmpty(query.Request.Search))
         {
-            var searchTerm = query.Request.Search.ToLower();
-            resultQuery = resultQuery.Where(x => x.Name.ToLower().Contains(searchTerm));
+            string searchTerm = query.Request.Search.ToLower();
+            resultQuery =
+                resultQuery.Where(l =>
+                    EF.Functions.Like(l.Name.ToLower(), $"%{searchTerm}%"));
         }
 
         if (query.Request.IsActive.HasValue)
@@ -63,8 +65,8 @@ public class GetLocationsHandler : IQueryHandler<IEnumerable<LocationDto>, GetLo
 
         if (query.Request.Page.HasValue && query.Request.PageSize.HasValue)
         {
-            var pageSize = query.Request.PageSize.Value;
-            var page = query.Request.Page.Value;
+            int pageSize = query.Request.PageSize.Value;
+            int page = query.Request.Page.Value;
 
             resultQuery = resultQuery
                 .Skip((page - 1) * pageSize)
@@ -92,6 +94,9 @@ public class GetLocationsHandler : IQueryHandler<IEnumerable<LocationDto>, GetLo
                 RoomNumber = l.Address.RoomNumber,
             },
         }).ToList();
-        return locations;
+
+        var totalCount = await resultQuery.LongCountAsync(cancellationToken);
+
+        return new GetLocationDto(locations, totalCount);
     }
 }

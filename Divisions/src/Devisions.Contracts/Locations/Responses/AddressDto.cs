@@ -1,6 +1,6 @@
 ﻿namespace Devisions.Contracts.Locations.Responses;
 
-public record AddressDto
+public sealed record AddressDto
 {
     public required string Country { get; init; }
 

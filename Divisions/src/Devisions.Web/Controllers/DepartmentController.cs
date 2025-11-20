@@ -2,9 +2,12 @@
 using Devisions.Application.Departments.Commands.CreateDepartment;
 using Devisions.Application.Departments.Commands.MoveDepartment;
 using Devisions.Application.Departments.Commands.UpdateLocations;
-using Devisions.Application.Departments.Queries.GetTopPositions;
+using Devisions.Application.Departments.Queries.DepartmentChildren;
+using Devisions.Application.Departments.Queries.RootDepartmentsWithChildren;
+using Devisions.Application.Departments.Queries.TopDepartments;
 using Devisions.Contracts.Departments.Requests;
 using Devisions.Contracts.Departments.Responses;
+using Devisions.Contracts.Shared;
 using Devisions.Web.EndPointResults;
 using Microsoft.AspNetCore.Mvc;
 
@@ -62,15 +65,48 @@ public class DepartmentController(ILogger<DepartmentController> logger) : Contro
     }
 
     [HttpGet]
-    [Route("api/departments/top-positions")]
-    public async Task<EndPointResult<IReadOnlyList<DepartmentDto>>> GetTopDepartments(
-        [FromServices] IQueryHandler<IReadOnlyList<DepartmentDto>, TopDepartmentsQuery> handler,
+    [Route("/api/departments/top-positions")]
+    public async Task<EndPointResult<IReadOnlyList<DepartmentWithPositionsDto>>> GetTopDepartments(
+        [FromServices] IQueryHandler<IReadOnlyList<DepartmentWithPositionsDto>, TopDepartmentsQuery> handler,
         CancellationToken cancellationToken)
     {
         var query = new TopDepartmentsQuery();
         var result = await handler.Handle(query, cancellationToken);
         if (result.IsSuccess)
             logger.LogInformation("Top positions is received");
+
+        return result;
+    }
+
+    [HttpGet]
+    [Route("/api/departments/roots")]
+    public async Task<EndPointResult<IReadOnlyList<DepartmentWithChildrenDto>>> GetRootDepartmentsWithChildrenPrefetch(
+        [FromQuery] PaginationRequest request,
+        [FromQuery] int? prefetch,
+        [FromServices]
+        IQueryHandler<IReadOnlyList<DepartmentWithChildrenDto>, RootDepartmentsWithChildrenQuery> handler,
+        CancellationToken cancellationToken)
+    {
+        var query = new RootDepartmentsWithChildrenQuery(request, prefetch);
+        var result = await handler.Handle(query, cancellationToken);
+        if (result.IsSuccess)
+            logger.LogInformation("Root departments with children are retrieved");
+
+        return result;
+    }
+
+    [HttpGet]
+    [Route("/api/departments/{parentId:Guid}/children")]
+    public async Task<EndPointResult<IReadOnlyList<DepartmentBaseDto>>> GetDepartmentChildren(
+        Guid parentId,
+        [FromQuery] PaginationRequest request,
+        [FromServices] IQueryHandler<IReadOnlyList<DepartmentBaseDto>, DepartmentChildrenQuery> handler,
+        CancellationToken cancellationToken)
+    {
+        var query = new DepartmentChildrenQuery(request, parentId);
+        var result = await handler.Handle(query, cancellationToken);
+        if (result.IsSuccess)
+            logger.LogInformation("Children of a department {department} are retrieved", parentId);
 
         return result;
     }

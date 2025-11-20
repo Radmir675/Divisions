@@ -2,7 +2,7 @@ using Devisions.Contracts.Positions.Responses;
 
 namespace Devisions.Contracts.Departments.Responses;
 
-public record DepartmentDto
+public sealed record DepartmentWithPositionsDto
 {
     public Guid Id { get; init; }
 
@@ -22,5 +22,5 @@ public record DepartmentDto
 
     public DateTime? UpdatedAt { get; init; }
 
-    public IReadOnlyList<PositionInfoDto> DepartmentPositions { get; init; } = [];
+    public IReadOnlyList<PositionInfoDto> Positions { get; init; } = [];
 }
