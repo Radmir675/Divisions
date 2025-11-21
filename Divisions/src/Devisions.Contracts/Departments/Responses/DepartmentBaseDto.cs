@@ -1,3 +1,5 @@
+using Devisions.Contracts.Positions.Responses;
+
 namespace Devisions.Contracts.Departments.Responses;
 
 public sealed record DepartmentBaseDto
@@ -21,4 +23,8 @@ public sealed record DepartmentBaseDto
     public DateTime? UpdatedAt { get; init; }
 
     public bool HasMoreChildren { get; init; }
+    
+    public IReadOnlyList<DepartmentBaseDto> Children { get; init; } = [];
+    
+    public IReadOnlyList<PositionInfoDto> Positions { get; init; } = [];
 }

@@ -16,7 +16,7 @@ public class CreateLocationTests : DivisionsBaseTests
     { }
 
     [Fact]
-    public async Task CreateLocation_with_valid_data_should_succeed()
+    public async Task CreateLocation_WithValidData_ShouldSucceed()
     {
         // arrange
         var cancellationToken = CancellationToken.None;
@@ -44,7 +44,8 @@ public class CreateLocationTests : DivisionsBaseTests
         location.Id.Should().Be(new LocationId(locationIdResult.Value));
     }
 
-    public async Task CreateLocation_with_invalid_names_should_failed()
+    [Fact]
+    public async Task CreateLocation_WithInvalidName_ShouldFail()
     {
         // arrange
         var cancellationToken = CancellationToken.None;

@@ -1,1 +1,6 @@
-﻿<Project Sdk="Microsoft.NET.Sdk"/>
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <Compile Remove="Departments\Responses\DepartmentWithChildrenDto.cs" />
+    <Compile Remove="Departments\Responses\DepartmentWithPositionsDto.cs" />
+  </ItemGroup>
+</Project>

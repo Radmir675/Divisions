@@ -44,7 +44,7 @@ public class MoveDepartmentsTests : DivisionsBaseTests
     }
 
     [Fact]
-    public async Task MoveDepartment_to_parent_null_should_succeed()
+    public async Task MoveDepartment_ToParentNull_ShouldSucceed()
     {
         // arrange
         var cancellationToken = CancellationToken.None;
@@ -92,7 +92,7 @@ public class MoveDepartmentsTests : DivisionsBaseTests
     }
 
     [Fact]
-    public async Task MoveDepartment_to_parent_should_succeed()
+    public async Task MoveDepartment_ToParent_ShouldSucceed()
     {
         // arrange
         var cancellationToken = CancellationToken.None;
@@ -133,7 +133,7 @@ public class MoveDepartmentsTests : DivisionsBaseTests
     }
 
     [Fact]
-    public async Task Move_Department_to_his_children_should_failed()
+    public async Task MoveDepartment_ToItsChild_ShouldFail()
     {
         // arrange
         var cancellationToken = CancellationToken.None;
@@ -154,7 +154,7 @@ public class MoveDepartmentsTests : DivisionsBaseTests
 
 
     [Fact]
-    public async Task MoveDepartment_with_same_parent_and_department_id_should_failed()
+    public async Task MoveDepartment_WithSameParentAndDepartmentId_ShouldFail()
     {
         // arrange
         var cancellationToken = CancellationToken.None;

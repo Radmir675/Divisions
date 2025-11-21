@@ -66,8 +66,8 @@ public class DepartmentController(ILogger<DepartmentController> logger) : Contro
 
     [HttpGet]
     [Route("/api/departments/top-positions")]
-    public async Task<EndPointResult<IReadOnlyList<DepartmentWithPositionsDto>>> GetTopDepartments(
-        [FromServices] IQueryHandler<IReadOnlyList<DepartmentWithPositionsDto>, TopDepartmentsQuery> handler,
+    public async Task<EndPointResult<IReadOnlyList<DepartmentBaseDto>>> GetTopDepartments(
+        [FromServices] IQueryHandler<IReadOnlyList<DepartmentBaseDto>, TopDepartmentsQuery> handler,
         CancellationToken cancellationToken)
     {
         var query = new TopDepartmentsQuery();
@@ -80,11 +80,11 @@ public class DepartmentController(ILogger<DepartmentController> logger) : Contro
 
     [HttpGet]
     [Route("/api/departments/roots")]
-    public async Task<EndPointResult<IReadOnlyList<DepartmentWithChildrenDto>>> GetRootDepartmentsWithChildrenPrefetch(
+    public async Task<EndPointResult<IReadOnlyList<DepartmentBaseDto>>> GetRootDepartmentsWithChildrenPrefetch(
         [FromQuery] PaginationRequest request,
         [FromQuery] int? prefetch,
         [FromServices]
-        IQueryHandler<IReadOnlyList<DepartmentWithChildrenDto>, RootDepartmentsWithChildrenQuery> handler,
+        IQueryHandler<IReadOnlyList<DepartmentBaseDto>, RootDepartmentsWithChildrenQuery> handler,
         CancellationToken cancellationToken)
     {
         var query = new RootDepartmentsWithChildrenQuery(request, prefetch);

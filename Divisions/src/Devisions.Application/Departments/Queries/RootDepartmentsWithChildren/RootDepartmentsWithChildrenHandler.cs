@@ -12,7 +12,7 @@ using Shared.Errors;
 
 namespace Devisions.Application.Departments.Queries.RootDepartmentsWithChildren;
 
-public class RootDepartmentsWithChildrenHandler : IQueryHandler<IReadOnlyList<DepartmentWithChildrenDto>,
+public class RootDepartmentsWithChildrenHandler : IQueryHandler<IReadOnlyList<DepartmentBaseDto>,
     RootDepartmentsWithChildrenQuery>
 {
     private readonly IDbConnectionFactory _dbConnectionFactory;
@@ -26,7 +26,7 @@ public class RootDepartmentsWithChildrenHandler : IQueryHandler<IReadOnlyList<De
         _logger = logger;
     }
 
-    public async Task<Result<IReadOnlyList<DepartmentWithChildrenDto>, Errors>> Handle(
+    public async Task<Result<IReadOnlyList<DepartmentBaseDto>, Errors>> Handle(
         RootDepartmentsWithChildrenQuery withChildrenQuery,
         CancellationToken cancellationToken)
     {
@@ -78,7 +78,7 @@ public class RootDepartmentsWithChildrenHandler : IQueryHandler<IReadOnlyList<De
         using var connection = await _dbConnectionFactory.GetConnectionAsync(cancellationToken);
 
         var result = await connection
-            .QueryAsync<DepartmentWithChildrenDto>(sql, sqlParams);
+            .QueryAsync<DepartmentBaseDto>(sql, sqlParams);
 
         var resultCollection = result.ToList();
 

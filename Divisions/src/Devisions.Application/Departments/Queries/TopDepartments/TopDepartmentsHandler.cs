@@ -14,7 +14,7 @@ namespace Devisions.Application.Departments.Queries.TopDepartments;
 
 public record TopDepartmentsQuery() : IQuery;
 
-public class TopDepartmentsHandler : IQueryHandler<IReadOnlyList<DepartmentWithPositionsDto>, TopDepartmentsQuery>
+public class TopDepartmentsHandler : IQueryHandler<IReadOnlyList<DepartmentBaseDto>, TopDepartmentsQuery>
 {
     private const byte TOP_DEPARTMENTS_COUNT = 5;
     private readonly IReadDbContext _readDbContext;
@@ -24,14 +24,14 @@ public class TopDepartmentsHandler : IQueryHandler<IReadOnlyList<DepartmentWithP
         _readDbContext = readDbContext;
     }
 
-    public async Task<Result<IReadOnlyList<DepartmentWithPositionsDto>, Errors>> Handle(
+    public async Task<Result<IReadOnlyList<DepartmentBaseDto>, Errors>> Handle(
         TopDepartmentsQuery query,
         CancellationToken cancellationToken)
     {
         var departmentDtos = _readDbContext.DepartmentsRead
             .Include(x => x.DepartmentPositions)
             .Select(d =>
-                new DepartmentWithPositionsDto
+                new DepartmentBaseDto
                 {
                     Id = d.Id.Value,
                     Name = d.Name.Name,
