@@ -17,7 +17,7 @@ public class CreateDepartmentTests : DivisionsBaseTests
     }
 
     [Fact]
-    public async Task CreateDepartment_with_valid_data_should_succeed()
+    public async Task CreateDepartment_WithValidData_ShouldSucceed()
     {
         // arrange
         var cancellationToken = CancellationToken.None;
@@ -53,7 +53,7 @@ public class CreateDepartmentTests : DivisionsBaseTests
     }
 
     [Fact]
-    public async Task CreateDepartment_with_multiple_locations_should_succeed()
+    public async Task CreateDepartment_WithMultipleLocations_ShouldSucceed()
     {
         // arrange
         var cancellationToken = CancellationToken.None;
@@ -87,7 +87,7 @@ public class CreateDepartmentTests : DivisionsBaseTests
     }
 
     [Fact]
-    public async Task CreateDepartment_with_invalid_location_should_failure()
+    public async Task CreateDepartment_WithInvalidLocation_ShouldFail()
     {
         // arrange
         var cancellationToken = CancellationToken.None;
@@ -111,7 +111,7 @@ public class CreateDepartmentTests : DivisionsBaseTests
     }
 
     [Fact]
-    public async Task CreateDepartment_without_locations_should_failure()
+    public async Task CreateDepartment_WithoutLocations_ShouldFail()
     {
         // arrange
         var cancellationToken = CancellationToken.None;
@@ -133,7 +133,7 @@ public class CreateDepartmentTests : DivisionsBaseTests
     }
 
     [Fact]
-    public async Task CreateDepartments_with_identical_identifiers_should_failure()
+    public async Task CreateDepartments_WithIdenticalIdentifiers_ShouldFail()
     {
         // arrange
         var cancellationToken = CancellationToken.None;

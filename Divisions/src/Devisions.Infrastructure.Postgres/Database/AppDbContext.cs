@@ -18,11 +18,21 @@ public sealed class AppDbContext : DbContext, IReadDbContext
 
     public DbSet<Position> Positions { get; set; }
 
+    public DbSet<DepartmentLocation> DepartmentLocations { get; set; }
+
+    public DbSet<DepartmentPosition> DepartmentPositions { get; set; }
+
     public IQueryable<Location> LocationsRead => Set<Location>().AsQueryable().AsNoTracking();
 
     public IQueryable<Department> DepartmentsRead => Set<Department>().AsQueryable().AsNoTracking();
 
     public IQueryable<Position> PositionsRead => Set<Position>().AsQueryable().AsNoTracking();
+
+    public IQueryable<DepartmentPosition> DepartmentPositionsRead =>
+        Set<DepartmentPosition>().AsQueryable().AsNoTracking();
+
+    public IQueryable<DepartmentLocation> DepartmentLocationsRead =>
+        Set<DepartmentLocation>().AsQueryable().AsNoTracking();
 
     public AppDbContext(string connectionString)
     {

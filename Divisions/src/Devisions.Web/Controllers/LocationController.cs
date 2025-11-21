@@ -30,8 +30,8 @@ public class LocationController(ILogger<LocationController> logger) : Controller
 
     [HttpGet]
     [Route("/api/locations")]
-    public async Task<EndPointResult<IEnumerable<LocationDto>>> Locations(
-        [FromServices] IQueryHandler<IEnumerable<LocationDto>, GetLocationQuery> handler,
+    public async Task<EndPointResult<GetLocationDto>> Locations(
+        [FromServices] IQueryHandler<GetLocationDto, GetLocationQuery> handler,
         [FromQuery] GetLocationsRequest request,
         CancellationToken cancellationToken)
     {

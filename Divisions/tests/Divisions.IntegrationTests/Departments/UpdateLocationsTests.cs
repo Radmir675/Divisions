@@ -17,7 +17,7 @@ public class UpdateLocationsTests : DivisionsBaseTests
     }
 
     [Fact]
-    public async Task UpdateDepartmentLocation_with_valid_data_should_succeed()
+    public async Task UpdateDepartmentLocation_WithValidData_ShouldSucceed()
     {
         // arrange
         var cancellationToken = CancellationToken.None;
@@ -51,7 +51,7 @@ public class UpdateLocationsTests : DivisionsBaseTests
     }
 
     [Fact]
-    public async Task UpdateDepartmentLocation_with_valid_two_locations_data_should_succeed()
+    public async Task UpdateDepartmentLocation_WithTwoValidLocations_ShouldSucceed()
     {
         // arrange
         var cancellationToken = CancellationToken.None;
@@ -88,7 +88,7 @@ public class UpdateLocationsTests : DivisionsBaseTests
     }
 
     [Fact]
-    public async Task UpdateDepartmentLocation_with_invalid_locations_data_should_failed()
+    public async Task UpdateDepartmentLocation_WithInvalidLocations_ShouldFail()
     {
         // arrange
         var cancellationToken = CancellationToken.None;

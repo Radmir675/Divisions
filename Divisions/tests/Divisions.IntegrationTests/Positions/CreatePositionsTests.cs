@@ -17,7 +17,7 @@ public class CreatePositionsTests : DivisionsBaseTests
     { }
 
     [Fact]
-    public async Task CreatePosition_with_valid_data_should_succeed()
+    public async Task CreatePosition_WithValidData_ShouldSucceed()
     {
         // arrange
         var cancellationToken = CancellationToken.None;
@@ -54,7 +54,8 @@ public class CreatePositionsTests : DivisionsBaseTests
         position.Id.Should().Be(new PositionId(positionIdResult.Value));
     }
 
-    public async Task CreatePosition_with_invalid_random_departments_should_failed()
+    [Fact]
+    public async Task CreatePosition_WithInvalidRandomDepartments_ShouldFail()
     {
         // arrange
         var cancellationToken = CancellationToken.None;
@@ -74,15 +75,13 @@ public class CreatePositionsTests : DivisionsBaseTests
         var position = await ExecuteInDb(async dbContext =>
         {
             var department = await dbContext.Positions
-                .FirstAsync(x => x.Id == new PositionId(randomDepartmentId), cancellationToken);
+                .FirstOrDefaultAsync(x => x.Id == new PositionId(randomDepartmentId), cancellationToken);
             return department;
         });
 
         // assert
         positionIdResult.IsFailure.Should().BeTrue();
-        positionIdResult.Value.Should().NotBe(Guid.Empty);
         position.Should().BeNull();
-        position.Id.Should().NotBe(new PositionId(positionIdResult.Value));
     }
 
     private async Task<T> ExecuteHandler<T>(Func<CreatePositionsHandler, Task<T>> action)
