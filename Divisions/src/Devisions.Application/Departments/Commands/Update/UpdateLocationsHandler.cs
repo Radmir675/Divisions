@@ -14,7 +14,7 @@ using FluentValidation;
 using Microsoft.Extensions.Logging;
 using Shared.Errors;
 
-namespace Devisions.Application.Departments.Commands.UpdateLocations;
+namespace Devisions.Application.Departments.Commands.Update;
 
 public record UpdateLocationsCommand(Guid DepartmentId, UpdateLocationsRequest Request) : ICommand;
 

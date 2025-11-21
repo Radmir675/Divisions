@@ -1,7 +1,8 @@
 ﻿using Devisions.Application.Abstractions;
-using Devisions.Application.Departments.Commands.CreateDepartment;
-using Devisions.Application.Departments.Commands.MoveDepartment;
-using Devisions.Application.Departments.Commands.UpdateLocations;
+using Devisions.Application.Departments.Commands.Create;
+using Devisions.Application.Departments.Commands.Delete;
+using Devisions.Application.Departments.Commands.Move;
+using Devisions.Application.Departments.Commands.Update;
 using Devisions.Application.Departments.Queries.DepartmentChildren;
 using Devisions.Application.Departments.Queries.RootDepartmentsWithChildren;
 using Devisions.Application.Departments.Queries.TopDepartments;
@@ -107,6 +108,21 @@ public class DepartmentController(ILogger<DepartmentController> logger) : Contro
         var result = await handler.Handle(query, cancellationToken);
         if (result.IsSuccess)
             logger.LogInformation("Children of a department {department} are retrieved", parentId);
+
+        return result;
+    }
+
+    [HttpDelete]
+    [Route("/api/departments/{departmentId:Guid}")]
+    public async Task<EndPointResult<Guid>> SoftDelete(
+        [FromRoute] Guid departmentId,
+        [FromServices] ICommandHandler<Guid, SoftDeleteDepartmentCommand> handler,
+        CancellationToken cancellationToken)
+    {
+        var command = new SoftDeleteDepartmentCommand(departmentId);
+        var result = await handler.Handle(command, cancellationToken);
+        if (result.IsSuccess)
+            logger.LogInformation("Department with ID:{departmentId} is deleted", result.Value);
 
         return result;
     }

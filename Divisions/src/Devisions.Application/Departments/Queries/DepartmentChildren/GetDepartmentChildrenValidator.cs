@@ -1,0 +1,15 @@
+﻿using Devisions.Application.Departments.Queries.DepartmentChildren;
+using Devisions.Application.Validation;
+using FluentValidation;
+using Shared.Errors;
+
+namespace Devisions.Application.Departments.Commands.Create;
+
+public class GetDepartmentChildrenValidator : AbstractValidator<DepartmentChildrenQuery>
+{
+    public GetDepartmentChildrenValidator()
+    {
+        RuleFor(x => x.ParentId).NotEmpty()
+            .WithError(GeneralErrors.ValueIsRequired("ParentId"));
+    }
+}

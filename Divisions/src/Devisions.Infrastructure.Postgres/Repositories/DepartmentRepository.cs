@@ -183,13 +183,18 @@ public class DepartmentRepository : IDepartmentRepository
     {
         try
         {
-            await _dbContext.Database.ExecuteSqlAsync(
-                $"SELECT * FROM departments WHERE id={departmentId.Value} FOR UPDATE",
-                cancellationToken);
-
-            var department =
-                await _dbContext.Departments
-                    .FirstOrDefaultAsync(x => x.Id == departmentId, cancellationToken);
+            var department = await _dbContext.Departments
+                .FromSqlRaw(
+                    "SELECT * FROM departments WHERE id = {0} FOR UPDATE",
+                    departmentId.Value)
+                .FirstOrDefaultAsync(cancellationToken);
+            // await _dbContext.Database.ExecuteSqlAsync(
+            //     $"SELECT * FROM departments WHERE id={departmentId.Value} FOR UPDATE",
+            //     cancellationToken);
+            //
+            // var department =
+            //     await _dbContext.Departments
+            //         .FirstOrDefaultAsync(x => x.Id == departmentId, cancellationToken);
 
             if (department is null)
             {

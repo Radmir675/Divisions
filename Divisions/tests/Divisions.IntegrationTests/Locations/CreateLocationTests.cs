@@ -1,4 +1,4 @@
-﻿using Devisions.Application.Locations.Commands.CreateLocation;
+﻿using Devisions.Application.Locations.Commands.Create;
 using Devisions.Contracts.Locations.Requests;
 using Devisions.Domain.Location;
 using Divisions.IntegrationTests.Infrastructure;
@@ -13,7 +13,8 @@ public class CreateLocationTests : DivisionsBaseTests
 {
     public CreateLocationTests(DivisionsTestFactory divisionsTestFactory)
         : base(divisionsTestFactory)
-    { }
+    {
+    }
 
     [Fact]
     public async Task CreateLocation_with_valid_data_should_succeed()

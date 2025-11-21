@@ -34,6 +34,10 @@ namespace Devisions.Infrastructure.Postgres.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
                     b.Property<short>("Depth")
                         .HasColumnType("smallint")
                         .HasColumnName("depth");

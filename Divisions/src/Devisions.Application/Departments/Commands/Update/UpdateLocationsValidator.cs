@@ -2,7 +2,7 @@
 using FluentValidation;
 using Shared.Errors;
 
-namespace Devisions.Application.Departments.Commands.UpdateLocations;
+namespace Devisions.Application.Departments.Commands.Update;
 
 public class UpdateLocationsValidator : AbstractValidator<UpdateLocationsCommand>
 {

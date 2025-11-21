@@ -1,6 +1,5 @@
 ﻿using Devisions.Application.Abstractions;
-using Devisions.Application.Positions.CreatePositions;
-using Devisions.Contracts.Positions;
+using Devisions.Application.Positions.Create;
 using Devisions.Contracts.Positions.Requests;
 using Devisions.Web.EndPointResults;
 using Microsoft.AspNetCore.Mvc;

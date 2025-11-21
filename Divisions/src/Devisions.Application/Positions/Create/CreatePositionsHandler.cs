@@ -13,7 +13,7 @@ using FluentValidation;
 using Microsoft.Extensions.Logging;
 using Shared.Errors;
 
-namespace Devisions.Application.Positions.CreatePositions;
+namespace Devisions.Application.Positions.Create;
 
 public class CreatePositionsHandler : ICommandHandler<Guid, CreatePositionCommand>
 {

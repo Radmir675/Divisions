@@ -31,6 +31,8 @@ public sealed class Department
 
     public DateTime? UpdatedAt { get; private set; }
 
+    public DateTime? DeletedAt { get; private set; }
+
     public Department? Parent { get; private set; }
 
     private readonly List<Department> _childrens = [];
@@ -150,5 +152,11 @@ public sealed class Department
     {
         _childrens.Add(chidren);
         return UnitResult.Success<Error>();
+    }
+
+    public void SoftDelete()
+    {
+        IsActive = false;
+        DeletedAt = DateTime.UtcNow;
     }
 }
