@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using CSharpFunctionalExtensions;
+using Devisions.Domain.Interfaces;
 using Devisions.Domain.Location;
 using Shared.Errors;
 
@@ -9,7 +10,7 @@ namespace Devisions.Domain.Department;
 
 public record DepartmentId(Guid Value);
 
-public sealed class Department
+public sealed class Department : ISoftDeletable
 {
     private const short DEFAULT_DEPTH = 0;
 
@@ -158,5 +159,11 @@ public sealed class Department
     {
         IsActive = false;
         DeletedAt = DateTime.UtcNow;
+    }
+
+    public void Restore()
+    {
+        IsActive = true;
+        DeletedAt = null;
     }
 }

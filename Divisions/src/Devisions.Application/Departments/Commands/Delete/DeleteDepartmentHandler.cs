@@ -1,11 +1,15 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using Devisions.Application.Abstractions;
 using Devisions.Application.Extensions;
+using Devisions.Application.Locations;
+using Devisions.Application.Positions;
 using Devisions.Application.Transaction;
 using Devisions.Domain.Department;
+using Devisions.Domain.Position;
 using FluentValidation;
 using Microsoft.Extensions.Logging;
 using Shared.Errors;
@@ -17,6 +21,9 @@ public record SoftDeleteDepartmentCommand(Guid DepartmentId) : ICommand;
 public class DeleteDepartmentHandler : ICommandHandler<Guid, SoftDeleteDepartmentCommand>
 {
     private readonly IDepartmentRepository _departmentRepository;
+    private readonly ILocationRepository _locationRepository;
+    private readonly IPositionsRepository _positionRepository;
+    
     private readonly ITransactionManager _transactionManager;
     private readonly IValidator<SoftDeleteDepartmentCommand> _validator;
     private readonly ILogger<DeleteDepartmentHandler> _logger;
@@ -25,12 +32,14 @@ public class DeleteDepartmentHandler : ICommandHandler<Guid, SoftDeleteDepartmen
         IDepartmentRepository departmentRepository,
         ITransactionManager transactionManager,
         IValidator<SoftDeleteDepartmentCommand> validator,
-        ILogger<DeleteDepartmentHandler> logger)
+        ILogger<DeleteDepartmentHandler> logger, ILocationRepository locationRepository, IPositionsRepository positionRepository)
     {
         _departmentRepository = departmentRepository;
         _transactionManager = transactionManager;
         _validator = validator;
         _logger = logger;
+        _locationRepository = locationRepository;
+        _positionRepository = positionRepository;
     }
 
     public async Task<Result<Guid, Errors>> Handle(
@@ -56,15 +65,37 @@ public class DeleteDepartmentHandler : ICommandHandler<Guid, SoftDeleteDepartmen
             return lockedDepartment.Error.ToErrors();
         }
 
-        if (!lockedDepartment.Value.IsActive)
+        var department = lockedDepartment.Value;
+
+
+        if (!department.IsActive)
         {
             return Error.NotFound("not.found", "Not found active department",
                 command.DepartmentId, nameof(command.DepartmentId)).ToErrors();
         }
 
-        lockedDepartment.Value.SoftDelete();
+        department.SoftDelete();
 
+        var deleteResult = await _departmentRepository.Delete(department, cancellationToken);
+        if (deleteResult.IsFailure)
+            return deleteResult.Error.ToErrors();
 
+        // теперь надо подумать с локациями и позициями
+        var positionId=department.DepartmentPositions;
+        var positionInUsing = GetUnusedPositions(IEnumerable<PositionId>,cancellationToken);
+        var locationInUsing = true;
+        if (positionInUsing == false)
+        {
+            //
+            _positionRepository.Delete(cancellationToken);
+        }
+        
+        if (locationInUsing == false)
+        {
+            //
+            _locationRepository.Delete(cancellationToken);
+        }
+        
         var transactionResult = transactionScope.Commit();
         if (transactionResult.IsFailure)
         {
@@ -72,8 +103,7 @@ public class DeleteDepartmentHandler : ICommandHandler<Guid, SoftDeleteDepartmen
             return transactionResult.Error.ToErrors();
         }
 
-        return Guid.Empty;
-        // _logger.LogInformation("Department is created with id: {Id}", departmentCreationResult.Value.Id);
-        // return departmentCreationResult.Value.Id.Value;
+        _logger.LogInformation("Department is soft deleted with id: {Id}", deleteResult.Value);
+        return deleteResult.Value;
     }
 }

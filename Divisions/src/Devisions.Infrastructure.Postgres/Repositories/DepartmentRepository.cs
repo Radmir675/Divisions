@@ -235,6 +235,22 @@ public class DepartmentRepository : IDepartmentRepository
         }
     }
 
+    public async Task<Result<Guid, Error>> Delete(Department department, CancellationToken cancellationToken)
+    {
+        try
+        {
+            _dbContext.Departments.Remove(department);
+            await _dbContext.SaveChangesAsync(cancellationToken);
+            return department.Id.Value;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to delete department with id: {id}", department.Id.Value);
+            return GeneralErrors.DatabaseError($"Failed to delete department with id: {department.Id.Value}");
+        }
+    }
+
+
     public async Task<UnitResult<Error>> UpdateDepthDescendants(
         Path path,
         int deltaDepth,

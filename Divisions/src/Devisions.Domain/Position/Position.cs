@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using CSharpFunctionalExtensions;
 using Devisions.Domain.Department;
+using Devisions.Domain.Interfaces;
 using Shared.Errors;
 
 namespace Devisions.Domain.Position;
 
 public record PositionId(Guid Value);
 
-public sealed class Position
+public sealed class Position:ISoftDeletable
 {
     public PositionId Id { get; } = null!;
 
@@ -18,9 +19,11 @@ public sealed class Position
 
     public bool IsActive { get; private set; }
 
-    public DateTime CreatedAt { get;  }
+    public DateTime CreatedAt { get; }
 
     public DateTime? UpdatedAt { get; private set; }
+
+    public DateTime? DeletedAt { get; private set; }
 
     public IReadOnlyList<DepartmentPosition> DepartmentPositions => _departmentPositions;
 
@@ -56,5 +59,17 @@ public sealed class Position
             departmentPositions);
 
         return model;
+    }
+
+    public void SoftDelete()
+    {
+        DeletedAt = DateTime.UtcNow;
+        IsActive = false;
+    }
+
+    public void Restore()
+    {
+        DeletedAt = null;
+        IsActive = true;
     }
 }

@@ -83,11 +83,13 @@ public class DepartmentConfiguration : IEntityTypeConfiguration<Department>
         builder
             .HasMany(x => x.DepartmentLocations)
             .WithOne()
-            .HasForeignKey(x => x.DepartmentId);
+            .HasForeignKey(x => x.DepartmentId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder
             .HasMany(x => x.DepartmentPositions)
             .WithOne()
-            .HasForeignKey(x => x.DepartmentId);
+            .HasForeignKey(x => x.DepartmentId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }
