@@ -1,4 +1,4 @@
-﻿using Devisions.Application.Departments.Commands.Update;
+﻿using Devisions.Application.Departments.Commands.UpdateLocations;
 using Devisions.Contracts.Departments.Requests;
 using Devisions.Domain.Department;
 using Devisions.Domain.Location;

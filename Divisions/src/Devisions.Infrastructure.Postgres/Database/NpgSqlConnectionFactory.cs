@@ -18,6 +18,13 @@ public class NpgSqlConnectionFactory : IDisposable, IAsyncDisposable, IDbConnect
         _dataSourse = dataSourceBuilder.Build();
     }
 
+    public NpgSqlConnectionFactory(string connectionString)
+    {
+        var dataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString);
+        dataSourceBuilder.UseLoggerFactory(ConsoleDBLogger());
+        _dataSourse = dataSourceBuilder.Build();
+    }
+
     public async Task<IDbConnection> GetConnectionAsync(CancellationToken cancellationToken)
     {
         return await _dataSourse.OpenConnectionAsync(cancellationToken);

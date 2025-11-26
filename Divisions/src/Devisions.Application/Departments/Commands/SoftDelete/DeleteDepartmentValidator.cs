@@ -1,9 +1,8 @@
-﻿using Devisions.Application.Departments.Commands.Delete;
-using Devisions.Application.Validation;
+﻿using Devisions.Application.Validation;
 using FluentValidation;
 using Shared.Errors;
 
-namespace Devisions.Application.Departments.Commands.Create;
+namespace Devisions.Application.Departments.Commands.SoftDelete;
 
 public class DeleteDepartmentValidator : AbstractValidator<SoftDeleteDepartmentCommand>
 {

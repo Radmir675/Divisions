@@ -18,5 +18,7 @@ public interface ILocationRepository
         IEnumerable<LocationId> locationsId,
         CancellationToken cancellationToken);
 
-    Task<Result<Guid, Error>> Delete(IEnumerable<Location> locations, CancellationToken cancellationToken);
+    Task<Result<IEnumerable<Location>, Error>> GetByIds(
+        IEnumerable<LocationId> locationIds,
+        CancellationToken cancellationToken);
 }

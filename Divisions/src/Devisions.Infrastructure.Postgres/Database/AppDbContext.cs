@@ -3,7 +3,6 @@ using Devisions.Application.Database;
 using Devisions.Domain.Department;
 using Devisions.Domain.Location;
 using Devisions.Domain.Position;
-using Devisions.Infrastructure.Postgres.Interceptors;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -48,7 +47,6 @@ public sealed class AppDbContext : DbContext, IReadDbContext
         optionsBuilder.EnableSensitiveDataLogging();
         optionsBuilder.UseLoggerFactory(ConsoleDbLogger());
         optionsBuilder.UseSnakeCaseNamingConvention();
-        optionsBuilder.AddInterceptors(new SoftDeleteInterceptor());
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

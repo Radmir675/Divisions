@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using CSharpFunctionalExtensions;
 using Devisions.Domain.Department;
 using Devisions.Domain.Interfaces;
@@ -26,6 +27,8 @@ public sealed class Location : ISoftDeletable
     public DateTime? UpdatedAt { get; private set; }
 
     public DateTime? DeletedAt { get; private set; }
+
+    [ConcurrencyCheck] public Guid Version { get; private set; }
 
     public IReadOnlyList<DepartmentLocation> DepartmentLocations => _departmentLocations;
 
@@ -63,11 +66,13 @@ public sealed class Location : ISoftDeletable
     {
         DeletedAt = DateTime.UtcNow;
         IsActive = false;
+        Version = Guid.NewGuid();
     }
 
     public void Restore()
     {
         DeletedAt = null;
         IsActive = true;
+        Version = Guid.NewGuid();
     }
 }

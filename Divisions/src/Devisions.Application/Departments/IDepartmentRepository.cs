@@ -38,5 +38,9 @@ public interface IDepartmentRepository
 
     Task<UnitResult<Error>> UpdatePathDescendants(Path oldPath, Path newPath, CancellationToken cancellationToken);
 
-    Task<Result<Guid, Error>> Delete(Department department, CancellationToken cancellationToken);
+    Task<Result<Guid, Error>> DeleteAsync(Department department, CancellationToken cancellationToken);
+
+    Task<UnitResult<Error>> SetPathDescendantsDeleted(
+        Path departmentPath,
+        CancellationToken cancellationToken);
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
+using Devisions.Domain.Department;
 using Devisions.Domain.Position;
 using Shared.Errors;
 
@@ -14,5 +15,15 @@ public interface IPositionsRepository
 
     Task<Result<bool, Error>> IsNameActiveAndFreeAsync(PositionName name, CancellationToken cancellationToken);
 
-    Task<Result<Guid, Error>> Delete(IEnumerable<Position> positions, CancellationToken cancellationToken);
+    Task<UnitResult<Error>> DeleteAsync(
+        IEnumerable<PositionId> positionIds,
+        CancellationToken cancellationToken);
+
+    Task<Result<IEnumerable<PositionId>, Error>> GetUnusedAsync(
+        DepartmentId departmentId,
+        CancellationToken cancellationToken);
+
+    Task<Result<IEnumerable<Position>, Error>> GetByIds(
+        IEnumerable<PositionId> positionIds,
+        CancellationToken cancellationToken);
 }

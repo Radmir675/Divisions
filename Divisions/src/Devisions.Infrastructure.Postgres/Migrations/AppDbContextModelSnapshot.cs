@@ -75,13 +75,15 @@ namespace Devisions.Infrastructure.Postgres.Migrations
                                 .HasColumnName("name");
                         });
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_departments");
 
                     b.HasIndex("Identifier")
                         .IsUnique()
                         .HasDatabaseName("UK_departments_identifier");
 
-                    b.HasIndex("ParentId");
+                    b.HasIndex("ParentId")
+                        .HasDatabaseName("ix_departments_parent_id");
 
                     b.HasIndex("Path")
                         .HasDatabaseName("UK_departments_path");
@@ -106,11 +108,14 @@ namespace Devisions.Infrastructure.Postgres.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("location_id");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_department_locations");
 
-                    b.HasIndex("DepartmentId");
+                    b.HasIndex("DepartmentId")
+                        .HasDatabaseName("ix_department_locations_department_id");
 
-                    b.HasIndex("LocationId");
+                    b.HasIndex("LocationId")
+                        .HasDatabaseName("ix_department_locations_location_id");
 
                     b.ToTable("department_locations", (string)null);
                 });
@@ -130,11 +135,14 @@ namespace Devisions.Infrastructure.Postgres.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("position_id");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_department_positions");
 
-                    b.HasIndex("DepartmentId");
+                    b.HasIndex("DepartmentId")
+                        .HasDatabaseName("ix_department_positions_department_id");
 
-                    b.HasIndex("PositionId");
+                    b.HasIndex("PositionId")
+                        .HasDatabaseName("ix_department_positions_position_id");
 
                     b.ToTable("department_positions", (string)null);
                 });
@@ -149,6 +157,10 @@ namespace Devisions.Infrastructure.Postgres.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean")
                         .HasColumnName("is_active");
@@ -162,6 +174,11 @@ namespace Devisions.Infrastructure.Postgres.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
+                    b.Property<Guid>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("uuid")
+                        .HasColumnName("version");
+
                     b.ComplexProperty<Dictionary<string, object>>("Timezone", "Devisions.Domain.Location.Location.Timezone#Timezone", b1 =>
                         {
                             b1.IsRequired();
@@ -172,7 +189,8 @@ namespace Devisions.Infrastructure.Postgres.Migrations
                                 .HasColumnName("timezone");
                         });
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_locations");
 
                     b.HasIndex("Name")
                         .IsUnique()
@@ -191,6 +209,10 @@ namespace Devisions.Infrastructure.Postgres.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean")
                         .HasColumnName("is_active");
@@ -198,6 +220,11 @@ namespace Devisions.Infrastructure.Postgres.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
+
+                    b.Property<Guid>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("uuid")
+                        .HasColumnName("version");
 
                     b.ComplexProperty<Dictionary<string, object>>("Name", "Devisions.Domain.Position.Position.Name#PositionName", b1 =>
                         {
@@ -209,7 +236,8 @@ namespace Devisions.Infrastructure.Postgres.Migrations
                                 .HasColumnName("name");
                         });
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_positions");
 
                     b.ToTable("positions", (string)null);
                 });
@@ -219,7 +247,8 @@ namespace Devisions.Infrastructure.Postgres.Migrations
                     b.HasOne("Devisions.Domain.Department.Department", "Parent")
                         .WithMany("Childrens")
                         .HasForeignKey("ParentId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_departments_departments_parent_id");
 
                     b.Navigation("Parent");
                 });
@@ -230,13 +259,15 @@ namespace Devisions.Infrastructure.Postgres.Migrations
                         .WithMany("DepartmentLocations")
                         .HasForeignKey("DepartmentId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_department_locations_departments_department_id");
 
                     b.HasOne("Devisions.Domain.Location.Location", null)
                         .WithMany("DepartmentLocations")
                         .HasForeignKey("LocationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_department_locations_locations_location_id");
                 });
 
             modelBuilder.Entity("Devisions.Domain.Department.DepartmentPosition", b =>
@@ -245,13 +276,15 @@ namespace Devisions.Infrastructure.Postgres.Migrations
                         .WithMany("DepartmentPositions")
                         .HasForeignKey("DepartmentId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_department_positions_departments_department_id");
 
                     b.HasOne("Devisions.Domain.Position.Position", null)
                         .WithMany("DepartmentPositions")
                         .HasForeignKey("PositionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_department_positions_position_position_id");
                 });
 
             modelBuilder.Entity("Devisions.Domain.Location.Location", b =>
@@ -259,7 +292,8 @@ namespace Devisions.Infrastructure.Postgres.Migrations
                     b.OwnsOne("Devisions.Domain.Location.Address", "Address", b1 =>
                         {
                             b1.Property<Guid>("LocationId")
-                                .HasColumnType("uuid");
+                                .HasColumnType("uuid")
+                                .HasColumnName("id");
 
                             b1.Property<string>("City")
                                 .IsRequired()
@@ -298,7 +332,8 @@ namespace Devisions.Infrastructure.Postgres.Migrations
                             b1.ToTable("locations");
 
                             b1.WithOwner()
-                                .HasForeignKey("LocationId");
+                                .HasForeignKey("LocationId")
+                                .HasConstraintName("fk_locations_locations_id");
                         });
 
                     b.Navigation("Address")
@@ -310,7 +345,8 @@ namespace Devisions.Infrastructure.Postgres.Migrations
                     b.OwnsOne("Devisions.Domain.Position.Description", "Description", b1 =>
                         {
                             b1.Property<Guid>("PositionId")
-                                .HasColumnType("uuid");
+                                .HasColumnType("uuid")
+                                .HasColumnName("id");
 
                             b1.Property<string>("Value")
                                 .IsRequired()
@@ -323,7 +359,8 @@ namespace Devisions.Infrastructure.Postgres.Migrations
                             b1.ToTable("positions");
 
                             b1.WithOwner()
-                                .HasForeignKey("PositionId");
+                                .HasForeignKey("PositionId")
+                                .HasConstraintName("fk_positions_positions_id");
                         });
 
                     b.Navigation("Description");

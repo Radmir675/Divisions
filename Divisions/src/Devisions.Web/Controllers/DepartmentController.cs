@@ -1,8 +1,8 @@
 ﻿using Devisions.Application.Abstractions;
 using Devisions.Application.Departments.Commands.Create;
-using Devisions.Application.Departments.Commands.Delete;
 using Devisions.Application.Departments.Commands.Move;
-using Devisions.Application.Departments.Commands.Update;
+using Devisions.Application.Departments.Commands.SoftDelete;
+using Devisions.Application.Departments.Commands.UpdateLocations;
 using Devisions.Application.Departments.Queries.DepartmentChildren;
 using Devisions.Application.Departments.Queries.RootDepartmentsWithChildren;
 using Devisions.Application.Departments.Queries.TopDepartments;

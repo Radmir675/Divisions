@@ -14,7 +14,7 @@ using FluentValidation;
 using Microsoft.Extensions.Logging;
 using Shared.Errors;
 
-namespace Devisions.Application.Departments.Commands.Update;
+namespace Devisions.Application.Departments.Commands.UpdateLocations;
 
 public record UpdateLocationsCommand(Guid DepartmentId, UpdateLocationsRequest Request) : ICommand;
 
@@ -67,10 +67,18 @@ public class UpdateLocationsHandler : ICommandHandler<Guid, UpdateLocationsComma
             return isLocationsActiveResult.Error;
         }
 
-        var departmentLocations = command.Request.LocationsId;
+        var locationsId = command.Request.LocationsId;
         var department = departmentResult.Value;
 
-        var updateLocationsResult = department.UpdateLocations(departmentLocations);
+        var updateLocationsResult = department.UpdateLocations(locationsId);
+
+        var saveChangesResult = await _transactionManager.SaveChangesAsync(cancellationToken);
+        if (saveChangesResult.IsFailure)
+        {
+            transactionScope.Rollback();
+            return saveChangesResult.Error.ToErrors();
+        }
+
         if (updateLocationsResult.IsFailure)
         {
             transactionScope.Rollback();
@@ -79,7 +87,10 @@ public class UpdateLocationsHandler : ICommandHandler<Guid, UpdateLocationsComma
 
         var commitResult = transactionScope.Commit();
         if (commitResult.IsFailure)
+        {
+            transactionScope.Rollback();
             return commitResult.Error.ToErrors();
+        }
 
         return command.DepartmentId;
     }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using CSharpFunctionalExtensions;
 using Devisions.Domain.Department;
 using Devisions.Domain.Interfaces;
@@ -9,7 +10,7 @@ namespace Devisions.Domain.Position;
 
 public record PositionId(Guid Value);
 
-public sealed class Position:ISoftDeletable
+public sealed class Position : ISoftDeletable
 {
     public PositionId Id { get; } = null!;
 
@@ -24,6 +25,8 @@ public sealed class Position:ISoftDeletable
     public DateTime? UpdatedAt { get; private set; }
 
     public DateTime? DeletedAt { get; private set; }
+
+    [ConcurrencyCheck] public Guid Version { get; private set; }
 
     public IReadOnlyList<DepartmentPosition> DepartmentPositions => _departmentPositions;
 
@@ -65,11 +68,13 @@ public sealed class Position:ISoftDeletable
     {
         DeletedAt = DateTime.UtcNow;
         IsActive = false;
+        Version = Guid.NewGuid();
     }
 
     public void Restore()
     {
         DeletedAt = null;
         IsActive = true;
+        Version = Guid.NewGuid();
     }
 }

@@ -118,12 +118,12 @@ public sealed class Department : ISoftDeletable
         return department;
     }
 
-    public UnitResult<Error> UpdateLocations(Guid[] departmentLocations)
+    public UnitResult<Error> UpdateLocations(Guid[] locationIds)
     {
-        if (departmentLocations.Length == 0)
+        if (locationIds.Length == 0)
             return GeneralErrors.ValueIsRequired("departmentLocations");
 
-        var newDepartmentLocations = departmentLocations.Select(d =>
+        var newDepartmentLocations = locationIds.Select(d =>
             new DepartmentLocation(Id, new LocationId(d)));
 
         _departmentLocations = newDepartmentLocations.ToList();
@@ -149,9 +149,9 @@ public sealed class Department : ISoftDeletable
         return UnitResult.Success<Error>();
     }
 
-    public UnitResult<Error> AddChildren(Department chidren)
+    public UnitResult<Error> AddChildren(Department children)
     {
-        _childrens.Add(chidren);
+        _childrens.Add(children);
         return UnitResult.Success<Error>();
     }
 
@@ -159,6 +159,7 @@ public sealed class Department : ISoftDeletable
     {
         IsActive = false;
         DeletedAt = DateTime.UtcNow;
+        Path = Path.SetAsDeleted(Path.PathValue, ParentId);
     }
 
     public void Restore()
