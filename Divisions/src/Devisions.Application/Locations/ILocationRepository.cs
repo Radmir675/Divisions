@@ -17,4 +17,8 @@ public interface ILocationRepository
     Task<UnitResult<Errors>> AllExistsAndActiveAsync(
         IEnumerable<LocationId> locationsId,
         CancellationToken cancellationToken);
+
+    Task<Result<IEnumerable<Location>, Error>> GetByIds(
+        IEnumerable<LocationId> locationIds,
+        CancellationToken cancellationToken);
 }

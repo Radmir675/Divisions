@@ -1,4 +1,4 @@
-﻿using Devisions.Application.Positions.CreatePositions;
+﻿using Devisions.Application.Positions.Create;
 using Devisions.Contracts.Positions.Requests;
 using Devisions.Domain.Location;
 using Devisions.Domain.Position;
@@ -14,7 +14,8 @@ public class CreatePositionsTests : DivisionsBaseTests
 {
     public CreatePositionsTests(DivisionsTestFactory divisionsTestFactory)
         : base(divisionsTestFactory)
-    { }
+    {
+    }
 
     [Fact]
     public async Task CreatePosition_WithValidData_ShouldSucceed()

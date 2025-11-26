@@ -1,14 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using CSharpFunctionalExtensions;
 using Devisions.Domain.Department;
+using Devisions.Domain.Interfaces;
 using Shared.Errors;
 
 namespace Devisions.Domain.Location;
 
 public record LocationId(Guid Value);
 
-public sealed class Location
+public sealed class Location : ISoftDeletable
 {
     public LocationId Id { get; } = null!;
 
@@ -23,6 +25,10 @@ public sealed class Location
     public DateTime CreatedAt { get; private set; }
 
     public DateTime? UpdatedAt { get; private set; }
+
+    public DateTime? DeletedAt { get; private set; }
+
+    [ConcurrencyCheck] public Guid Version { get; private set; }
 
     public IReadOnlyList<DepartmentLocation> DepartmentLocations => _departmentLocations;
 
@@ -54,5 +60,19 @@ public sealed class Location
 
         var model = new Location(new LocationId(Guid.NewGuid()), name, address, isActive, timezone);
         return model;
+    }
+
+    public void SoftDelete()
+    {
+        DeletedAt = DateTime.UtcNow;
+        IsActive = false;
+        Version = Guid.NewGuid();
+    }
+
+    public void Restore()
+    {
+        DeletedAt = null;
+        IsActive = true;
+        Version = Guid.NewGuid();
     }
 }

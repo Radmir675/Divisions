@@ -9,7 +9,7 @@ using FluentValidation;
 using Microsoft.Extensions.Logging;
 using Shared.Errors;
 
-namespace Devisions.Application.Locations.Commands.CreateLocation;
+namespace Devisions.Application.Locations.Commands.Create;
 
 public class CreateLocationHandler : ICommandHandler<Guid, CreateLocationCommand>
 {

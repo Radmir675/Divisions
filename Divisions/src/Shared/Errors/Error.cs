@@ -19,8 +19,8 @@ public record Error
         Id = id;
     }
 
-    public static Error NotFound(string? code, string message, Guid? id) =>
-        new Error(code ?? "record.not.found", message, ErrorType.NOT_FOUND, null, id);
+    public static Error NotFound(string? code, string message, Guid? id = null, string? invalidField = null) =>
+        new Error(code ?? "record.not.found", message, ErrorType.NOT_FOUND, invalidField, id);
 
     public static Error Validation(string? code, string message, string? invalidField = null) =>
         new Error(code ?? "record.is.invalid", message, ErrorType.VALIDATION, invalidField);

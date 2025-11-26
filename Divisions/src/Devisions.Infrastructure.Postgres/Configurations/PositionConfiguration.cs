@@ -49,8 +49,17 @@ public class PositionConfiguration : IEntityTypeConfiguration<Position>
             .HasColumnName("updated_at")
             .IsRequired(false);
 
+        builder.Property(p => p.DeletedAt)
+            .HasColumnName("deleted_at")
+            .IsRequired(false);
+
+        builder.Property(x => x.Version)
+            .IsConcurrencyToken()
+            .HasColumnName("version");
+
         builder.HasMany(x => x.DepartmentPositions)
             .WithOne()
-            .HasForeignKey(x => x.PositionId);
+            .HasForeignKey(x => x.PositionId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

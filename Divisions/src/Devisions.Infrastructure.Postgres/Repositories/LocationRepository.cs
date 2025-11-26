@@ -105,4 +105,21 @@ public class LocationRepository : ILocationRepository
 
         return errors.Any() ? new Errors(errors) : UnitResult.Success<Errors>();
     }
+
+    public async Task<Result<IEnumerable<Location>, Error>> GetByIds(
+        IEnumerable<LocationId> locationIds,
+        CancellationToken cancellationToken)
+    {
+        var result = await _dbContext.Locations
+            .Include(x => x.DepartmentLocations)
+            .Where(x => locationIds.Contains(x.Id))
+            .ToListAsync(cancellationToken);
+
+        if (result.Any() == false)
+        {
+            return GeneralErrors.NotFoundInDatabase();
+        }
+
+        return result;
+    }
 }

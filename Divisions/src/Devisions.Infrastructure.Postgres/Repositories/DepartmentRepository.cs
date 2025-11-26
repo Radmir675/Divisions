@@ -190,7 +190,6 @@ public class DepartmentRepository : IDepartmentRepository
             var department =
                 await _dbContext.Departments
                     .FirstOrDefaultAsync(x => x.Id == departmentId, cancellationToken);
-
             if (department is null)
             {
                 return Error.NotFound(
@@ -229,6 +228,47 @@ public class DepartmentRepository : IDepartmentRepository
             return UnitResult.Failure(Error.Failure("fail.update.path.", "Failed to update path"));
         }
     }
+
+    public async Task<Result<Guid, Error>> DeleteAsync(Department department, CancellationToken cancellationToken)
+    {
+        try
+        {
+            _dbContext.Departments.Remove(department);
+            await _dbContext.SaveChangesAsync(cancellationToken);
+            return department.Id.Value;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to delete department with id: {id}", department.Id.Value);
+            return GeneralErrors.DatabaseError($"Failed to delete department with id: {department.Id.Value}");
+        }
+    }
+
+    public async Task<UnitResult<Error>> SetPathDescendantsDeleted(
+        Path departmentPath,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var sql = @"
+                        UPDATE departments
+                        SET path = subpath(path, 0, -1)::ltree || ('deleted_' || subpath(path, -1)::text)::ltree
+                        WHERE path <@ @DepartmentPath::ltree 
+                          AND path != @DepartmentPath::ltree 
+                          AND nlevel(path) > 1";
+
+            var parameters = new { DepartmentPath = departmentPath.PathValue };
+
+            await _dbContext.Database.ExecuteSqlRawAsync(sql, parameters, cancellationToken);
+            return UnitResult.Success<Error>();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to update path");
+            return UnitResult.Failure(Error.Failure("fail.update.path.", "Failed to update path"));
+        }
+    }
+
 
     public async Task<UnitResult<Error>> UpdateDepthDescendants(
         Path path,

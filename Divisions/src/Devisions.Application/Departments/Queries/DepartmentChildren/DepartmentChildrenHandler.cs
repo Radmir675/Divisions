@@ -7,7 +7,9 @@ using Dapper;
 using Devisions.Application.Abstractions;
 using Devisions.Application.Database;
 using Devisions.Application.Departments.Queries.RootDepartmentsWithChildren;
+using Devisions.Application.Extensions;
 using Devisions.Contracts.Departments.Responses;
+using FluentValidation;
 using Microsoft.Extensions.Logging;
 using Shared.Errors;
 
@@ -17,13 +19,16 @@ public class
     DepartmentChildrenHandler : IQueryHandler<IReadOnlyList<DepartmentBaseDto>, DepartmentChildrenQuery>
 {
     private readonly IDbConnectionFactory _dbConnectionFactory;
+    private readonly IValidator<DepartmentChildrenQuery> _validator;
     private readonly ILogger<RootDepartmentsWithChildrenHandler> _logger;
 
     public DepartmentChildrenHandler(
         IDbConnectionFactory dbConnectionFactory,
+        IValidator<DepartmentChildrenQuery> validator,
         ILogger<RootDepartmentsWithChildrenHandler> logger)
     {
         _dbConnectionFactory = dbConnectionFactory;
+        _validator = validator;
         _logger = logger;
     }
 
@@ -31,6 +36,10 @@ public class
         DepartmentChildrenQuery query,
         CancellationToken cancellationToken)
     {
+        var validationResult = await _validator.ValidateAsync(query, cancellationToken);
+        if (!validationResult.IsValid)
+            return validationResult.ToErrors();
+
         const string sqlQuery =
             """
             WITH dep AS (SELECT id,

@@ -17,7 +17,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Departments\Commands\"/>
     <Folder Include="Locations\Commands\"/>
   </ItemGroup>
   <PropertyGroup>

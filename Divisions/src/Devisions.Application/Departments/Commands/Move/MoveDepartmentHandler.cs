@@ -10,7 +10,7 @@ using Devisions.Domain.Department;
 using FluentValidation;
 using Shared.Errors;
 
-namespace Devisions.Application.Departments.Commands.MoveDepartment;
+namespace Devisions.Application.Departments.Commands.Move;
 
 public record MoveDepartmentCommand(Guid DepartmentId, Guid? ParentId) : ICommand;
 

@@ -33,7 +33,8 @@ public class DevisionsSeeder : ISeeder
 
     public async Task CreateAsync(CancellationToken cancellationToken)
     {
-        await SeedAsync(_cancellationToken);
+        if (_dbContext.Departments.Any() == false)
+            await SeedAsync(_cancellationToken);
     }
 
     private async Task SeedAsync(CancellationToken cancellationToken)
@@ -43,7 +44,11 @@ public class DevisionsSeeder : ISeeder
         try
         {
             // Очистка базы данных
-            await ClearDatabase(cancellationToken);
+            var result = await ClearDatabase(cancellationToken);
+            if (result.IsFailure)
+            {
+                await transaction.RollbackAsync(cancellationToken);
+            }
 
             // Сидирование данных
             _locations = await SeedLocationsAsync(cancellationToken);
@@ -66,18 +71,27 @@ public class DevisionsSeeder : ISeeder
     }
 
 
-    private async Task ClearDatabase(CancellationToken cancellationToken)
+    private async Task<UnitResult<Error>> ClearDatabase(CancellationToken cancellationToken)
     {
-        _dbContext.DepartmentLocations.RemoveRange(_dbContext.DepartmentLocations);
-        _dbContext.DepartmentPositions.RemoveRange(_dbContext.DepartmentPositions);
+        try
+        {
+            _dbContext.DepartmentPositions.RemoveRange(_dbContext.DepartmentPositions);
+            _dbContext.DepartmentLocations.RemoveRange(_dbContext.DepartmentLocations);
+            await _dbContext.SaveChangesAsync(cancellationToken);
+            _dbContext.Positions.RemoveRange(_dbContext.Positions);
+            _dbContext.Departments.RemoveRange(_dbContext.Departments);
+            _dbContext.Locations.RemoveRange(_dbContext.Locations);
 
-        _dbContext.Positions.RemoveRange(_dbContext.Positions);
-        _dbContext.Departments.RemoveRange(_dbContext.Departments);
-        _dbContext.Locations.RemoveRange(_dbContext.Locations);
+            await _dbContext.SaveChangesAsync(cancellationToken);
 
-        await _dbContext.SaveChangesAsync(cancellationToken);
-
-        _logger.LogInformation("Clearing database");
+            _logger.LogInformation("Clearing database");
+            return UnitResult.Success<Error>();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occured while clearing the database");
+            return GeneralErrors.DatabaseError();
+        }
     }
 
     private async Task<IEnumerable<Location>> SeedLocationsAsync(CancellationToken cancellationToken)

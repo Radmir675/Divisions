@@ -4,7 +4,7 @@ using Devisions.Domain.Location;
 using FluentValidation;
 using Shared.Errors;
 
-namespace Devisions.Application.Locations.Commands.CreateLocation;
+namespace Devisions.Application.Locations.Commands.Create;
 
 public class CreateLocationCommandValidator : AbstractValidator<CreateLocationCommand>
 {
