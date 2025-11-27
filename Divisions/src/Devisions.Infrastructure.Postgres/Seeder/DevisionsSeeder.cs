@@ -61,7 +61,6 @@ public class DevisionsSeeder : ISeeder
 
             await transaction.CommitAsync(_cancellationToken);
 
-
             _logger.LogInformation("Seeding completed successfully");
         }
         catch (Exception ex)

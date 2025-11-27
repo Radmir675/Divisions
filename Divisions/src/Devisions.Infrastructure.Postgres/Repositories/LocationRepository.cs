@@ -1,5 +1,6 @@
 ﻿using CSharpFunctionalExtensions;
 using Devisions.Application.Locations;
+using Devisions.Domain.Department;
 using Devisions.Domain.Location;
 using Devisions.Infrastructure.Postgres.Database;
 using Microsoft.EntityFrameworkCore;
@@ -121,5 +122,29 @@ public class LocationRepository : ILocationRepository
         }
 
         return result;
+    }
+
+    public async Task<Result<IEnumerable<LocationId>, Error>> FindLocationsUsedExclusivelyByAsync(
+        DepartmentId departmentId,
+        CancellationToken cancellationToken)
+    {
+        const string sql = """
+                           SELECT id, department_id, location_id
+                           FROM department_locations
+                           WHERE department_id = {0}
+                             AND location_id NOT IN (SELECT location_id
+                                                 FROM department_locations
+                                                 WHERE department_id != {0})
+                           """;
+
+        var result = await _dbContext.DepartmentLocations
+            .FromSqlRaw(sql, departmentId.Value)
+            .ToListAsync(cancellationToken);
+
+        var locationIds = result.Select(x => x.LocationId).ToList();
+
+        _logger.LogDebug("Founded: {locationsCount} locations", locationIds.Count);
+
+        return locationIds;
     }
 }

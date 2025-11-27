@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
+using Devisions.Domain.Department;
 using Devisions.Domain.Location;
 using Shared.Errors;
 
@@ -20,5 +21,9 @@ public interface ILocationRepository
 
     Task<Result<IEnumerable<Location>, Error>> GetByIds(
         IEnumerable<LocationId> locationIds,
+        CancellationToken cancellationToken);
+
+    Task<Result<IEnumerable<LocationId>, Error>> FindLocationsUsedExclusivelyByAsync(
+        DepartmentId departmentId,
         CancellationToken cancellationToken);
 }

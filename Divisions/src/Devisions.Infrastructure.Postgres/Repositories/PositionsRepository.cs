@@ -77,49 +77,28 @@ public class PositionsRepository : IPositionsRepository
         }
     }
 
-    public async Task<Result<IEnumerable<PositionId>, Error>> GetUnusedAsync(
+    public async Task<Result<IEnumerable<PositionId>, Error>> FindPositionsUsedExclusivelyByAsync(
         DepartmentId departmentId,
         CancellationToken cancellationToken)
     {
-        try
-        {
-            // const string sql = """
-            //                    SELECT *
-            //                    FROM department_positions
-            //                    WHERE department_id != 'f4469485-920b-45b1-a783-9c4518600604'
-            //                      AND position_id IN (SELECT position_id
-            //                                          FROM department_positions
-            //                                          WHERE department_id = 'f4469485-920b-45b1-a783-9c4518600604')
-            //                    """;
-            //
-            // object[] parameters = { new NpgsqlParameter("DepartmentId", departmentId.Value) };
-            // var result = await _dbContext.DepartmentPositions
-            //     .FromSqlRaw("SELECT * FROM department_positions")
-            //     .ToListAsync(cancellationToken);
+        const string sql = """
+                           SELECT id, department_id, position_id
+                           FROM department_positions
+                           WHERE department_id = {0}
+                             AND position_id NOT IN (SELECT position_id
+                                                 FROM department_positions
+                                                 WHERE department_id != {0})
+                           """;
 
+        var result = await _dbContext.DepartmentPositions
+            .FromSqlRaw(sql, departmentId.Value)
+            .ToListAsync(cancellationToken);
 
-            // var positionIds = result.Select(x => x.PositionId).ToList();
+        var positionIds = result.Select(x => x.PositionId).ToList();
 
+        _logger.LogDebug("Founded: {positionsCount} positions", result.Count);
 
-            var result = await _dbContext.DepartmentPositions
-                .FromSqlInterpolated($@"
-                                                SELECT dp.*
-                                                FROM department_positions dp
-                                                WHERE dp.department_id = {departmentId.Value}
-                                            ")
-                .ToListAsync(cancellationToken);
-
-            Console.WriteLine($"Найдено: {result.Count}");
-
-
-            var positionIds = result.Select(x => x.PositionId).ToList();
-            return positionIds;
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-            throw;
-        }
+        return positionIds;
     }
 
     public async Task<Result<IEnumerable<Position>, Error>> GetByIds(

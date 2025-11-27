@@ -19,7 +19,7 @@ public interface IPositionsRepository
         IEnumerable<PositionId> positionIds,
         CancellationToken cancellationToken);
 
-    Task<Result<IEnumerable<PositionId>, Error>> GetUnusedAsync(
+    Task<Result<IEnumerable<PositionId>, Error>> FindPositionsUsedExclusivelyByAsync(
         DepartmentId departmentId,
         CancellationToken cancellationToken);
 

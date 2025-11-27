@@ -1,10 +1,8 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
-using Dapper;
 using Devisions.Application.Abstractions;
 using Devisions.Application.Database;
 using Devisions.Application.Extensions;
@@ -12,8 +10,6 @@ using Devisions.Application.Locations;
 using Devisions.Application.Positions;
 using Devisions.Application.Transaction;
 using Devisions.Domain.Department;
-using Devisions.Domain.Location;
-using Devisions.Domain.Position;
 using FluentValidation;
 using Microsoft.Extensions.Logging;
 using Shared.Errors;
@@ -93,18 +89,6 @@ public class SoftDeleteDepartmentHandler : ICommandHandler<Guid, SoftDeleteDepar
 
         var oldPath = department.Path;
         department.SoftDelete();
-        var saveChangesResult3 = await _transactionManager.SaveChangesAsync(cancellationToken);
-        if (saveChangesResult3.IsFailure)
-        {
-            return saveChangesResult3.Error.ToErrors();
-        }
-
-        var saveChangesResult1 = await _transactionManager.SaveChangesAsync(cancellationToken);
-        if (saveChangesResult1.IsFailure)
-        {
-            return saveChangesResult1.Error.ToErrors();
-        }
-
         var newPath = department.Path;
 
         var descendantsId = descendantsIdResult.Value.Select(id => id.Value).ToList();
@@ -122,7 +106,8 @@ public class SoftDeleteDepartmentHandler : ICommandHandler<Guid, SoftDeleteDepar
         _logger.LogInformation("Descendants path updated {descendants}", string.Join("; ", descendantsId));
 
         // проверка позиций на активность
-        var unusedPositionsResult = await FindPositionsUsedExclusivelyByAsync(department.Id, cancellationToken);
+        var unusedPositionsResult =
+            await _positionRepository.FindPositionsUsedExclusivelyByAsync(department.Id, cancellationToken);
         if (unusedPositionsResult.IsFailure)
         {
             transactionScope.Rollback();
@@ -141,19 +126,14 @@ public class SoftDeleteDepartmentHandler : ICommandHandler<Guid, SoftDeleteDepar
 
             var positions = positionsResult.Value.ToList();
             positions.ForEach(x => x.SoftDelete());
-            var saveChangesResult2 = await _transactionManager.SaveChangesAsync(cancellationToken);
-            if (saveChangesResult2.IsFailure)
-            {
-                transactionScope.Rollback();
-                return saveChangesResult1.Error.ToErrors();
-            }
 
             string deletedPositions = string.Join("; ", positions.Select(x => x.Id.Value));
             _logger.LogInformation("These positions are soft deleted:{locations}", deletedPositions);
         }
 
         // проверка локаций на активность
-        var unusedLocationsResult = await FindLocationsUsedExclusivelyByAsync(department.Id, cancellationToken);
+        var unusedLocationsResult =
+            await _locationRepository.FindLocationsUsedExclusivelyByAsync(department.Id, cancellationToken);
         if (unusedLocationsResult.IsFailure)
         {
             transactionScope.Rollback();
@@ -192,43 +172,5 @@ public class SoftDeleteDepartmentHandler : ICommandHandler<Guid, SoftDeleteDepar
 
         _logger.LogInformation("Department is soft deleted with id: {Id}", department.Id);
         return department.Id.Value;
-    }
-
-    private async Task<Result<IEnumerable<PositionId>, Error>> FindPositionsUsedExclusivelyByAsync(
-        DepartmentId departmentId,
-        CancellationToken cancellationToken)
-    {
-        using var connection = await _dbConnectionFactory.GetConnectionAsync(cancellationToken);
-        const string sql = """
-                           SELECT position_id
-                           FROM department_positions
-                           WHERE department_id = @DepartmentId
-                           AND position_id NOT IN (SELECT position_id
-                                                 FROM department_positions
-                                                 WHERE department_id != @DepartmentId)
-                           """;
-
-        var sqlParams = new { DepartmentId = departmentId.Value };
-        var result = await connection.QueryAsync<Guid>(sql, sqlParams);
-        return result.Select(id => new PositionId(id)).ToList();
-    }
-
-    private async Task<Result<IEnumerable<LocationId>, Error>> FindLocationsUsedExclusivelyByAsync(
-        DepartmentId departmentId,
-        CancellationToken cancellationToken)
-    {
-        using var connection = await _dbConnectionFactory.GetConnectionAsync(cancellationToken);
-        const string sql = """
-                           SELECT location_id
-                           FROM department_locations
-                           WHERE department_id = @DepartmentId
-                           AND location_id NOT IN (SELECT location_id
-                                                 FROM department_locations
-                                                 WHERE department_id != @DepartmentId)
-                           """;
-
-        var sqlParams = new { DepartmentId = departmentId.Value };
-        var result = await connection.QueryAsync<Guid>(sql, sqlParams);
-        return result.Select(id => new LocationId(id)).ToList();
     }
 }
