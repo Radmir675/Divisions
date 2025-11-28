@@ -1,3 +1,4 @@
+using Devisions.Infrastructure.BackgroundService;
 using Devisions.Web;
 using Devisions.Web.Extensions;
 using Devisions.Web.Middlewares;
@@ -10,6 +11,7 @@ builder.AddDbContext();
 builder.AddLogging();
 
 builder.Services.AddProgramDependencies();
+builder.Services.AddHostedService<DivisionCleanerBackgroundService>();
 
 var app = builder.Build();
 app.UseExceptionMiddleware();

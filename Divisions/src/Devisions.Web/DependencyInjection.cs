@@ -1,4 +1,5 @@
 ﻿using Devisions.Application;
+using Devisions.Infrastructure.BackgroundService;
 using Devisions.Infrastructure.Postgres;
 using Devisions.Infrastructure.Postgres.Seeder;
 using Devisions.Web.EndPointResults;
@@ -26,6 +27,7 @@ public static class DependencyInjection
             options.OperationFilter<EndPointResultOperationFilter>();
         });
         services.AddScoped<ISeeder, DevisionsSeeder>();
+        services.AddScoped<IDivisionCleanerService, DivisionCleanerService>();
 
         return services;
     }

@@ -16,6 +16,7 @@
     <ProjectReference Include="..\Devisions.Application\Devisions.Application.csproj"/>
     <ProjectReference Include="..\Devisions.Contracts\Devisions.Contracts.csproj"/>
     <ProjectReference Include="..\Devisions.Domain\Devisions.Domain.csproj"/>
+    <ProjectReference Include="..\Devisions.Infrastructure.BackgroundService\Devisions.Infrastructure.BackgroundService.csproj" />
     <ProjectReference Include="..\Devisions.Infrastructure.Postgres\Devisions.Infrastructure.Postgres.csproj"/>
   </ItemGroup>
   <ItemGroup>

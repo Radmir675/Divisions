@@ -118,34 +118,6 @@ public class DepartmentRepository : IDepartmentRepository
         return errors.Any() ? new Errors(errors) : UnitResult.Success<Errors>();
     }
 
-    public async Task<UnitResult<Error>> UpdateAsync(Department department, CancellationToken cancellationToken)
-    {
-        try
-        {
-            _dbContext.Departments.Update(department);
-            await _dbContext.SaveChangesAsync(cancellationToken);
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, e.Message);
-            return Error.Failure(
-                "department.repository.update",
-                "Department is not updated");
-        }
-
-        return UnitResult.Success<Error>();
-    }
-
-    public async Task<Result<bool, Error>> IsIdentifierAlreadyExistsAsync(
-        Identifier identifier,
-        CancellationToken cancellationToken)
-    {
-        bool result = await _dbContext.Departments.AnyAsync(
-            x => x.Identifier == identifier,
-            cancellationToken);
-        return result;
-    }
-
     public async Task<Result<IEnumerable<DepartmentId>, Error>> LockDescendants(
         Path rootPath,
         CancellationToken cancellationToken)
@@ -229,47 +201,6 @@ public class DepartmentRepository : IDepartmentRepository
         }
     }
 
-    public async Task<Result<Guid, Error>> DeleteAsync(Department department, CancellationToken cancellationToken)
-    {
-        try
-        {
-            _dbContext.Departments.Remove(department);
-            await _dbContext.SaveChangesAsync(cancellationToken);
-            return department.Id.Value;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to delete department with id: {id}", department.Id.Value);
-            return GeneralErrors.DatabaseError($"Failed to delete department with id: {department.Id.Value}");
-        }
-    }
-
-    public async Task<UnitResult<Error>> SetPathDescendantsDeleted(
-        Path departmentPath,
-        CancellationToken cancellationToken)
-    {
-        try
-        {
-            var sql = @"
-                        UPDATE departments
-                        SET path = subpath(path, 0, -1)::ltree || ('deleted_' || subpath(path, -1)::text)::ltree
-                        WHERE path <@ @DepartmentPath::ltree 
-                          AND path != @DepartmentPath::ltree 
-                          AND nlevel(path) > 1";
-
-            var parameters = new { DepartmentPath = departmentPath.PathValue };
-
-            await _dbContext.Database.ExecuteSqlRawAsync(sql, parameters, cancellationToken);
-            return UnitResult.Success<Error>();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to update path");
-            return UnitResult.Failure(Error.Failure("fail.update.path.", "Failed to update path"));
-        }
-    }
-
-
     public async Task<UnitResult<Error>> UpdateDepthDescendants(
         Path path,
         int deltaDepth,
@@ -289,6 +220,24 @@ public class DepartmentRepository : IDepartmentRepository
         {
             _logger.LogError(ex, "Failed to update path");
             return UnitResult.Failure(Error.Failure("fail.update.depth.", "Failed to update depth"));
+        }
+    }
+
+    public async Task<Result<IEnumerable<Guid>, Error>> DeleteAsync(
+        IEnumerable<Department> departments,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var departmentsList = departments.ToList();
+            _dbContext.Departments.RemoveRange(departmentsList);
+            await _dbContext.SaveChangesAsync(cancellationToken);
+            return departmentsList.Select(d => d.Id.Value).ToList();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to delete departments.");
+            return GeneralErrors.DatabaseError($"Failed to delete departments");
         }
     }
 }

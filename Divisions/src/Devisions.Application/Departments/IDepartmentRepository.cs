@@ -22,11 +22,6 @@ public interface IDepartmentRepository
         IEnumerable<DepartmentId> departmentIds,
         CancellationToken cancellationToken);
 
-    Task<Result<bool, Error>>
-        IsIdentifierAlreadyExistsAsync(Identifier identifier, CancellationToken cancellationToken);
-
-    Task<UnitResult<Error>> UpdateAsync(Department department, CancellationToken cancellationToken);
-
     Task<Result<IEnumerable<DepartmentId>, Error>> LockDescendants(
         Path parentPath, CancellationToken cancellationToken);
 
@@ -38,9 +33,7 @@ public interface IDepartmentRepository
 
     Task<UnitResult<Error>> UpdatePathDescendants(Path oldPath, Path newPath, CancellationToken cancellationToken);
 
-    Task<Result<Guid, Error>> DeleteAsync(Department department, CancellationToken cancellationToken);
-
-    Task<UnitResult<Error>> SetPathDescendantsDeleted(
-        Path departmentPath,
+    Task<Result<IEnumerable<Guid>, Error>> DeleteAsync(
+        IEnumerable<Department> departments,
         CancellationToken cancellationToken);
 }

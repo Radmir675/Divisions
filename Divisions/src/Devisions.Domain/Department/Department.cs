@@ -149,12 +149,6 @@ public sealed class Department : ISoftDeletable
         return UnitResult.Success<Error>();
     }
 
-    public UnitResult<Error> AddChildren(Department children)
-    {
-        _childrens.Add(children);
-        return UnitResult.Success<Error>();
-    }
-
     public void SoftDelete()
     {
         IsActive = false;
