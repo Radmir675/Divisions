@@ -71,20 +71,26 @@ public class DepartmentConfiguration : IEntityTypeConfiguration<Department>
         builder.Property(p => p.UpdatedAt)
             .HasColumnName("updated_at");
 
+        builder.Property(p => p.DeletedAt)
+            .HasColumnName("deleted_at")
+            .IsRequired(false);
+
         builder.HasOne(x => x.Parent)
             .WithMany(x => x.Childrens)
             .HasForeignKey(x => x.ParentId)
             .IsRequired(false)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.SetNull);
 
         builder
             .HasMany(x => x.DepartmentLocations)
             .WithOne()
-            .HasForeignKey(x => x.DepartmentId);
+            .HasForeignKey(x => x.DepartmentId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder
             .HasMany(x => x.DepartmentPositions)
             .WithOne()
-            .HasForeignKey(x => x.DepartmentId);
+            .HasForeignKey(x => x.DepartmentId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

@@ -46,6 +46,7 @@ public sealed class AppDbContext : DbContext, IReadDbContext
         optionsBuilder.EnableDetailedErrors();
         optionsBuilder.EnableSensitiveDataLogging();
         optionsBuilder.UseLoggerFactory(ConsoleDbLogger());
+        optionsBuilder.UseSnakeCaseNamingConvention();
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

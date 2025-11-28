@@ -1,7 +1,7 @@
 ﻿using System.Data.Common;
+using Devisions.Application.Database;
 using Devisions.Infrastructure.Postgres.Database;
 using Devisions.Web;
-using Divisions.IntegrationTests.Share;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
@@ -54,7 +54,10 @@ public class DivisionsTestFactory : WebApplicationFactory<Program>, IAsyncLifeti
         {
             services.RemoveAll<AppDbContext>();
             services.AddScoped<AppDbContext>(_ => new AppDbContext(_dbContainer.GetConnectionString()));
-            services.AddScoped<LocationCreator>();
+
+            services.RemoveAll<IDbConnectionFactory>();
+            services.AddScoped<IDbConnectionFactory, NpgSqlConnectionFactory>(_ =>
+                new NpgSqlConnectionFactory(_dbContainer.GetConnectionString()));
         });
     }
 

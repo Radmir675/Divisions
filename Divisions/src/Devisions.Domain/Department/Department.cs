@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using CSharpFunctionalExtensions;
+using Devisions.Domain.Interfaces;
 using Devisions.Domain.Location;
 using Shared.Errors;
 
@@ -9,7 +10,7 @@ namespace Devisions.Domain.Department;
 
 public record DepartmentId(Guid Value);
 
-public sealed class Department
+public sealed class Department : ISoftDeletable
 {
     private const short DEFAULT_DEPTH = 0;
 
@@ -30,6 +31,8 @@ public sealed class Department
     public DateTime CreatedAt { get; private set; }
 
     public DateTime? UpdatedAt { get; private set; }
+
+    public DateTime? DeletedAt { get; private set; }
 
     public Department? Parent { get; private set; }
 
@@ -115,12 +118,12 @@ public sealed class Department
         return department;
     }
 
-    public UnitResult<Error> UpdateLocations(Guid[] departmentLocations)
+    public UnitResult<Error> UpdateLocations(Guid[] locationIds)
     {
-        if (departmentLocations.Length == 0)
+        if (locationIds.Length == 0)
             return GeneralErrors.ValueIsRequired("departmentLocations");
 
-        var newDepartmentLocations = departmentLocations.Select(d =>
+        var newDepartmentLocations = locationIds.Select(d =>
             new DepartmentLocation(Id, new LocationId(d)));
 
         _departmentLocations = newDepartmentLocations.ToList();
@@ -146,9 +149,22 @@ public sealed class Department
         return UnitResult.Success<Error>();
     }
 
-    public UnitResult<Error> AddChildren(Department chidren)
+    public UnitResult<Error> AddChildren(Department children)
     {
-        _childrens.Add(chidren);
+        _childrens.Add(children);
         return UnitResult.Success<Error>();
+    }
+
+    public void SoftDelete()
+    {
+        IsActive = false;
+        DeletedAt = DateTime.UtcNow;
+        Path = Path.SetAsDeleted(Path.PathValue, ParentId);
+    }
+
+    public void Restore()
+    {
+        IsActive = true;
+        DeletedAt = null;
     }
 }

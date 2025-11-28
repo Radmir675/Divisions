@@ -5,7 +5,7 @@ using Devisions.Domain.Position;
 using FluentValidation;
 using Shared.Errors;
 
-namespace Devisions.Application.Positions.CreatePositions;
+namespace Devisions.Application.Positions.Create;
 
 public class CreatePositionValidator : AbstractValidator<CreatePositionCommand>
 {

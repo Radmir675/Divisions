@@ -13,7 +13,7 @@ using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Shared.Errors;
 
-namespace Devisions.Application.Locations.Queries.GetLocation;
+namespace Devisions.Application.Locations.Queries.Get;
 
 public record GetLocationQuery(GetLocationsRequest Request) : IQuery;
 

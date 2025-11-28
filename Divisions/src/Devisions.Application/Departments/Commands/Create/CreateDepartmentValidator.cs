@@ -3,7 +3,7 @@ using Devisions.Domain.Department;
 using FluentValidation;
 using Shared.Errors;
 
-namespace Devisions.Application.Departments.Commands.CreateDepartment;
+namespace Devisions.Application.Departments.Commands.Create;
 
 public class CreateDepartmentValidator : AbstractValidator<CreateDepartmentCommand>
 {
