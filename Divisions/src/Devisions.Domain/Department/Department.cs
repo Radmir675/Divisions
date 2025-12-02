@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using CSharpFunctionalExtensions;
 using Devisions.Domain.Interfaces;
@@ -33,6 +34,8 @@ public sealed class Department : ISoftDeletable
     public DateTime? UpdatedAt { get; private set; }
 
     public DateTime? DeletedAt { get; private set; }
+
+    [ConcurrencyCheck] public Guid Version { get; private set; }
 
     public Department? Parent { get; private set; }
 
@@ -90,14 +93,14 @@ public sealed class Department : ISoftDeletable
     public static Result<Department, Error> CreateParent(
         DepartmentName name,
         Identifier identifier,
-        IEnumerable<LocationId> departmentLocations)
+        IEnumerable<LocationId> locationIds)
     {
         var currentPath = Path.Create(identifier.Identify);
 
         var departmentId = new DepartmentId(Guid.NewGuid());
 
         var department = new Department(departmentId, name, identifier, currentPath, DEFAULT_DEPTH, true,
-            departmentLocations);
+            locationIds);
 
         return department;
     }
@@ -106,14 +109,14 @@ public sealed class Department : ISoftDeletable
         DepartmentName name,
         Identifier identifier,
         Department parent,
-        IEnumerable<LocationId> departmentLocations)
+        IEnumerable<LocationId> locationIds)
     {
         var departmentId = new DepartmentId(Guid.NewGuid());
         var path = Path.Create(identifier.Identify, parent.Path.PathValue);
         short depth = (short)(parent.Depth + 1);
 
         var department = new Department(
-            departmentId, name, identifier, path, depth, true, departmentLocations, parent.Id);
+            departmentId, name, identifier, path, depth, true, locationIds, parent.Id);
 
         return department;
     }
@@ -149,10 +152,10 @@ public sealed class Department : ISoftDeletable
         return UnitResult.Success<Error>();
     }
 
-    public void SoftDelete()
+    public void SoftDelete(DateTime? deletedAt = null)
     {
         IsActive = false;
-        DeletedAt = DateTime.UtcNow;
+        DeletedAt = deletedAt ?? DateTime.UtcNow;
         Path = Path.SetAsDeleted(Path.PathValue, ParentId);
     }
 
@@ -160,5 +163,20 @@ public sealed class Department : ISoftDeletable
     {
         IsActive = true;
         DeletedAt = null;
+    }
+
+    public Path RemovePath()
+    {
+        return Path.RemoveCurrent(Path.PathValue, ParentId);
+    }
+
+    public void Lock()
+    {
+        Version = Guid.NewGuid();
+    }
+
+    public void UpdateParent(DepartmentId? parentId)
+    {
+        ParentId = parentId;
     }
 }

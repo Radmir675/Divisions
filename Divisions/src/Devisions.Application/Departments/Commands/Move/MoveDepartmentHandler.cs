@@ -119,10 +119,8 @@ public class MoveDepartmentHandler : ICommandHandler<Guid, MoveDepartmentCommand
 
         int deltaDepth = GetDeltaDepartmentDepth(department.Depth, oldDepartmentDepth);
 
-        var departmentPath = department.Path;
-
         var depthUpdateResult =
-            await _departmentRepository.UpdateDepthDescendants(oldDepartmentPath, deltaDepth, cancellationToken);
+            await _departmentRepository.UpdateDescendantsDepthAsync(oldDepartmentPath, deltaDepth, cancellationToken);
         if (depthUpdateResult.IsFailure)
         {
             transactionScope.Rollback();
@@ -130,7 +128,7 @@ public class MoveDepartmentHandler : ICommandHandler<Guid, MoveDepartmentCommand
         }
 
         var pathUpdateResult =
-            await _departmentRepository.UpdatePathDescendants(
+            await _departmentRepository.UpdateDescendantsPathAsync(
                 oldDepartmentPath,
                 department.Path,
                 cancellationToken);

@@ -1,8 +1,10 @@
-﻿namespace Devisions.Domain.Interfaces;
+﻿using System;
+
+namespace Devisions.Domain.Interfaces;
 
 public interface ISoftDeletable
 {
-    void SoftDelete();
+    void SoftDelete(DateTime? deletedAt = null);
 
     void Restore();
 }

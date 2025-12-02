@@ -1,6 +1,6 @@
 ﻿using Devisions.Application;
-using Devisions.Infrastructure.BackgroundService;
 using Devisions.Infrastructure.Postgres;
+using Devisions.Infrastructure.Postgres.BackgroundServices;
 using Devisions.Infrastructure.Postgres.Seeder;
 using Devisions.Web.EndPointResults;
 

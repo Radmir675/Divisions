@@ -43,4 +43,16 @@ public record Path
 
         return new Path(path);
     }
+
+    public static Path RemoveCurrent(string pathValue, DepartmentId? parentId)
+    {
+        string[] segments = pathValue.Split(SEPARATOR);
+        if (parentId is null)
+        {
+            return Create(string.Empty);
+        }
+
+        string updatedPath = string.Join(SEPARATOR.ToString(), segments.SkipLast(1));
+        return Create(updatedPath);
+    }
 }

@@ -1,10 +1,11 @@
 ﻿using Devisions.Application;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace Devisions.Infrastructure.BackgroundService;
+namespace Devisions.Infrastructure.Postgres.BackgroundServices;
 
-public class DivisionCleanerBackgroundService : Microsoft.Extensions.Hosting.BackgroundService
+public class DivisionCleanerBackgroundService : BackgroundService
 {
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly ILogger<DivisionCleanerBackgroundService> _logger;
@@ -19,18 +20,21 @@ public class DivisionCleanerBackgroundService : Microsoft.Extensions.Hosting.Bac
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var targetTime = new TimeSpan(0, 0, 10);
+        var targetTime = new TimeSpan(0, 10, 10);
         while (!stoppingToken.IsCancellationRequested)
         {
             try
             {
                 await Task.Delay(targetTime, stoppingToken);
                 await using var scope = _scopeFactory.CreateAsyncScope();
-                var s = scope.ServiceProvider.GetRequiredService<IDivisionCleanerService>();
-                await s.Process(stoppingToken);
+                var divisionCleanerService = scope.ServiceProvider.GetRequiredService<IDivisionCleanerService>();
+                var result = await divisionCleanerService.Process(stoppingToken);
+                if (result.IsFailure)
+                    _logger.LogError("Error processing division cleaner");
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Error in division cleaner");
             }
         }
     }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
@@ -12,13 +13,17 @@ public interface IDepartmentRepository
 {
     Task<Result<Department, Error>> GetByIdAsync(DepartmentId departmentId, CancellationToken cancellationToken);
 
-    Task<Result<Department, Error>> GetByIdWithLocationsAsync(
+    Task<Result<Department, Error>> GetByAsync(
+        Expression<Func<Department, bool>> predicate,
+        CancellationToken cancellationToken);
+
+    Task<Result<Department, Error>> GetByIdIncludingLocationsAsync(
         DepartmentId departmentId,
         CancellationToken cancellationToken);
 
     Task<Result<Guid, Error>> AddAsync(Department value, CancellationToken cancellationToken);
 
-    Task<UnitResult<Errors>> AllExistAndActiveAsync(
+    Task<UnitResult<Errors>> AreAllActiveAsync(
         IEnumerable<DepartmentId> departmentIds,
         CancellationToken cancellationToken);
 
@@ -29,11 +34,13 @@ public interface IDepartmentRepository
         DepartmentId departmentId,
         CancellationToken cancellationToken);
 
-    Task<UnitResult<Error>> UpdateDepthDescendants(Path path, int deltaDepth, CancellationToken cancellationToken);
+    Task<UnitResult<Error>> UpdateDescendantsDepthAsync(Path path, int deltaDepth, CancellationToken cancellationToken);
 
-    Task<UnitResult<Error>> UpdatePathDescendants(Path oldPath, Path newPath, CancellationToken cancellationToken);
+    Task<UnitResult<Error>> UpdateDescendantsPathAsync(Path oldPath, Path newPath, CancellationToken cancellationToken);
 
     Task<Result<IEnumerable<Guid>, Error>> DeleteAsync(
         IEnumerable<Department> departments,
         CancellationToken cancellationToken);
+
+    Task<IEnumerable<Department>> GetRemovableAsync(CancellationToken cancellationToken);
 }

@@ -59,7 +59,7 @@ public class CreateDepartmentHandler : ICommandHandler<Guid, CreateDepartmentCom
 
         var locations = command.Request.LocationsId.ToList();
         var locationsId = locations.Select(x => new LocationId(x)).ToList();
-        var locationsExistResult = await _locationRepository.ExistsByIdsAsync(locationsId, cancellationToken);
+        var locationsExistResult = await _locationRepository.ExistsAsync(locationsId, cancellationToken);
         if (locationsExistResult.IsFailure)
         {
             transactionScope.Rollback();
@@ -78,6 +78,14 @@ public class CreateDepartmentHandler : ICommandHandler<Guid, CreateDepartmentCom
             {
                 transactionScope.Rollback();
                 return departmentResult.Error.ToErrors();
+            }
+
+            if (departmentResult.Value.IsActive == false)
+            {
+                return Error.NotFound(
+                    "department.not.active",
+                    "The parent department is not active.",
+                    departmentResult.Value.Id.Value).ToErrors();
             }
 
             departmentCreationResult = Department.CreateChild(

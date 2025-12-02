@@ -27,7 +27,7 @@ namespace Divisions.Infrastructure.Postgres.Migrations
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     deleted_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    name = table.Column<string>(type: "text", nullable: false)
+                    name = table.Column<string>(type: "text", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -56,7 +56,7 @@ namespace Divisions.Infrastructure.Postgres.Migrations
                     updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     deleted_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     version = table.Column<Guid>(type: "uuid", nullable: false),
-                    timezone = table.Column<string>(type: "text", nullable: false)
+                    timezone = table.Column<string>(type: "text", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -74,7 +74,7 @@ namespace Divisions.Infrastructure.Postgres.Migrations
                     updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     deleted_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     version = table.Column<Guid>(type: "uuid", nullable: false),
-                    name = table.Column<string>(type: "text", nullable: false)
+                    name = table.Column<string>(type: "text", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -87,7 +87,7 @@ namespace Divisions.Infrastructure.Postgres.Migrations
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
                     department_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    location_id = table.Column<Guid>(type: "uuid", nullable: false)
+                    location_id = table.Column<Guid>(type: "uuid", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -112,7 +112,7 @@ namespace Divisions.Infrastructure.Postgres.Migrations
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
                     department_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    position_id = table.Column<Guid>(type: "uuid", nullable: false)
+                    position_id = table.Column<Guid>(type: "uuid", nullable: false),
                 },
                 constraints: table =>
                 {

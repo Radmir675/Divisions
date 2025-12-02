@@ -10,16 +10,15 @@ namespace Devisions.Infrastructure.Postgres.Seeder;
 
 public class DevisionsSeeder : ISeeder
 {
-    private readonly AppDbContext _dbContext;
-    private readonly ILogger<DevisionsSeeder> _logger;
-    private readonly CancellationToken _cancellationToken;
     private const int MAX_LOCATIONS = 10;
     private const int MAX_DEPARTMENTS = 10;
     private const int MAX_POSITIONS = 10;
-    private IEnumerable<Position> _positions;
-    private IEnumerable<Department> _departments;
-    private IEnumerable<Location> _locations;
-
+    private readonly AppDbContext _dbContext;
+    private readonly ILogger<DevisionsSeeder> _logger;
+    private readonly CancellationToken _cancellationToken;
+    private IEnumerable<Position> _positions = null!;
+    private IEnumerable<Department> _departments = null!;
+    private IEnumerable<Location> _locations = null!;
 
     public DevisionsSeeder(
         AppDbContext dbContext,
@@ -69,7 +68,6 @@ public class DevisionsSeeder : ISeeder
         }
     }
 
-
     private async Task<UnitResult<Error>> ClearDatabase(CancellationToken cancellationToken)
     {
         try
@@ -102,7 +100,7 @@ public class DevisionsSeeder : ISeeder
         {
             var locationBaseNames = new[]
             {
-                "Haven", "Vale", "Ridge", "Hollow", "Meadow", "Pines", "Springs", "Thorn", "Bluff"
+                "Haven", "Vale", "Ridge", "Hollow", "Meadow", "Pines", "Springs", "Thorn", "Bluff",
             };
 
             var random = new Random(); // ✅ один экземпляр
@@ -179,7 +177,7 @@ public class DevisionsSeeder : ISeeder
         var departmentNameBases = new[]
         {
             "Engineering", "Marketing", "Sales", "Human Resources", "Finance", "Support", "R&D", "Legal",
-            "Operations", "Product"
+            "Operations", "Product",
         };
 
         var identifierPrefixes = new[] { "ENG", "MKT", "SLS", "HR", "FIN", "SUP", "RND", "LGL", "OPS", "PRD" };
@@ -188,7 +186,7 @@ public class DevisionsSeeder : ISeeder
         var suffixes = new[]
         {
             "Alpha", "Beta", "Gamma", "Delta", "Epsilon", "Zeta", "Eta", "Theta", "Iota", "Kappa", "Lambda", "Mu",
-            "Nu", "Xi", "Omicron", "Pi"
+            "Nu", "Xi", "Omicron", "Pi",
         };
 
         try
@@ -228,7 +226,9 @@ public class DevisionsSeeder : ISeeder
 
                 // === 4. Родитель? ===
                 Department? parent = null;
-                if (departments.Count > 0 && random.Next(0, 10) >= 3) // 70% → дочерний
+
+                // 70% → дочерних
+                if (departments.Count > 0 && random.Next(0, 10) >= 3)
                 {
                     parent = departments[random.Next(departments.Count)];
                 }
@@ -295,7 +295,7 @@ public class DevisionsSeeder : ISeeder
             {
                 "Manager", "Team Lead", "Developer", "Analyst", "Coordinator", "Specialist", "Consultant",
                 "Engineer", "Administrator", "Officer", "Director", "Supervisor", "Associate", "Executive",
-                "Architect", "Designer", "Technician", "Operator", "Planner", "Advisor"
+                "Architect", "Designer", "Technician", "Operator", "Planner", "Advisor",
             };
 
             var random = new Random(); // ✅ один экземпляр

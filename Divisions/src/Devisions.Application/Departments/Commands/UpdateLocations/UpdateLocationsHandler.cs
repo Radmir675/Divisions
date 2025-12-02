@@ -60,7 +60,7 @@ public class UpdateLocationsHandler : ICommandHandler<Guid, UpdateLocationsComma
         }
 
         var locations = command.Request.LocationsId.Select(x => new LocationId(x)).ToList();
-        var isLocationsActiveResult = await _locationRepository.AllExistsAndActiveAsync(locations, cancellationToken);
+        var isLocationsActiveResult = await _locationRepository.AreAllActiveAsync(locations, cancellationToken);
         if (isLocationsActiveResult.IsFailure)
         {
             transactionScope.Rollback();
@@ -100,7 +100,8 @@ public class UpdateLocationsHandler : ICommandHandler<Guid, UpdateLocationsComma
         CancellationToken cancellationToken)
     {
         var departmentId = new DepartmentId(command.DepartmentId);
-        var departmentResult = await _departmentRepository.GetByIdWithLocationsAsync(departmentId, cancellationToken);
+        var departmentResult =
+            await _departmentRepository.GetByIdIncludingLocationsAsync(departmentId, cancellationToken);
         if (departmentResult.IsFailure)
             return departmentResult.Error.ToErrors();
 

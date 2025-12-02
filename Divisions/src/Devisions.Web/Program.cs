@@ -1,4 +1,4 @@
-using Devisions.Infrastructure.BackgroundService;
+using Devisions.Infrastructure.Postgres.BackgroundServices;
 using Devisions.Web;
 using Devisions.Web.Extensions;
 using Devisions.Web.Middlewares;
