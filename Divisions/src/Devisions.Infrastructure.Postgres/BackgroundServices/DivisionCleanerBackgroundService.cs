@@ -1,6 +1,4 @@
-﻿using System.Runtime.InteropServices.JavaScript;
-using Devisions.Application;
-using Devisions.Application.Exceptions;
+﻿using Devisions.Application;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -26,41 +24,12 @@ public class DivisionCleanerBackgroundService : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var cleanerTime = _configuration.GetRequiredSection("Cleaner").GetValue<TimeOnly>("RunTime");
-        _logger.LogInformation("Cleaner service started. Planned launch: {Time}", cleanerTime);
+        var cleanerTime = _configuration.GetRequiredSection("Cleaner").GetValue<TimeSpan>("RunTime");
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            var now = TimeOnly.FromDateTime(DateTime.UtcNow);
-
-            // Вычисляем, сколько ждать до следующего запуска
-            TimeSpan delay;
-            if (cleanerTime > now)
-            {
-                // Сегодня ещё не наступило
-                delay = cleanerTime.ToTimeSpan() - now.ToTimeSpan();
-            }
-            else
-            {
-                // Уже прошло — ждём до завтра
-                var timeUntilMidnight = TimeOnly.MaxValue.ToTimeSpan() - now.ToTimeSpan();
-                var timeFromMidnight = cleanerTime.ToTimeSpan();
-                delay = timeUntilMidnight + timeFromMidnight +
-                        TimeSpan.FromSeconds(1); // +1 сек, чтобы не попасть в "сегодня"
-            }
-
-            _logger.LogInformation("Next start after {Delay}", delay);
-
-            try
-            {
-                await Task.Delay(delay, stoppingToken);
-            }
-            catch (OperationCanceledException)
-            {
-                _logger.LogInformation("Cleaner service stopped.");
-                return;
-            }
-
+            _logger.LogInformation("Cleaner service started");
+            await Task.Delay(cleanerTime, stoppingToken);
             try
             {
                 await using var scope = _scopeFactory.CreateAsyncScope();
