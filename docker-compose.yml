@@ -23,6 +23,20 @@ services:
     ports:
       - 5341:5341
       - 8081:80
+  
+  app:
+    build:
+      context: ./Divisions
+      dockerfile: Dockerfile
+    container_name: devisions_web
+    ports:
+      - "8888:8888"
+    depends_on:
+      - postgres
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+      - ASPNETCORE_URLS=http://+:8888
+
 
 volumes:
   postgres-data:        

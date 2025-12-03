@@ -15,6 +15,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionItems", "SolutionIt
 		Directory.Build.props = Directory.Build.props
 		.editorconfig = .editorconfig
 		..\docker-compose.yml = ..\docker-compose.yml
+		Dockerfile = Dockerfile
+		.dockerignore = .dockerignore
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Devisions.Contracts", "src\Devisions.Contracts\Devisions.Contracts.csproj", "{4FC96561-B4B0-4460-9420-26F65AF06BD9}"
