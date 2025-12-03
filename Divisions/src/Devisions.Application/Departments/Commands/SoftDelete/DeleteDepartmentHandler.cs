@@ -95,7 +95,7 @@ public class SoftDeleteDepartmentHandler : ICommandHandler<Guid, SoftDeleteDepar
         if (descendantsId.Count > 0)
         {
             var updatePathDescendants =
-                await _departmentRepository.UpdatePathDescendants(oldPath, newPath, cancellationToken);
+                await _departmentRepository.UpdateDescendantsPathAsync(oldPath, newPath, cancellationToken);
             if (updatePathDescendants.IsFailure)
             {
                 transactionScope.Rollback();
@@ -107,7 +107,7 @@ public class SoftDeleteDepartmentHandler : ICommandHandler<Guid, SoftDeleteDepar
 
         // проверка позиций на активность
         var unusedPositionsResult =
-            await _positionRepository.FindPositionsUsedExclusivelyByAsync(department.Id, cancellationToken);
+            await _positionRepository.GetPositionsExclusiveToAsync(department.Id, cancellationToken);
         if (unusedPositionsResult.IsFailure)
         {
             transactionScope.Rollback();
@@ -117,7 +117,7 @@ public class SoftDeleteDepartmentHandler : ICommandHandler<Guid, SoftDeleteDepar
         if (unusedPositionsResult.Value.Any())
         {
             var positionsResult = await _positionRepository
-                .GetByIds(unusedPositionsResult.Value, cancellationToken);
+                .GetByIdsAsync(unusedPositionsResult.Value, cancellationToken);
             if (positionsResult.IsFailure)
             {
                 transactionScope.Rollback();
@@ -133,7 +133,7 @@ public class SoftDeleteDepartmentHandler : ICommandHandler<Guid, SoftDeleteDepar
 
         // проверка локаций на активность
         var unusedLocationsResult =
-            await _locationRepository.FindLocationsUsedExclusivelyByAsync(department.Id, cancellationToken);
+            await _locationRepository.GetExclusiveToDepartmentAsync(department.Id, cancellationToken);
         if (unusedLocationsResult.IsFailure)
         {
             transactionScope.Rollback();
@@ -143,7 +143,7 @@ public class SoftDeleteDepartmentHandler : ICommandHandler<Guid, SoftDeleteDepar
         if (unusedLocationsResult.Value.Any())
         {
             var locationsResult = await _locationRepository
-                .GetByIds(unusedLocationsResult.Value, cancellationToken);
+                .GetByIdsAsync(unusedLocationsResult.Value, cancellationToken);
             if (locationsResult.IsFailure)
             {
                 transactionScope.Rollback();

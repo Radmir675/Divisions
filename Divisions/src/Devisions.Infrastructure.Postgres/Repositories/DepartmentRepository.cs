@@ -1,6 +1,6 @@
-﻿using CSharpFunctionalExtensions;
+﻿using System.Linq.Expressions;
+using CSharpFunctionalExtensions;
 using Dapper;
-using Devisions.Application.Database;
 using Devisions.Application.Departments;
 using Devisions.Domain.Department;
 using Devisions.Infrastructure.Postgres.Database;
@@ -15,17 +15,27 @@ namespace Devisions.Infrastructure.Postgres.Repositories;
 public class DepartmentRepository : IDepartmentRepository
 {
     private readonly AppDbContext _dbContext;
-    private readonly IDbConnectionFactory _dbConnectionFactory;
     private readonly ILogger<LocationRepository> _logger;
 
     public DepartmentRepository(
         AppDbContext dbContext,
-        IDbConnectionFactory dbConnectionFactory,
         ILogger<LocationRepository> logger)
     {
         _dbContext = dbContext;
-        _dbConnectionFactory = dbConnectionFactory;
         _logger = logger;
+    }
+
+    public async Task<Result<Department, Error>> GetByAsync(
+        Expression<Func<Department, bool>> predicate,
+        CancellationToken cancellationToken)
+    {
+        var department =
+            await _dbContext.Departments
+                .FirstOrDefaultAsync(predicate, cancellationToken);
+        if (department == null)
+            return Error.NotFound("department.repository", "Department not found", null);
+
+        return department;
     }
 
     public async Task<Result<Department, Error>> GetByIdAsync(
@@ -41,7 +51,7 @@ public class DepartmentRepository : IDepartmentRepository
         return department;
     }
 
-    public async Task<Result<Department, Error>> GetByIdWithLocationsAsync(
+    public async Task<Result<Department, Error>> GetByIdIncludingLocationsAsync(
         DepartmentId departmentId,
         CancellationToken cancellationToken)
     {
@@ -94,7 +104,7 @@ public class DepartmentRepository : IDepartmentRepository
         }
     }
 
-    public async Task<UnitResult<Errors>> AllExistAndActiveAsync(
+    public async Task<UnitResult<Errors>> AreAllActiveAsync(
         IEnumerable<DepartmentId> departmentIds,
         CancellationToken cancellationToken)
     {
@@ -116,34 +126,6 @@ public class DepartmentRepository : IDepartmentRepository
         }
 
         return errors.Any() ? new Errors(errors) : UnitResult.Success<Errors>();
-    }
-
-    public async Task<UnitResult<Error>> UpdateAsync(Department department, CancellationToken cancellationToken)
-    {
-        try
-        {
-            _dbContext.Departments.Update(department);
-            await _dbContext.SaveChangesAsync(cancellationToken);
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, e.Message);
-            return Error.Failure(
-                "department.repository.update",
-                "Department is not updated");
-        }
-
-        return UnitResult.Success<Error>();
-    }
-
-    public async Task<Result<bool, Error>> IsIdentifierAlreadyExistsAsync(
-        Identifier identifier,
-        CancellationToken cancellationToken)
-    {
-        bool result = await _dbContext.Departments.AnyAsync(
-            x => x.Identifier == identifier,
-            cancellationToken);
-        return result;
     }
 
     public async Task<Result<IEnumerable<DepartmentId>, Error>> LockDescendants(
@@ -207,7 +189,7 @@ public class DepartmentRepository : IDepartmentRepository
         }
     }
 
-    public async Task<UnitResult<Error>> UpdatePathDescendants(
+    public async Task<UnitResult<Error>> UpdateDescendantsPathAsync(
         Path oldPath,
         Path newPath,
         CancellationToken cancellationToken)
@@ -215,7 +197,11 @@ public class DepartmentRepository : IDepartmentRepository
         try
         {
             FormattableString query = $@"UPDATE departments
-                           SET path= {newPath.PathValue}::ltree || subpath(path, nlevel({oldPath.PathValue}::ltree))
+                           SET path=CASE
+                               WHEN {newPath.PathValue} = '' 
+                                   THEN subpath(path, 1)
+                                   ELSE {newPath.PathValue}::ltree || subpath(path, nlevel({oldPath.PathValue}::ltree))
+                                   END
                            WHERE path <@ {oldPath.PathValue}::ltree AND path != {oldPath.PathValue}::ltree";
 
             await _dbContext.Database.ExecuteSqlInterpolatedAsync(query, cancellationToken);
@@ -229,54 +215,14 @@ public class DepartmentRepository : IDepartmentRepository
         }
     }
 
-    public async Task<Result<Guid, Error>> DeleteAsync(Department department, CancellationToken cancellationToken)
-    {
-        try
-        {
-            _dbContext.Departments.Remove(department);
-            await _dbContext.SaveChangesAsync(cancellationToken);
-            return department.Id.Value;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to delete department with id: {id}", department.Id.Value);
-            return GeneralErrors.DatabaseError($"Failed to delete department with id: {department.Id.Value}");
-        }
-    }
-
-    public async Task<UnitResult<Error>> SetPathDescendantsDeleted(
-        Path departmentPath,
-        CancellationToken cancellationToken)
-    {
-        try
-        {
-            var sql = @"
-                        UPDATE departments
-                        SET path = subpath(path, 0, -1)::ltree || ('deleted_' || subpath(path, -1)::text)::ltree
-                        WHERE path <@ @DepartmentPath::ltree 
-                          AND path != @DepartmentPath::ltree 
-                          AND nlevel(path) > 1";
-
-            var parameters = new { DepartmentPath = departmentPath.PathValue };
-
-            await _dbContext.Database.ExecuteSqlRawAsync(sql, parameters, cancellationToken);
-            return UnitResult.Success<Error>();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to update path");
-            return UnitResult.Failure(Error.Failure("fail.update.path.", "Failed to update path"));
-        }
-    }
-
-
-    public async Task<UnitResult<Error>> UpdateDepthDescendants(
+    public async Task<UnitResult<Error>> UpdateDescendantsDepthAsync(
         Path path,
         int deltaDepth,
         CancellationToken cancellationToken)
     {
         try
         {
+            var dep = _dbContext.Departments.ToList();
             FormattableString query =
                 $@"UPDATE departments
                          SET depth =depth + {deltaDepth}
@@ -290,5 +236,43 @@ public class DepartmentRepository : IDepartmentRepository
             _logger.LogError(ex, "Failed to update path");
             return UnitResult.Failure(Error.Failure("fail.update.depth.", "Failed to update depth"));
         }
+    }
+
+    public async Task<Result<IEnumerable<Guid>, Error>> DeleteAsync(
+        IEnumerable<Department> departments,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var departmentsList = departments.ToList();
+
+            _dbContext.DepartmentPositions
+                .RemoveRange(departmentsList.SelectMany(d => d.DepartmentPositions));
+            _dbContext.DepartmentLocations
+                .RemoveRange(departmentsList.SelectMany(d => d.DepartmentLocations));
+
+            _dbContext.Departments.RemoveRange(departmentsList);
+
+            await _dbContext.SaveChangesAsync(cancellationToken);
+            return departmentsList.Select(d => d.Id.Value).ToList();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to delete departments.");
+            return GeneralErrors.DatabaseError($"Failed to delete departments");
+        }
+    }
+
+    public async Task<IEnumerable<Department>> GetRemovableAsync(CancellationToken cancellationToken)
+    {
+        var departments = await _dbContext.Departments
+            .Where(d => d.IsActive == false)
+            .Where(d => d.DeletedAt + TimeSpan.FromDays(30) <= DateTime.UtcNow)
+            .Include(dl => dl.DepartmentLocations)
+            .Include(dp => dp.DepartmentPositions)
+            .ToListAsync(cancellationToken);
+
+        _logger.LogInformation("Find departments for deletion:{count}", departments.Count);
+        return departments;
     }
 }

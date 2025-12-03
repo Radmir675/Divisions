@@ -38,7 +38,7 @@ public class PositionsRepository : IPositionsRepository
         return position.Id.Value;
     }
 
-    public async Task<Result<bool, Error>> IsNameActiveAndFreeAsync(
+    public async Task<Result<bool, Error>> IsNameAvailableAsync(
         PositionName name,
         CancellationToken cancellationToken)
     {
@@ -59,6 +59,7 @@ public class PositionsRepository : IPositionsRepository
         {
             var positions = await _dbContext.Positions
                 .Where(p => positionIds.Contains(p.Id))
+                .Include(position => position.DepartmentPositions)
                 .ToListAsync(cancellationToken);
 
             if (positions.Count != positionIds.Count())
@@ -66,6 +67,7 @@ public class PositionsRepository : IPositionsRepository
                 return GeneralErrors.NotFoundInDatabase();
             }
 
+            _dbContext.DepartmentPositions.RemoveRange(positions.SelectMany(x => x.DepartmentPositions));
             _dbContext.Positions.RemoveRange(positions);
             await _dbContext.SaveChangesAsync(cancellationToken);
             return UnitResult.Success<Error>();
@@ -77,7 +79,7 @@ public class PositionsRepository : IPositionsRepository
         }
     }
 
-    public async Task<Result<IEnumerable<PositionId>, Error>> FindPositionsUsedExclusivelyByAsync(
+    public async Task<Result<IEnumerable<PositionId>, Error>> GetPositionsExclusiveToAsync(
         DepartmentId departmentId,
         CancellationToken cancellationToken)
     {
@@ -101,7 +103,7 @@ public class PositionsRepository : IPositionsRepository
         return positionIds;
     }
 
-    public async Task<Result<IEnumerable<Position>, Error>> GetByIds(
+    public async Task<Result<IEnumerable<Position>, Error>> GetByIdsAsync(
         IEnumerable<PositionId> positionIds,
         CancellationToken cancellationToken)
     {
@@ -114,5 +116,17 @@ public class PositionsRepository : IPositionsRepository
             return GeneralErrors.NotFoundInDatabase();
 
         return result;
+    }
+
+    public async Task<IEnumerable<Position>> GetRemovableAsync(
+        CancellationToken cancellationToken)
+    {
+        var positions = await _dbContext.Positions
+            .Where(d => d.IsActive == false)
+            .Where(d => d.DeletedAt + TimeSpan.FromDays(30) <= DateTime.UtcNow)
+            .ToListAsync(cancellationToken);
+
+        _logger.LogInformation("Find position for deletion:{count}", positions.Count);
+        return positions;
     }
 }

@@ -22,9 +22,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared", "src\Shared\Shared.csproj", "{3162BE83-9FA9-49E6-99A0-661E29217013}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{964FD311-4C97-4754-84EB-7178D91F99D2}"
-	ProjectSection(SolutionItems) = preProject
-		tests\TestFactory = tests\TestFactory
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Divisions.IntegrationTests", "tests\Divisions.IntegrationTests\Divisions.IntegrationTests.csproj", "{828BAD3F-EF10-4782-A2C0-F29F71AA7464}"
 EndProject

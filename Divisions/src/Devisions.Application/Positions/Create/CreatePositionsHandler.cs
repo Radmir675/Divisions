@@ -63,7 +63,7 @@ public class CreatePositionsHandler : ICommandHandler<Guid, CreatePositionComman
             .Select(x => new DepartmentId(x))
             .ToList();
 
-        var checkDepartmentsIdAsync = await _departmentRepository.AllExistAndActiveAsync(
+        var checkDepartmentsIdAsync = await _departmentRepository.AreAllActiveAsync(
             departmentsId,
             cancellationToken);
         if (checkDepartmentsIdAsync.IsFailure)
@@ -73,7 +73,7 @@ public class CreatePositionsHandler : ICommandHandler<Guid, CreatePositionComman
         }
 
         var nameFreeResult =
-            await _positionsRepository.IsNameActiveAndFreeAsync(positionNameResult.Value, cancellationToken);
+            await _positionsRepository.IsNameAvailableAsync(positionNameResult.Value, cancellationToken);
 
         if (nameFreeResult.IsFailure)
         {

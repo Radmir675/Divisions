@@ -57,7 +57,7 @@ public class LocationRepository : ILocationRepository
         return location.Id.Value;
     }
 
-    public async Task<UnitResult<Errors>> ExistsByIdsAsync(
+    public async Task<UnitResult<Errors>> ExistsAsync(
         IEnumerable<LocationId> locationsId,
         CancellationToken cancellationToken)
     {
@@ -83,7 +83,7 @@ public class LocationRepository : ILocationRepository
         return errors.Any() ? new Errors(errors) : UnitResult.Success<Errors>();
     }
 
-    public async Task<UnitResult<Errors>> AllExistsAndActiveAsync(
+    public async Task<UnitResult<Errors>> AreAllActiveAsync(
         IEnumerable<LocationId> locationsId,
         CancellationToken cancellationToken)
     {
@@ -107,7 +107,7 @@ public class LocationRepository : ILocationRepository
         return errors.Any() ? new Errors(errors) : UnitResult.Success<Errors>();
     }
 
-    public async Task<Result<IEnumerable<Location>, Error>> GetByIds(
+    public async Task<Result<IEnumerable<Location>, Error>> GetByIdsAsync(
         IEnumerable<LocationId> locationIds,
         CancellationToken cancellationToken)
     {
@@ -124,7 +124,7 @@ public class LocationRepository : ILocationRepository
         return result;
     }
 
-    public async Task<Result<IEnumerable<LocationId>, Error>> FindLocationsUsedExclusivelyByAsync(
+    public async Task<Result<IEnumerable<LocationId>, Error>> GetExclusiveToDepartmentAsync(
         DepartmentId departmentId,
         CancellationToken cancellationToken)
     {
@@ -146,5 +146,44 @@ public class LocationRepository : ILocationRepository
         _logger.LogDebug("Founded: {locationsCount} locations", locationIds.Count);
 
         return locationIds;
+    }
+
+    public async Task<IEnumerable<Location>> GetRemovableAsync(CancellationToken cancellationToken)
+    {
+        var locations = await _dbContext.Locations
+            .Where(d => d.IsActive == false)
+            .Where(d => d.DeletedAt + TimeSpan.FromDays(30) <= DateTime.UtcNow)
+            .ToListAsync(cancellationToken);
+
+        _logger.LogInformation("Find position for deletion:{count}", locations.Count);
+        return locations;
+    }
+
+    public async Task<UnitResult<Error>> DeleteAsync(
+        IEnumerable<LocationId> locationIds,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var locations = await _dbContext.Locations
+                .Where(l => locationIds.Contains(l.Id))
+                .Include(location => location.DepartmentLocations)
+                .ToListAsync(cancellationToken);
+
+            if (locations.Count != locationIds.Count())
+            {
+                return GeneralErrors.NotFoundInDatabase();
+            }
+
+            _dbContext.DepartmentLocations.RemoveRange(locations.SelectMany(x => x.DepartmentLocations));
+            _dbContext.Locations.RemoveRange(locations);
+            await _dbContext.SaveChangesAsync(cancellationToken);
+            return UnitResult.Success<Error>();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, ex.Message, "Error deleting positions");
+            return GeneralErrors.DatabaseError();
+        }
     }
 }

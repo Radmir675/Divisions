@@ -1,5 +1,6 @@
 ﻿using Devisions.Domain.Location;
 using Devisions.Infrastructure.Postgres.Database;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Divisions.IntegrationTests.Share;
@@ -29,5 +30,18 @@ public class LocationCreator
         var locationId = location.Value.Id;
 
         return locationId;
+    }
+
+    public async Task<Location> SetAsSoftDeletedAsync(
+        LocationId locationId,
+        CancellationToken cancellationToken = default)
+    {
+        await using var scope = _services.CreateAsyncScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+        var department = await dbContext.Locations.FirstAsync(x => x.Id == locationId, cancellationToken);
+        department.SoftDelete(DateTime.UtcNow.AddDays(-31));
+        await dbContext.SaveChangesAsync(cancellationToken);
+        return department;
     }
 }

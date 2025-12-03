@@ -62,9 +62,9 @@ public sealed class Location : ISoftDeletable
         return model;
     }
 
-    public void SoftDelete()
+    public void SoftDelete(DateTime? deletedAt = null)
     {
-        DeletedAt = DateTime.UtcNow;
+        DeletedAt = deletedAt ?? DateTime.UtcNow;
         IsActive = false;
         Version = Guid.NewGuid();
     }
@@ -73,6 +73,11 @@ public sealed class Location : ISoftDeletable
     {
         DeletedAt = null;
         IsActive = true;
+        Version = Guid.NewGuid();
+    }
+
+    public void Lock()
+    {
         Version = Guid.NewGuid();
     }
 }
