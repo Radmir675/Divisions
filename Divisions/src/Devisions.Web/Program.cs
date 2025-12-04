@@ -13,11 +13,15 @@ builder.AddLogging();
 builder.Services.AddProgramDependencies();
 builder.Services.AddHostedService<DivisionCleanerBackgroundService>();
 
+string environment = builder.Environment.EnvironmentName;
+builder.Configuration.AddJsonFile($"appsettings.{environment}.json", optional: true, reloadOnChange: true);
+// builder.Services.AddConfiguration(builder.Configuration);
+
 var app = builder.Build();
 app.UseExceptionMiddleware();
 app.UseSerilogRequestLogging();
 
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Docker"))
 {
     app.UseSwagger();
     app.UseSwaggerUI();
