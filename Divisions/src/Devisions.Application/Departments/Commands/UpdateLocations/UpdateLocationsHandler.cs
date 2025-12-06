@@ -6,6 +6,7 @@ using CSharpFunctionalExtensions;
 using Devisions.Application.Abstractions;
 using Devisions.Application.Extensions;
 using Devisions.Application.Locations;
+using Devisions.Application.Services;
 using Devisions.Application.Transaction;
 using Devisions.Contracts.Departments.Requests;
 using Devisions.Domain.Department;
@@ -24,6 +25,7 @@ public class UpdateLocationsHandler : ICommandHandler<Guid, UpdateLocationsComma
     private readonly IDepartmentRepository _departmentRepository;
     private readonly ILocationRepository _locationRepository;
     private readonly ITransactionManager _transactionManager;
+    private readonly ICacheService _cache;
     private readonly ILogger<UpdateLocationsHandler> _logger;
 
     public UpdateLocationsHandler(
@@ -31,12 +33,14 @@ public class UpdateLocationsHandler : ICommandHandler<Guid, UpdateLocationsComma
         IDepartmentRepository departmentRepository,
         ILocationRepository locationRepository,
         ITransactionManager transactionManager,
+        ICacheService cache,
         ILogger<UpdateLocationsHandler> logger)
     {
         _validator = validator;
         _departmentRepository = departmentRepository;
         _locationRepository = locationRepository;
         _transactionManager = transactionManager;
+        _cache = cache;
         _logger = logger;
     }
 
@@ -92,6 +96,9 @@ public class UpdateLocationsHandler : ICommandHandler<Guid, UpdateLocationsComma
             return commitResult.Error.ToErrors();
         }
 
+        await UpdateCache(department, cancellationToken);
+        _logger.LogInformation("Department is updated with id: {Id}", departmentResult.Value.Id);
+
         return command.DepartmentId;
     }
 
@@ -114,5 +121,11 @@ public class UpdateLocationsHandler : ICommandHandler<Guid, UpdateLocationsComma
         }
 
         return departmentResult.Value;
+    }
+
+    private async Task UpdateCache(Department department, CancellationToken cancellationToken)
+    {
+        string key = "departments_" + department.Id.Value;
+        await _cache.RemoveAsync(key, cancellationToken);
     }
 }

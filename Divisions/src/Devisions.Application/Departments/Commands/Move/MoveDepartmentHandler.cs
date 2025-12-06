@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using Devisions.Application.Abstractions;
 using Devisions.Application.Extensions;
+using Devisions.Application.Services;
 using Devisions.Application.Transaction;
 using Devisions.Domain.Department;
 using FluentValidation;
@@ -18,15 +19,18 @@ public class MoveDepartmentHandler : ICommandHandler<Guid, MoveDepartmentCommand
 {
     private readonly IValidator<MoveDepartmentCommand> _validator;
     private readonly IDepartmentRepository _departmentRepository;
+    private readonly ICacheService _cache;
     private readonly ITransactionManager _transactionManager;
 
     public MoveDepartmentHandler(
         IValidator<MoveDepartmentCommand> validator,
         IDepartmentRepository departmentRepository,
+        ICacheService cache,
         ITransactionManager transactionManager)
     {
         _validator = validator;
         _departmentRepository = departmentRepository;
+        _cache = cache;
         _transactionManager = transactionManager;
     }
 
@@ -146,9 +150,17 @@ public class MoveDepartmentHandler : ICommandHandler<Guid, MoveDepartmentCommand
             return commitResult.Error.ToErrors();
         }
 
+        await UpdateCache(cancellationToken);
+
         return command.DepartmentId;
     }
 
     private static int GetDeltaDepartmentDepth(short newDepth, short oldDepth) =>
         newDepth - oldDepth;
+
+    private async Task UpdateCache(CancellationToken cancellationToken)
+    {
+        const string key = "departments_";
+        await _cache.RemoveByPrefixAsync(key, cancellationToken);
+    }
 }
