@@ -4,10 +4,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using Devisions.Application.Abstractions;
-using Devisions.Application.Database;
 using Devisions.Application.Extensions;
 using Devisions.Application.Locations;
 using Devisions.Application.Positions;
+using Devisions.Application.Services;
 using Devisions.Application.Transaction;
 using Devisions.Domain.Department;
 using FluentValidation;
@@ -23,27 +23,27 @@ public class SoftDeleteDepartmentHandler : ICommandHandler<Guid, SoftDeleteDepar
     private readonly IDepartmentRepository _departmentRepository;
     private readonly ILocationRepository _locationRepository;
     private readonly IPositionsRepository _positionRepository;
-    private readonly IDbConnectionFactory _dbConnectionFactory;
     private readonly ITransactionManager _transactionManager;
     private readonly IValidator<SoftDeleteDepartmentCommand> _validator;
     private readonly ILogger<SoftDeleteDepartmentHandler> _logger;
+    private readonly ICacheService _cache;
 
     public SoftDeleteDepartmentHandler(
         IDepartmentRepository departmentRepository,
         ITransactionManager transactionManager,
         IValidator<SoftDeleteDepartmentCommand> validator,
         ILogger<SoftDeleteDepartmentHandler> logger,
+        ICacheService cache,
         ILocationRepository locationRepository,
-        IPositionsRepository positionRepository,
-        IDbConnectionFactory dbConnectionFactory)
+        IPositionsRepository positionRepository)
     {
         _departmentRepository = departmentRepository;
         _transactionManager = transactionManager;
         _validator = validator;
         _logger = logger;
+        _cache = cache;
         _locationRepository = locationRepository;
         _positionRepository = positionRepository;
-        _dbConnectionFactory = dbConnectionFactory;
     }
 
     public async Task<Result<Guid, Errors>> Handle(
@@ -170,7 +170,15 @@ public class SoftDeleteDepartmentHandler : ICommandHandler<Guid, SoftDeleteDepar
             return transactionResult.Error.ToErrors();
         }
 
+        await UpdateCache(cancellationToken);
+
         _logger.LogInformation("Department is soft deleted with id: {Id}", department.Id);
         return department.Id.Value;
+    }
+
+    private async Task UpdateCache(CancellationToken cancellationToken)
+    {
+        const string key = "departments_";
+        await _cache.RemoveByPrefixAsync(key, cancellationToken);
     }
 }

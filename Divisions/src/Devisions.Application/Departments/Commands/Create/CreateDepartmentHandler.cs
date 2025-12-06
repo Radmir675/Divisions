@@ -6,6 +6,7 @@ using CSharpFunctionalExtensions;
 using Devisions.Application.Abstractions;
 using Devisions.Application.Extensions;
 using Devisions.Application.Locations;
+using Devisions.Application.Services;
 using Devisions.Application.Transaction;
 using Devisions.Contracts.Departments.Requests;
 using Devisions.Domain.Department;
@@ -24,6 +25,7 @@ public class CreateDepartmentHandler : ICommandHandler<Guid, CreateDepartmentCom
     private readonly IDepartmentRepository _departmentRepository;
     private readonly ILocationRepository _locationRepository;
     private readonly ITransactionManager _transactionManager;
+    private readonly ICacheService _cache;
     private readonly ILogger<CreateDepartmentHandler> _logger;
 
     public CreateDepartmentHandler(
@@ -31,12 +33,14 @@ public class CreateDepartmentHandler : ICommandHandler<Guid, CreateDepartmentCom
         IDepartmentRepository departmentRepository,
         ILocationRepository locationRepository,
         ITransactionManager transactionManager,
+        ICacheService cache,
         ILogger<CreateDepartmentHandler> logger)
     {
         _validator = validator;
         _departmentRepository = departmentRepository;
         _locationRepository = locationRepository;
         _transactionManager = transactionManager;
+        _cache = cache;
         _logger = logger;
     }
 
@@ -117,7 +121,15 @@ public class CreateDepartmentHandler : ICommandHandler<Guid, CreateDepartmentCom
             return transactionResult.Error.ToErrors();
         }
 
+        await UpdateCache(cancellationToken);
+
         _logger.LogInformation("Department is created with id: {Id}", departmentCreationResult.Value.Id);
         return departmentCreationResult.Value.Id.Value;
+    }
+
+    private async Task UpdateCache(CancellationToken cancellationToken)
+    {
+        const string key = "departments_";
+        await _cache.RemoveByPrefixAsync(key, cancellationToken);
     }
 }

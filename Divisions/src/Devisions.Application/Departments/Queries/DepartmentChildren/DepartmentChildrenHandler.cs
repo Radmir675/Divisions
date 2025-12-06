@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
@@ -8,27 +10,31 @@ using Devisions.Application.Abstractions;
 using Devisions.Application.Database;
 using Devisions.Application.Departments.Queries.RootDepartmentsWithChildren;
 using Devisions.Application.Extensions;
+using Devisions.Application.Services;
 using Devisions.Contracts.Departments.Responses;
 using FluentValidation;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using Shared.Errors;
 
 namespace Devisions.Application.Departments.Queries.DepartmentChildren;
 
-public class
-    DepartmentChildrenHandler : IQueryHandler<IReadOnlyList<DepartmentBaseDto>, DepartmentChildrenQuery>
+public class DepartmentChildrenHandler : IQueryHandler<IReadOnlyList<DepartmentBaseDto>, DepartmentChildrenQuery>
 {
     private readonly IDbConnectionFactory _dbConnectionFactory;
     private readonly IValidator<DepartmentChildrenQuery> _validator;
-    private readonly ILogger<RootDepartmentsWithChildrenHandler> _logger;
+    private readonly ICacheService _cache;
+    private readonly ILogger<DepartmentChildrenHandler> _logger;
 
     public DepartmentChildrenHandler(
         IDbConnectionFactory dbConnectionFactory,
         IValidator<DepartmentChildrenQuery> validator,
-        ILogger<RootDepartmentsWithChildrenHandler> logger)
+        ICacheService cache,
+        ILogger<DepartmentChildrenHandler> logger)
     {
         _dbConnectionFactory = dbConnectionFactory;
         _validator = validator;
+        _cache = cache;
         _logger = logger;
     }
 
@@ -40,6 +46,25 @@ public class
         if (!validationResult.IsValid)
             return validationResult.ToErrors();
 
+        DistributedCacheEntryOptions options = new() { SlidingExpiration = TimeSpan.FromMinutes(5) };
+        string key = "departments_" + JsonSerializer.Serialize(query);
+
+        var cachedData = await _cache.GetOrSetAsync(
+            key,
+            options,
+            async () => await GetDepartmentsAsync(query, cancellationToken),
+            cancellationToken);
+
+        if (cachedData is null)
+            return GeneralErrors.NotFound().ToErrors();
+
+        return cachedData;
+    }
+
+    private async Task<List<DepartmentBaseDto>> GetDepartmentsAsync(
+        DepartmentChildrenQuery query,
+        CancellationToken cancellationToken)
+    {
         const string sqlQuery =
             """
             WITH dep AS (SELECT id,
@@ -65,7 +90,7 @@ public class
         int size = query.Request.Size!.Value;
         int page = query.Request.Page!.Value;
 
-        var sqlParams = new { parent_id = query.ParentId, offset = (page - 1) * size, limit = size, };
+        var sqlParams = new { parent_id = query.ParentId, offset = (page - 1) * size, limit = size };
         var result = await connection.QueryAsync<DepartmentBaseDto>(sqlQuery, sqlParams);
         _logger.LogInformation("Departments received");
         return result.ToList();

@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using Shared.Errors;
 
-namespace Devisions.Application;
+namespace Devisions.Application.Services;
 
 public interface IDivisionCleanerService
 {
