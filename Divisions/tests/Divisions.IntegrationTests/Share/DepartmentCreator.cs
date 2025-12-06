@@ -24,7 +24,6 @@ public class DepartmentCreator
         await using var scope = _services.CreateAsyncScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-
         var department = (parent == null)
             ? Department.CreateParent(
                 DepartmentName.Create("department").Value,

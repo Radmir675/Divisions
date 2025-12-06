@@ -36,10 +36,8 @@ public class PositionCreator
             null,
             departmentPositionsResult);
 
-
         dbContext.Positions.Add(position.Value);
         await dbContext.SaveChangesAsync(cancellationToken);
-
 
         return positionId;
     }

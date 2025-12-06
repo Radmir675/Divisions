@@ -53,7 +53,7 @@ public class SoftDeleteDepartmentTest : DivisionsBaseTests
             await new PositionCreator(Services).CreateAsync("position4", [fourthDepartment.Id], cancellationToken);
 
         // удаляем второй департамент
-        // у которого все локации должны быть активны так как используются в других подразделениях 
+        // у которого все локации должны быть активны так как используются в других подразделениях
         // и позиции  не активны
         var result = await ExecuteHandler(sut =>
         {
@@ -88,11 +88,8 @@ public class SoftDeleteDepartmentTest : DivisionsBaseTests
         department.Childrens.First(c => c.Identifier.Identify == "fourthDepartment").Path.PathValue
             .Should().Be(fourthDepartmentPath);
 
-
         // активности
         department.IsActive.Should().BeFalse();
-
-        // проверить позиции
 
         var secondDepartmentPositionsInDb = await ExecuteInDb(async dbContext =>
         {
@@ -109,8 +106,6 @@ public class SoftDeleteDepartmentTest : DivisionsBaseTests
 
         secondDepartmentPositionsInDb.All(x => x.IsActive).Should().BeFalse();
 
-        // проверить локации
-
         var secondDepartmentLocationsInDb = await ExecuteInDb(async dbContext =>
         {
             var locationIds = await dbContext.DepartmentLocations
@@ -125,7 +120,6 @@ public class SoftDeleteDepartmentTest : DivisionsBaseTests
 
         secondDepartmentLocationsInDb.All(x => x.IsActive).Should().BeTrue();
     }
-
 
     [Fact]
     public async Task SoftDeleteDepartment_InValidData_ShouldFailed()
@@ -165,7 +159,6 @@ public class SoftDeleteDepartmentTest : DivisionsBaseTests
             await new PositionCreator(Services).CreateAsync("position3", [firstDepartment.Id], cancellationToken);
 
         // удаляем первый департамент
-
         var result = await ExecuteHandler(sut =>
         {
             var command = new SoftDeleteDepartmentCommand(firstDepartment.Id.Value);
@@ -216,7 +209,6 @@ public class SoftDeleteDepartmentTest : DivisionsBaseTests
         department.IsActive.Should().BeFalse();
 
         // проверить позиции
-
         var firstDepartmentPositionsInDb = await ExecuteInDb(async dbContext =>
         {
             var positionIds = await dbContext.DepartmentPositions
@@ -234,7 +226,6 @@ public class SoftDeleteDepartmentTest : DivisionsBaseTests
         firstDepartmentPositionsInDb.First(x => x.Id == thirdPosition).IsActive.Should().BeFalse();
 
         // проверить локации
-
         var firstDepartmentLocationsInDb = await ExecuteInDb(async dbContext =>
         {
             var locationIds = await dbContext.DepartmentLocations
