@@ -1,12 +1,16 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using Dapper;
 using Devisions.Application.Abstractions;
 using Devisions.Application.Database;
+using Devisions.Application.Services;
 using Devisions.Contracts.Departments.Responses;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using Shared.Errors;
 
@@ -16,19 +20,40 @@ public class RootDepartmentsWithChildrenHandler : IQueryHandler<IReadOnlyList<De
     RootDepartmentsWithChildrenQuery>
 {
     private readonly IDbConnectionFactory _dbConnectionFactory;
+    private readonly ICacheService _cacheService;
     private readonly ILogger<RootDepartmentsWithChildrenHandler> _logger;
 
     public RootDepartmentsWithChildrenHandler(
         IDbConnectionFactory dbConnectionFactory,
+        ICacheService cacheService,
         ILogger<RootDepartmentsWithChildrenHandler> logger)
     {
         _dbConnectionFactory = dbConnectionFactory;
+        _cacheService = cacheService;
         _logger = logger;
     }
 
     public async Task<Result<IReadOnlyList<DepartmentBaseDto>, Errors>> Handle(
         RootDepartmentsWithChildrenQuery withChildrenQuery,
         CancellationToken cancellationToken)
+    {
+        DistributedCacheEntryOptions options = new() { SlidingExpiration = TimeSpan.FromMinutes(5) };
+        string key = "departments_" + JsonSerializer.Serialize(withChildrenQuery);
+
+        var cachedData = await _cacheService.GetOrSetAsync(
+            key,
+            options,
+            async () => await GetDataAsync(withChildrenQuery, cancellationToken),
+            cancellationToken);
+
+        if (cachedData is null)
+            return GeneralErrors.NotFound().ToErrors();
+
+        return cachedData;
+    }
+
+    private async Task<List<DepartmentBaseDto>> GetDataAsync(
+        RootDepartmentsWithChildrenQuery withChildrenQuery, CancellationToken cancellationToken)
     {
         const string sql = $"""
                             WITH root AS (SELECT id,
@@ -60,7 +85,15 @@ public class RootDepartmentsWithChildrenHandler : IQueryHandler<IReadOnlyList<De
                                    EXISTS (SELECT 1 FROM departments d WHERE parent_id = cd.id) as hasMoreChildren
                             FROM root r
                                      CROSS JOIN LATERAL (
-                                SELECT *
+                                SELECT  id,
+                                        identifier,
+                                        parent_id,
+                                        path,
+                                        depth,
+                                        is_active,
+                                        created_at,
+                                        updated_at,
+                                        name
                                 FROM departments d
                                 WHERE d.parent_id = r.id
                                   AND d.is_active = true

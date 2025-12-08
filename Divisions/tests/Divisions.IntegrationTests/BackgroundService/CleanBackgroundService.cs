@@ -1,4 +1,4 @@
-﻿using Devisions.Application;
+﻿using Devisions.Application.Services;
 using Devisions.Domain.Department;
 using Divisions.IntegrationTests.Infrastructure;
 using Divisions.IntegrationTests.Share;
@@ -15,6 +15,7 @@ public class CleanBackgroundService : DivisionsBaseTests
         : base(divisionsTestFactory)
     {
     }
+
     [Fact]
     public async Task DeleteDepartments_WithRootDepartment_ShouldSucceed()
     {
@@ -61,7 +62,6 @@ public class CleanBackgroundService : DivisionsBaseTests
             "position_free",
             [firstGenerationDepartment.Id, secondGenerationDepartment.Id],
             cancellationToken);
-
 
         // act
         var processResult = await ExecuteHandler(x => x.Process(cancellationToken));

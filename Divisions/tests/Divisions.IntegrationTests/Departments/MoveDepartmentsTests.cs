@@ -17,31 +17,10 @@ public class MoveDepartmentsTests : DivisionsBaseTests
         Init().GetAwaiter().GetResult();
     }
 
-    private Department _root;
-    private Department _underRoot;
-    private Department _underRootChildren;
-    private Department _children;
-
-    private async Task Init()
-    {
-        var cancellationToken = CancellationToken.None;
-
-        var locationId = await new LocationCreator(Services).CreateAsync(
-            "location",
-            cancellationToken);
-
-        _root = await new DepartmentCreator(Services)
-            .CreateAsync(null, [locationId], "root", cancellationToken);
-
-        _underRoot = await new DepartmentCreator(Services)
-            .CreateAsync(_root, [locationId], "under_root", cancellationToken);
-
-        _underRootChildren = await new DepartmentCreator(Services)
-            .CreateAsync(_underRoot, [locationId], "under_root_children", cancellationToken);
-
-        _children = await new DepartmentCreator(Services)
-            .CreateAsync(_underRootChildren, [locationId], "children", cancellationToken);
-    }
+    private Department _root = null!;
+    private Department _underRoot = null!;
+    private Department _underRootChildren = null!;
+    private Department _children = null!;
 
     [Fact]
     public async Task MoveDepartment_ToParentNull_ShouldSucceed()
@@ -152,7 +131,6 @@ public class MoveDepartmentsTests : DivisionsBaseTests
         result.Error.First().Code.Should().Be("parent.id.failure");
     }
 
-
     [Fact]
     public async Task MoveDepartment_WithSameParentAndDepartmentId_ShouldFail()
     {
@@ -171,6 +149,27 @@ public class MoveDepartmentsTests : DivisionsBaseTests
         result.Error.Should().NotBeNull();
         result.Error.First().ErrorType.Should().Be(ErrorType.VALIDATION);
         result.Error.First().Code.Should().Be("input.failure");
+    }
+
+    private async Task Init()
+    {
+        var cancellationToken = CancellationToken.None;
+
+        var locationId = await new LocationCreator(Services).CreateAsync(
+            "location",
+            cancellationToken);
+
+        _root = await new DepartmentCreator(Services)
+            .CreateAsync(null, [locationId], "root", cancellationToken);
+
+        _underRoot = await new DepartmentCreator(Services)
+            .CreateAsync(_root, [locationId], "under_root", cancellationToken);
+
+        _underRootChildren = await new DepartmentCreator(Services)
+            .CreateAsync(_underRoot, [locationId], "under_root_children", cancellationToken);
+
+        _children = await new DepartmentCreator(Services)
+            .CreateAsync(_underRootChildren, [locationId], "children", cancellationToken);
     }
 
     private async Task<T> ExecuteHandler<T>(Func<MoveDepartmentHandler, Task<T>> action)
